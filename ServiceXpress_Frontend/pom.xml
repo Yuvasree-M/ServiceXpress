@@ -8,11 +8,11 @@
 		<version>3.4.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.backend</groupId>
+	<groupId>com.frontend</groupId>
 	<artifactId>ServiceXpress_Frontend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ServiceXpress_Frontend</name>
-	<description>Vehical Service Manageemnt System Backend (ServiceXpress)</description>
+	<description>Vehical Service Manageemnt System Frontend (ServiceXpress)</description>
 	<url/>
 	<licenses>
 		<license/>
