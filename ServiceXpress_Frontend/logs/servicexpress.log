@@ -1,0 +1,12 @@
+2025-04-05 20:05:40 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 17.0.11 with PID 17152 (C:\Users\ADMIN\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by ADMIN in C:\Users\ADMIN\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-05 20:05:40 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-05 20:05:41 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-04-05 20:05:41 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-04-05 20:05:41 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-05 20:05:41 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 1.172 seconds (process running for 1.803)
+2025-04-05 20:06:15 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 17.0.11 with PID 21056 (C:\Users\ADMIN\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by ADMIN in C:\Users\ADMIN\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-05 20:06:15 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-05 20:06:15 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-04-05 20:06:15 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-04-05 20:06:16 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-05 20:06:16 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 1.091 seconds (process running for 1.705)

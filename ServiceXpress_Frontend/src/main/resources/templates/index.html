@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ServiceXpress - Vehicle Maintenance Experts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTop" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Fixed Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2 fixed-top">
+        <div class="container-fluid col-11 mx-auto">
+            <a class="navbar-brand" href="#" onclick="scrollToTop()">
+                <img th:src="@{/Images/logo.jpg}" style="height: 40px;" alt="ServiceXpress Logo" th:onerror="'this.src=\'https://via.placeholder.com/40\''">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="user-icon" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header" style="background-color: #333; color: white;">
+                    <h5 class="modal-title" id="loginModalLabel">
+                        <span class="part1">Service</span><span class="part2">Xpress Login</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body bg-white">
+                   <form method="POST" th:action="@{/login}" id="loginForm">
+    <div class="mb-3">
+        <label class="form-label">Username / Mobile Number</label>
+        <input type="text" class="form-control" id="identifier" name="identifier" required placeholder="Enter your credential">
+    </div>
+    <div class="mb-3" id="passwordDiv">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" required placeholder="Enter password">
+    </div>
+    <button type="submit" class="btn btn-primary w-100" id="loginBtn">Login</button>
+</form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Display -->
+    <div th:if="${error != null}" class="alert alert-danger mt-5 text-center" th:text="${error}"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid col-11 mx-auto main-container">
+            <!-- Home Section -->
+            <section id="home" class="mb-3">
+                <div class="home-section-container">
+                    <div class="home-section-content">
+                        <div id="homeCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img th:src="@{/Images/Service1.jpg}" class="d-block w-100" alt="Service 1" th:onerror="'this.src=\'https://via.placeholder.com/800x400\''">
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Fast Vehicle Service</h5>
+                                        <p>Get your vehicle serviced in record time.</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <img th:src="@{/Images/Expert tech.jpg}" class="d-block w-100" alt="Service 2" th:onerror="'this.src=\'https://via.placeholder.com/800x400\''">
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Expert Technicians</h5>
+                                        <p>Certified professionals at your service.</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <img th:src="@{/Images/qualitywork.jpg}" class="d-block w-100" alt="Service 3" th:onerror="'this.src=\'https://via.placeholder.com/800x400\''">
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Quality Work</h5>
+                                        <p>Quality work at your service.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                        <div class="home-welcome-card">
+                            <h1 class="display-4 fw-bold mx-auto">
+                                <span class="part1" th:text="${welcomePart1}">Welcome to</span> 
+                                <span class="part2" th:text="${welcomePart2}">ServiceXpress</span>
+                            </h1>
+                            <p class="lead" th:text="${welcomeMessage}">Your one-stop solution for vehicle maintenance and management.</p>
+                            <button type="button" class="btn btn-primary btn-lg mt-3 mx-auto" data-bs-toggle="modal" data-bs-target="#loginModal">Book Service</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Services Section -->
+            <section id="services" class="mb-3">
+                <div class="container-fluid">
+                    <div class="text-center mb-4">
+                        <h2 class="display-6">
+                            <span style="color: #f28c38; font-weight: bold;" th:text="${servicesPart1}">Our</span> 
+                            <span style="color: #333; font-weight: bold;" th:text="${servicesPart2}">Services</span>
+                        </h2>
+                        <p class="lead text-muted" th:text="${servicesSubtitle}">Comprehensive Vehicle Care Solutions</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-4" th:each="service : ${services}">
+                            <div class="card service-card">
+                                <div class="card-body text-center">
+                                    <div class="service-card-icon">
+                                        <i th:classappend="${service.icon}"></i>
+                                    </div>
+                                    <h4 class="card-title" th:text="${service.title}">Car Oil Change</h4>
+                                    <p class="card-text text-muted" th:text="${service.description}">Precision oil changes.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="mb-3">
+                <div class="container-fluid">
+                    <div class="text-center mb-4">
+                        <h2 class="display-6">
+                            <span style="color: #f28c38; font-weight: bold;" th:text="${aboutPart1}">About</span> 
+                            <span style="color: #333; font-weight: bold;" th:text="${aboutPart2}">ServiceXpress</span>
+                        </h2>
+                        <p class="lead text-muted" th:text="${aboutSubtitle}">Revolutionizing Vehicle Maintenance</p>
+                    </div>
+
+                    <div class="about-scroll">
+                        <div class="about-scroll-container">
+                            <img th:each="image : ${aboutImages}" th:src="@{|/Images/${image}|}" alt="About Image" th:onerror="'this.src=\'https://via.placeholder.com/200x150\''">
+                        </div>
+                    </div>
+
+                    <div class="about-process">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="about-process-step" th:each="step : ${processSteps}">
+                                    <div class="about-process-icon">
+                                        <i th:classappend="${step.icon}"></i>
+                                    </div>
+                                    <div>
+                                        <h4 th:text="${step.title}">Book Online</h4>
+                                        <p class="text-muted" th:text="${step.description}">Easily schedule your service.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <h2 class="display-6">
+                            <span style="color: #f28c38; font-weight: bold;" th:text="${reviewsPart1}">Customer</span> 
+                            <span style="color: #333; font-weight: bold;" th:text="${reviewsPart2}">Reviews</span>
+                        </h2>
+                        <p class="lead text-muted" th:text="${reviewsSubtitle}">What Our Customers Say</p>
+                    </div>
+
+                    <div class="reviews-scroll">
+                        <div class="reviews-scroll-container">
+                            <div class="review-card" th:each="review : ${reviews}">
+                                <p class="review-author" th:text="${review.author}">John D.</p>
+                                <div class="review-stars" th:utext="${review.starsHtml}"></div>
+                                <p class="review-text" th:text="${review.text}">"Fast and reliable service!"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container-fluid col-md-11 mx-auto">
+            <div class="row">
+                <div class="col-md-4 text-center-mobile footer-column">
+                    <h5 th:text="${footerAboutTitle}">About</h5>
+                    <p th:text="${footerAboutText}">Your trusted partner since 2025.</p>
+                </div>
+                <div class="col-md-2 text-center-mobile footer-column">
+                    <h5>Quick Links</h5>
+                    <div class="quick-links">
+                        <a href="#home">Home</a>
+                        <a href="#services">Services</a>
+                        <a href="#about">About</a>
+                        <a href="#contact">Contact</a>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center-mobile footer-column">
+                    <h5>Contact</h5>
+                    <p>
+                        <i class="fas fa-phone me-2"></i>
+                        <a th:href="${contactPhoneLink}" th:text="${contactPhone}" class="contact-link">+1 234 567 8900</a>
+                    </p>
+                    <p>
+                        <i class="fas fa-envelope me-2"></i>
+                        <a th:href="${contactEmailLink}" th:text="${contactEmail}" class="contact-link">info@servicexpress.com</a>
+                    </p>
+                    <p>
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <span th:text="${contactAddress}">123 Service St, Auto City</span>
+                    </p>
+                </div>
+                <div class="col-md-3 text-center-mobile footer-column follow-us">
+                    <h5>Follow Us</h5>
+                    <div class="social-icons">
+                        <a th:each="social : ${socialLinks}" th:href="${social.url}" target="_blank" class="social-icon">
+                            <i th:classappend="${social.icon}"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="text-center mb-0" th:text="${footerCopyright}">© 2025 ServiceXpress. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/script.js}"></script>
+    <script>
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
