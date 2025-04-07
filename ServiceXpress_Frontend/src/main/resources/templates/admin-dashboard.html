@@ -16,7 +16,8 @@
 
     <div class="container mt-5 pt-5">
         <h1 class="display-4">Admin Dashboard</h1>
-        <div class="row mt-4">
+        <div th:if="${error != null}" class="alert alert-danger mt-4" th:text="${error}"></div>
+        <div class="row mt-4" th:if="${dashboardData != null}">
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -37,10 +38,13 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Total Revenue</h5>
-                        <p class="card-text display-6" th:text=" ${dashboardData.totalRevenue}">0</p>
+                        <p class="card-text display-6" th:text="${dashboardData.totalRevenue}">0</p>
                     </div>
                 </div>
             </div>
+        </div>
+        <div th:if="${dashboardData == null and error == null}" class="alert alert-warning mt-4">
+            No dashboard data available.
         </div>
     </div>
 

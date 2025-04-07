@@ -16,7 +16,8 @@
 
     <div class="container mt-5 pt-5">
         <h1 class="display-4">Service Advisor Dashboard</h1>
-        <div class="row mt-4">
+        <div th:if="${error != null}" class="alert alert-danger mt-4" th:text="${error}"></div>
+        <div class="row mt-4" th:if="${dashboardData != null}">
             <div class="col-md-6">
                 <div class="card text-center">
                     <div class="card-body">
@@ -34,11 +35,15 @@
                 </div>
             </div>
         </div>
-        <div class="mt-4">
+        <div class="mt-4" th:if="${dashboardData != null}">
             <h3>Assigned Tasks</h3>
-            <ul class="list-group">
+            <ul class="list-group" th:if="${dashboardData.assignedTasks != null and !dashboardData.assignedTasks.isEmpty()}">
                 <li class="list-group-item" th:each="task : ${dashboardData.assignedTasks}" th:text="${task}"></li>
             </ul>
+            <p th:if="${dashboardData.assignedTasks == null or dashboardData.assignedTasks.isEmpty()}" class="text-muted">No assigned tasks.</p>
+        </div>
+        <div th:if="${dashboardData == null and error == null}" class="alert alert-warning mt-4">
+            No dashboard data available.
         </div>
     </div>
 

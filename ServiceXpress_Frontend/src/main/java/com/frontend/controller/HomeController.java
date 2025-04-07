@@ -1,20 +1,36 @@
 package com.frontend.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-
 import com.frontend.model.ProcessStep;
 import com.frontend.model.Review;
 import com.frontend.model.Service;
 import com.frontend.model.SocialLink;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Controller
 public class HomeController {
+    
+    @Value("${backend.api.url}")
+    private String backendApiUrl;
+    
+    private final RestTemplate restTemplate;
+
+    // Constructor injection for RestTemplate
+    public HomeController(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @GetMapping("/")
     public String home(Model model) {
@@ -81,27 +97,52 @@ public class HomeController {
         model.addAttribute("socialLinks", socialLinks);
 
         return "index";
-    }@PostMapping("/login")
+    }
+
+    @PostMapping("/login")
     public String login(String identifier, String password, Model model) {
-        System.out.println("Login attempt: " + identifier + " / " + password); // Debug
-        String role = determineRole(identifier, password);
-        System.out.println("Role determined: " + role); // Debug
-        if ("ADMIN".equals(role)) {
-            return "redirect:/admin/dashboard";
-        } else if ("SERVICE_ADVISOR".equals(role)) {
-            return "redirect:/service-advisor/dashboard";
-        } else if ("CUSTOMER".equals(role)) {
-            return "redirect:/customer/dashboard";
-        } else {
+        try {
+            String url = backendApiUrl + "/auth/login";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("identifier", identifier);
+            body.add("password", password);
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+            AuthResponse response = restTemplate.postForObject(url, request, AuthResponse.class);
+
+            if (response != null && response.getToken() != null && response.getRole() != null) {
+                String token = response.getToken();
+                String role = response.getRole();
+                
+                String redirectUrl = switch (role) {
+                    case "ADMIN" -> "/admin/dashboard?token=" + token;
+                    case "SERVICE_ADVISOR" -> "/service-advisor/dashboard?token=" + token;
+                    case "CUSTOMER" -> "/customer/dashboard?token=" + token;
+                    default -> "/";
+                };
+                return "redirect:" + redirectUrl;
+            }
             model.addAttribute("error", "Invalid credentials");
+            return "index";
+        } catch (Exception e) {
+            model.addAttribute("error", "Login failed: " + e.getMessage());
             return "index";
         }
     }
 
-    private String determineRole(String identifier, String password) {
-        if ("admin".equals(identifier) && "admin123".equals(password)) return "ADMIN";
-        if ("advisor".equals(identifier) && "advisor123".equals(password)) return "SERVICE_ADVISOR";
-        if ("customer".equals(identifier) && "customer123".equals(password)) return "CUSTOMER";
-        return null;
+    // Inner class for AuthResponse
+    public static class AuthResponse {
+        private String token;
+        private String role;
+
+        public AuthResponse() {}
+
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+        public String getRole() { return role; }
+        public void setRole(String role) { this.role = role; }
     }
 }
