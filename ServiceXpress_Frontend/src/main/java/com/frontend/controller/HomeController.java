@@ -1,9 +1,14 @@
 package com.frontend.controller;
 
+import com.frontend.model.DashboardData;
+import com.frontend.model.LoginRequest;
 import com.frontend.model.ProcessStep;
 import com.frontend.model.Review;
 import com.frontend.model.Service;
 import com.frontend.model.SocialLink;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +32,6 @@ public class HomeController {
     
     private final RestTemplate restTemplate;
 
-    // Constructor injection for RestTemplate
     public HomeController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -100,27 +104,25 @@ public class HomeController {
     }
 
     @PostMapping("/login")
-    public String login(String identifier, String password, Model model) {
+    public String login(String identifier, String password, Model model, HttpSession session) {
         try {
             String url = backendApiUrl + "/auth/login";
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("identifier", identifier);
-            body.add("password", password);
-
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+            LoginRequest loginRequest = new LoginRequest(identifier, password);
+            HttpEntity<LoginRequest> request = new HttpEntity<>(loginRequest, headers);
             AuthResponse response = restTemplate.postForObject(url, request, AuthResponse.class);
 
             if (response != null && response.getToken() != null && response.getRole() != null) {
                 String token = response.getToken();
+                session.setAttribute("token", token); // Store token in session
                 String role = response.getRole();
                 
                 String redirectUrl = switch (role) {
-                    case "ADMIN" -> "/admin/dashboard?token=" + token;
-                    case "SERVICE_ADVISOR" -> "/service-advisor/dashboard?token=" + token;
-                    case "CUSTOMER" -> "/customer/dashboard?token=" + token;
+                    case "ADMIN" -> "/admin/dashboard";
+                    case "SERVICE_ADVISOR" -> "/service-advisor/dashboard";
+                    case "CUSTOMER" -> "/customer/dashboard";
                     default -> "/";
                 };
                 return "redirect:" + redirectUrl;
