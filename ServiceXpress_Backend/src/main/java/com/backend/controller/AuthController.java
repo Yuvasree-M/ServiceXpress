@@ -21,6 +21,7 @@ public class AuthController {
         private String identifier;
         private String password;
 
+        // Getters and setters
         public String getIdentifier() { return identifier; }
         public void setIdentifier(String identifier) { this.identifier = identifier; }
         public String getPassword() { return password; }
@@ -38,20 +39,20 @@ public class AuthController {
             String token = jwtUtil.generateToken(request.getIdentifier(), role);
             return ResponseEntity.ok(new AuthResponse(token, role));
         }
-        return ResponseEntity.badRequest().body("Invalid credentials");
-    }
-}
-
-// Simple response DTO
-class AuthResponse {
-    private String token;
-    private String role;
-
-    public AuthResponse(String token, String role) {
-        this.token = token;
-        this.role = role;
+        return ResponseEntity.status(401).body("Invalid credentials");
     }
 
-    public String getToken() { return token; }
-    public String getRole() { return role; }
+    // Simple response DTO
+    public static class AuthResponse {
+        private String token;
+        private String role;
+
+        public AuthResponse(String token, String role) {
+            this.token = token;
+            this.role = role;
+        }
+
+        public String getToken() { return token; }
+        public String getRole() { return role; }
+    }
 }
