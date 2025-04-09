@@ -1,6 +1,7 @@
 package com.backend.controller;
 
 import com.backend.config.JwtUtil;
+import com.backend.dto.AuthResponse;
 import com.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,17 +43,5 @@ public class AuthController {
         return ResponseEntity.status(401).body("Invalid credentials");
     }
 
-    // Simple response DTO
-    public static class AuthResponse {
-        private String token;
-        private String role;
-
-        public AuthResponse(String token, String role) {
-            this.token = token;
-            this.role = role;
-        }
-
-        public String getToken() { return token; }
-        public String getRole() { return role; }
-    }
+    
 }

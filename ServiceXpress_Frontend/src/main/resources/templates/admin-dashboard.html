@@ -1,57 +1,667 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - ServiceXpress</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
+    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet"/>
+
+    <style>
+        :root {
+            --primary-color: #FF6B00;
+            --secondary-color: #00274D;
+            --light-bg: #D9D9D9;
+            --white: #FFFFFF;
+            --text-muted: #4B4B4B;
+            --success-color: #28A745;
+            --warning-color: #FFC107;
+            --danger-color: #DC3545;
+            --shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --primary-orange: #ff6200;
+            --dark-gray: #343a40;
+            --light-gray: #e9ecef;
+            --soft-orange:#FF6B00;
+            --gray-hover: #495057;
+            --light-background: #F4F4F4;
+            --medium-gray: #6c757d;
+            --dark-theme-bg: #2a2e33;
+            --dark-theme-text: #d3d7db;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light-bg), #e9ecef);
+            font-family: Arial, sans-serif;
+            padding-top: 90px;
+            min-height: 100vh;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .navbar-custom {
+            background-color: rgba(255, 255, 255, 0.95);
+            height: 90px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-link {
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            position: relative;
+            color: var(--secondary-color) !important;
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-link:hover::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            bottom: -5px;
+            left: 0;
+            transition: all 0.3s ease;
+            background-color: var(--primary-color);
+        }
+
+        .nav-link:focus::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            left: 0;
+            background-color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+
+        .nav-pills .nav-link {
+            color: var(--secondary-color) !important;
+            border-radius: 25px;
+        }
+
+        .nav-pills .nav-link.active {
+            color: var(--primary-color) !important;
+            background-color: transparent;
+        }
+
+        .navbar-brand img {
+            height: 64px;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand:hover img,
+        .navbar-brand:focus img {
+            transform: scale(1.05);
+        }
+
+        .admin-card {
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            transition: var(--transition);
+            background: var(--white);
+            overflow: hidden;
+        }
+
+        .admin-card:hover,
+        .admin-card:focus {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, var(--primary-color), #ff6804);
+            color: var(--white);
+            border-radius: 15px 15px 0 0;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .dashboard-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .admin-card:hover .dashboard-icon,
+        .admin-card:focus .dashboard-icon {
+            transform: scale(1.1);
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-action-btn {
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 25px;
+            padding: 8px 20px;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .quick-action-btn:hover,
+        .quick-action-btn:focus {
+            background: #ff8c40;
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .status-requested { color: #004080; }
+        .status-assigned { color: var(--primary-color); }
+        .status-in-progress { color: var(--secondary-color); }
+        .status-completed { color: var(--success-color); }
+        .status-paid { color: #6F42C1; }
+        .status-pending { color: var(--danger-color); }
+        .status-rejected { color: #DC3545; }
+        .status-approved { color: #28A745; }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .profile-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .profile-large-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .profile-circle:hover,
+        .profile-circle:focus {
+            transform: scale(1.1);
+        }
+
+        .table-hover tbody tr {
+            transition: var(--transition);
+        }
+
+        .table-hover tbody tr:hover,
+        .table-hover tbody tr:focus-within {
+            background: rgba(255, 98, 0, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-img {
+            border: 4px solid var(--primary-color);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .profile-img:hover,
+        .profile-img:focus {
+            transform: scale(1.05);
+        }
+
+        .table th {
+            background: #f1f3f5;
+            font-weight: 600;
+            padding: 12px;
+        }
+
+        .table th:hover,
+        .table th:focus {
+            background: #e9ecef;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination .page-link {
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .pagination .page-link:hover,
+        .pagination .page-link:focus {
+            color: #ff8c40;
+            background-color: rgba(255, 107, 0, 0.1);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .filter-container {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-container input,
+        .filter-container select {
+            max-width: 200px;
+            border-radius: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .btn:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.5);
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+        
+        .admin-card { cursor: pointer; transition: transform 0.2s; }
+        .admin-card:hover { transform: scale(1.05); }
+        .dashboard-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .table-container { display: none; }  /* Hide all by default */
+        .table-container.active { display: block; } /* Only show active */
+
+        /* Accessibility Enhancements */
+        :focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        footer {
+            background-color: var(--dark-gray);
+            color: white;
+            padding: 60px 20px 40px;
+            flex-shrink: 0;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        footer h5 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--primary-orange);
+        }
+
+        footer p, footer a {
+            font-size: 0.95rem;
+            color: white;
+            transition: color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        footer .contact-link {
+            color: white;
+            text-decoration: none;
+        }
+
+        footer .contact-link:hover {
+            color: var(--primary-orange);
+        }
+
+        footer .quick-links a {
+            display: block;
+            margin-bottom: 10px;
+            color: white;
+            text-decoration: none;
+        }
+
+        footer .quick-links a:hover {
+            color: var(--primary-orange);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 25px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .social-icon {
+            color: white;
+            font-size: 26px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .social-icon:hover {
+            color: var(--primary-orange);
+            transform: scale(1.2);
+        }
+
+        footer .footer-bottom {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer .footer-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        footer .footer-column.follow-us {
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            footer .text-center-mobile {
+                text-align: center;
+                margin-bottom: 50px;
+            }
+
+            footer .footer-column {
+                align-items: center;
+            }
+
+            footer .social-icons {
+                justify-content: center;
+            }
+
+            footer {
+                padding: 40px 15px 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-custom {
+                height: auto;
+            }
+            .nav-link {
+                font-size: 1rem;
+                padding: 0.75rem;
+            }
+            .filter-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-container input,
+            .filter-container select {
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2 fixed-top">
-        <div class="container-fluid col-11 mx-auto">
-            <a class="navbar-brand" href="/">ServiceXpress</a>
-            <div><a href="/logout" class="btn btn-outline-danger">Logout</a></div>
-        </div>
-    </nav>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom fixed-top" aria-label="Main navigation">
+    <div class="container-fluid col-11 mx-auto">
+        <a class="navbar-brand" th:href="@{/admin/dashboard}" aria-label="ServiceXpress Home">
+            <img src="/images/logo.jpg" style="height: 40px;" alt="ServiceXpress Logo"
+                 onerror="this.src='https://via.placeholder.com/40';">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <div class="container mt-5 pt-5">
-        <h1 class="display-4">Admin Dashboard</h1>
-        <div th:if="${error != null}" class="alert alert-danger mt-4" th:text="${error}"></div>
-        <div class="row mt-4" th:if="${dashboardData != null}">
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Users</h5>
-                        <p class="card-text display-6" th:text="${dashboardData.totalUsers}">0</p>
-                    </div>
-                </div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/admin/dashboard}" aria-label="Dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/inventory}" aria-label="Inventory">Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/service-centers}" aria-label="Service Centers">Service Centers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/master-data}" aria-label="Manage Data">Manage Data</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="ms-3">
+            <div class="dropdown">
+                <a href="#" class="text-dark dropdown-toggle d-flex align-items-center"
+                   data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Profile">
+                    <div class="profile-circle me-2" th:text="${#strings.substring(profileName, 0, 1)}" aria-hidden="true">U</div>
+                    <span class="fw-medium" th:text="${profileName}">User</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item" th:href="@{/history}">History</a></li>
+                    <li><a class="dropdown-item" th:href="@{/profile}">Profile</a></li>
+                    <li><a class="dropdown-item text-danger" th:href="@{/logout}">Logout</a></li>
+                </ul>
             </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Services</h5>
-                        <p class="card-text display-6" th:text="${dashboardData.totalServices}">0</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Total Revenue</h5>
-                        <p class="card-text display-6" th:text="${dashboardData.totalRevenue}">0</p>
-                    </div>
+        </div>
+    </div>
+</nav>
+
+<main class="container mt-5 pt-4">
+    <div class="row mt-3">
+        <div class="col-md-3">
+            <div class="card admin-card" onclick="showTable('dueTable')">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar dashboard-icon"></i>
+                    <h5>Vehicles Due</h5>
+                    <p th:text="${dashboardData.dueCount}">0</p>
                 </div>
             </div>
         </div>
-        <div th:if="${dashboardData == null and error == null}" class="alert alert-warning mt-4">
-            No dashboard data available.
+        <div class="col-md-3">
+            <div class="card admin-card" onclick="showTable('servicingTable')">
+                <div class="card-body text-center">
+                    <i class="fas fa-tools dashboard-icon"></i>
+                    <h5>Under Servicing</h5>
+                    <p th:text="${dashboardData.servicingCount}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card admin-card" onclick="showTable('completedTable')">
+                <div class="card-body text-center">
+                    <i class="fas fa-check dashboard-icon"></i>
+                    <h5>Completed</h5>
+                    <p th:text="${dashboardData.completedCount}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card admin-card" onclick="showTable('advisorTable')">
+                <div class="card-body text-center">
+                    <i class="fas fa-comment-dots dashboard-icon"></i>
+                    <h5>Advisor Requests</h5>
+                    <p th:text="${dashboardData.advisorRequestsCount}">0</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:inline="javascript">
-        var token = /*[[${token}]]*/ null;
-        console.log("JWT Token: ", token);
-    </script>
+    <!-- Tables -->
+   <div id="dueTable" class="table-container mt-4">
+    <h4>Vehicles Due</h4>
+    <div th:if="${dashboardData == null}">dashboardData is null</div>
+    <div th:if="${dashboardData != null and dashboardData.vehiclesDue == null}">vehiclesDue is null</div>
+    <div th:if="${dashboardData != null and dashboardData.vehiclesDue.isEmpty()}">vehiclesDue is empty</div>
+    <table class="table table-striped table-hover display datatable">
+        <thead>
+        <tr>
+            <th>Customer Name</th>
+            <th>Vehicle Model</th>
+            <th>Vehicle Type</th>
+            <th>Service Needed</th>
+            <th>Location</th>
+            <th>Service Advisor</th>
+            <th>Date Requested</th>
+            <th>Due Date</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="v : ${dashboardData.vehiclesDue}">
+            <td th:text="${v.ownerName}">John Doe</td>
+            <td th:text="${v.vehicleModel}">Honda Civic</td>
+            <td th:text="${v.vehicleType}">Sedan</td>
+            <td th:text="${v.serviceNeeded}">Oil Change</td>
+            <td th:text="${v.location}">Bangalore</td>
+            <td>
+                <select class="form-select">
+                    <option th:each="advisor : ${v.availableAdvisors}"
+                            th:value="${advisor.id}"
+                            th:text="${advisor.name}"
+                            th:selected="${advisor.id == v.serviceAdvisorId}"></option>
+                </select>
+            </td>
+            <td th:text="${#dates.format(v.requestedDate, 'yyyy-MM-dd')}">2024-04-10</td>
+            <td th:text="${#dates.format(v.dueDate, 'yyyy-MM-dd')}">2024-04-12</td>
+            <td th:text="${v.status}">Requested</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+    <div id="servicingTable" class="table-container mt-4">
+        <h4>Under Servicing</h4>
+        <table class="table table-striped table-hover display datatable">
+            <thead>
+            <tr>
+                <th>Vehicle</th>
+                <th>Owner</th>
+                <th>Service Center</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="v : ${dashboardData.vehiclesUnderService}">
+                <td th:text="${v.vehicleNumber}">KA01CD5678</td>
+                <td th:text="${v.ownerName}">Jane Smith</td>
+                <td th:text="${v.serviceCenter}">Center A</td>
+                <td th:text="${v.status}">In Progress</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="completedTable" class="table-container mt-4">
+        <h4>Completed Services</h4>
+        <table class="table table-striped table-hover display datatable">
+            <thead>
+            <tr>
+                <th>Vehicle</th>
+                <th>Owner</th>
+                <th>Completed On</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="v : ${dashboardData.vehiclesCompleted}">
+                <td th:text="${v.vehicleNumber}">KA02XY1122</td>
+                <td th:text="${v.ownerName}">Sam White</td>
+                <td th:text="${#dates.format(v.completedDate, 'yyyy-MM-dd')}">2024-04-01</td>
+                <td th:text="${v.status}">Completed</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="advisorTable" class="table-container mt-4">
+        <h4>Advisor Requests</h4>
+        <table class="table table-striped table-hover display datatable">
+            <thead>
+            <tr>
+                <th>Request ID</th>
+                <th>Advisor</th>
+                <th>Requested On</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="v : ${dashboardData.advisorRequests}">
+                <td th:text="${v.requestId}">REQ123</td>
+                <td th:text="${v.advisorName}">Mark Advisor</td>
+                <td th:text="${#dates.format(v.requestDate, 'yyyy-MM-dd')}">2024-04-05</td>
+                <td th:text="${v.status}">Pending</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+    function showTable(tableId) {
+        document.querySelectorAll('.table-container').forEach(el => {
+            el.classList.remove('active');
+        });
+        const selectedTable = document.getElementById(tableId);
+        if (selectedTable) {
+            selectedTable.classList.add('active');
+        }
+    }
+
+    // Show the first table by default when page loads
+    document.addEventListener("DOMContentLoaded", function() {
+        showTable('dueTable');
+        $('.datatable').DataTable({
+            dom: 'Bfrtip',
+            buttons: ['csv', 'pdf'],
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50]
+        });
+    });
+</script>
+
 </body>
 </html>
