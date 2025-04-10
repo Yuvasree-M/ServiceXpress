@@ -7,8 +7,15 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class VehicleCompleted {
-    private String vehicleNumber;
+	private Long id;
     private String ownerName;
+    private String vehicleType;
+    private String vehicleModel;
+    private String serviceCenter;
+    private String serviceAdvisor;
+    private String serviceDone;
     private Date completedDate;
     private String status;
+    private boolean paymentRequested;
+    private boolean paymentReceived;
 }
