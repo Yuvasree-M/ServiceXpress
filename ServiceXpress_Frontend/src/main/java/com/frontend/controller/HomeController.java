@@ -1,5 +1,6 @@
 package com.frontend.controller;
 
+import com.frontend.model.AuthResponse;
 import com.frontend.model.DashboardData;
 import com.frontend.model.LoginRequest;
 import com.frontend.model.ProcessStep;
@@ -135,16 +136,5 @@ public class HomeController {
         }
     }
 
-    // Inner class for AuthResponse
-    public static class AuthResponse {
-        private String token;
-        private String role;
 
-        public AuthResponse() {}
-
-        public String getToken() { return token; }
-        public void setToken(String token) { this.token = token; }
-        public String getRole() { return role; }
-        public void setRole(String role) { this.role = role; }
-    }
 }

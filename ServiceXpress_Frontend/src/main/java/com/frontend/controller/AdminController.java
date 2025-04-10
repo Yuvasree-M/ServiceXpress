@@ -39,8 +39,6 @@ public class AdminController {
             model.addAttribute("error", "No authentication token found. Please log in.");
             return "index";
         }
-
-        // Load mock data for now
         addMockData(model);
         return "admin-dashboard";
     }
@@ -69,10 +67,10 @@ public class AdminController {
         model.addAttribute("profileName", dashboardData.getProfileName());
     }
 
-    @GetMapping("/logout")
+    @GetMapping("/admin/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return "redirect:/";
     }
 }
 
