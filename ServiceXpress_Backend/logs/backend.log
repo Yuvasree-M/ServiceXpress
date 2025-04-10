@@ -1981,3 +1981,9 @@ Caused by: java.sql.SQLException: Access denied for user 'root'@'localhost' (usi
 2025-04-09T21:39:16.199+05:30  INFO 20724 --- [ServiceXpress_Backend] [http-nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2025-04-09T21:39:16.199+05:30  INFO 20724 --- [ServiceXpress_Backend] [http-nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
 2025-04-09T21:51:10.016+05:30  WARN 20724 --- [ServiceXpress_Backend] [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=11m43s454ms695µs900ns).
+2025-04-09T23:28:21.876+05:30  INFO 20724 --- [ServiceXpress_Backend] [RMI TCP Connection(111)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2025-04-09T23:28:21.901+05:30  INFO 20724 --- [ServiceXpress_Backend] [RMI TCP Connection(111)-127.0.0.1] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-04-09T23:28:21.984+05:30  INFO 20724 --- [ServiceXpress_Backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-04-09T23:28:21.994+05:30  INFO 20724 --- [ServiceXpress_Backend] [RMI TCP Connection(111)-127.0.0.1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-04-09T23:28:22.003+05:30  INFO 20724 --- [ServiceXpress_Backend] [RMI TCP Connection(111)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-04-09T23:28:22.008+05:30  INFO 20724 --- [ServiceXpress_Backend] [RMI TCP Connection(111)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
