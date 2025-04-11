@@ -1,37 +1,37 @@
 package com.frontend.controller;
 
-import com.frontend.model.CustomerDashboardData;
+import com.frontend.model.Customer;
+import com.frontend.model.ServiceStatus;
 
 import jakarta.servlet.http.HttpSession;
+
+import com.frontend.model.ServiceHistory;
+import com.frontend.model.CustomerService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Controller
 public class CustomerController {
 
+    private final CustomerService customerService;
+
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
     @GetMapping("/customer/dashboard")
-    public String customerDashboard(Model model, HttpSession session) {
-        String token = (String) session.getAttribute("token");
+    public String showDashboard(Model model) {
+        Customer customer = customerService.getLoggedInCustomer();
+        List<ServiceStatus> ongoingServices = customerService.getOngoingServices(customer.getId());
+        List<ServiceHistory> serviceHistory = customerService.getServiceHistory(customer.getId());
 
-        if (token == null) {
-            model.addAttribute("error", "No authentication token found. Please log in.");
-            return "index";
-        }
-
-        CustomerDashboardData dashboardData = new CustomerDashboardData();
-        dashboardData.setBookedServices(3);
-        dashboardData.setLastServiceDate("2024-12-15");
-        dashboardData.setUpcomingAppointments(Arrays.asList(
-                "Oil Change - 2025-04-12",
-                "Tire Rotation - 2025-04-20"
-        ));
-
-        model.addAttribute("dashboardData", dashboardData);
-        model.addAttribute("token", token);
-
+        model.addAttribute("customer", customer);
+        model.addAttribute("cartCount", customerService.getCartCount(customer.getId()));
+        model.addAttribute("ongoingServices", ongoingServices);
+        model.addAttribute("serviceHistory", serviceHistory);
         return "customer-dashboard";
     }
     
@@ -40,5 +40,4 @@ public class CustomerController {
         session.invalidate();
         return "redirect:/";
     }
-
 }

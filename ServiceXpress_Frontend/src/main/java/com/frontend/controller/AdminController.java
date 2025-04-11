@@ -45,7 +45,7 @@ public class AdminController {
 
     private void addMockData(Model model) {
         DashboardData dashboardData = new DashboardData(
-            5, 3, 2, 2, "Admin User",
+            1, 1, 1, 1, "Admin User",
             List.of(
                 new VehicleDue("John Doe", "Honda Civic", "Sedan", "Oil Change", "Bangalore", 1L,
                     List.of(new Advisor(1L, "Alice Smith"), new Advisor(2L, "Bob Johnson")),

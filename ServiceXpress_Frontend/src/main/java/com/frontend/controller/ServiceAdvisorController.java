@@ -45,7 +45,7 @@ public class ServiceAdvisorController {
     @PostMapping("/service-advisor/startService/{vehicleId}")
     public String startService(@PathVariable String vehicleId) {
         vehicles.stream().filter(v -> v.getId().equals(vehicleId)).findFirst().ifPresent(v -> v.setStatus("In Progress"));
-        return "redirect:/service-advisor/dashboard";
+        return "redirect:/service-advisor-dashboard";
     }
 
     @PostMapping("/service-advisor/addServiceItem/{vehicleId}")
@@ -59,7 +59,7 @@ public class ServiceAdvisorController {
             vehicle.getServiceItems().add(new ServiceItem(parts[0], quantity, cost));
             vehicle.setTotalCost(vehicle.getServiceItems().stream().mapToDouble(ServiceItem::getTotalCost).sum());
         }
-        return "redirect:/service-advisor/dashboard";
+        return "redirect:/service-advisor-dashboard";
     }
 
     @PostMapping("/service-advisor/markComplete/{vehicleId}")
@@ -71,7 +71,7 @@ public class ServiceAdvisorController {
             completedVehicles.add(vehicle);
             vehicles.remove(vehicle);
         }
-        return "redirect:/service-advisor/dashboard";
+        return "redirect:/service-advisor-dashboard";
     }
 
     @PostMapping("/service-advisor/raiseToAdmin/{vehicleId}")
@@ -87,7 +87,7 @@ public class ServiceAdvisorController {
             request.setTotalCost(cost * quantity);
             adminRequests.add(request);
         }
-        return "redirect:/service-advisor/dashboard";
+        return "redirect:/service-advisor-dashboard";
     }
 
     @GetMapping("/service-advisor/logout")
