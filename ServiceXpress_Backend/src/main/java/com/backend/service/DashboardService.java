@@ -1,13 +1,26 @@
 package com.backend.service;
 
 import com.backend.model.DashboardData;
+import com.backend.repository.CustomerServiceRequestsRepository;
+import com.backend.repository.ServiceLocationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
     
+    private final ServiceLocationRepository serviceLocationRepository;
+    private final CustomerServiceRequestsRepository requestsRepository;
+
+    public DashboardService(ServiceLocationRepository serviceLocationRepository,
+                           CustomerServiceRequestsRepository requestsRepository) {
+        this.serviceLocationRepository = serviceLocationRepository;
+        this.requestsRepository = requestsRepository;
+    }
+
     public DashboardData getAdminDashboardData() {
         DashboardData data = new DashboardData();
         data.setTotalUsers(100);
@@ -26,9 +39,14 @@ public class DashboardService {
 
     public DashboardData getServiceAdvisorDashboardData() {
         DashboardData data = new DashboardData();
-        data.setPendingServices(5);
-        data.setCompletedServices(10);
-        data.setAssignedTasks(Arrays.asList("Oil Change - Car #123", "Tire Rotation - Bike #456"));
+        long pending = requestsRepository.countByServiceStatus("PENDING");
+        long completed = requestsRepository.countByServiceStatus("COMPLETED");
+        data.setPendingServices((int) pending);
+        data.setCompletedServices((int) completed);
+        List<String> assignedTasks = serviceLocationRepository.findAll().stream()
+            .map(advisor -> "Task at " + advisor.getCenterName() + " by " + advisor.getAdvisorUsername())
+            .collect(Collectors.toList());
+        data.setAssignedTasks(assignedTasks);
         return data;
     }
 }

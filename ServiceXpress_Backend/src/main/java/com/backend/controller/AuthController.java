@@ -22,14 +22,10 @@ public class AuthController {
         private String identifier;
         private String password;
 
-        // Getters and setters
         public String getIdentifier() { return identifier; }
         public void setIdentifier(String identifier) { this.identifier = identifier; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
-
-        // No-args constructor for Jackson deserialization
-        public LoginRequest() {}
     }
 
     @PostMapping("/login")
@@ -42,6 +38,4 @@ public class AuthController {
         }
         return ResponseEntity.status(401).body("Invalid credentials");
     }
-
-    
 }

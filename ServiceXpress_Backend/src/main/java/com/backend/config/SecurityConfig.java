@@ -10,17 +10,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import com.backend.repository.AdminRepository;
 import com.backend.repository.CustomerRepository;
-import com.backend.repository.ServiceAdvisorRepository;
-
+import com.backend.repository.ServiceLocationRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import jakarta.annotation.PostConstruct;
 
 @Configuration
 @EnableWebSecurity
@@ -28,16 +24,16 @@ public class SecurityConfig {
 
     private final AdminRepository adminRepository;
     private final CustomerRepository customerRepository;
-    private final ServiceAdvisorRepository serviceAdvisorRepository;
+    private final ServiceLocationRepository serviceLocationRepository;
     private final JwtUtil jwtUtil;
 
     public SecurityConfig(AdminRepository adminRepository,
                          CustomerRepository customerRepository,
-                         ServiceAdvisorRepository serviceAdvisorRepository,
+                         ServiceLocationRepository serviceLocationRepository,
                          JwtUtil jwtUtil) {
         this.adminRepository = adminRepository;
         this.customerRepository = customerRepository;
-        this.serviceAdvisorRepository = serviceAdvisorRepository;
+        this.serviceLocationRepository = serviceLocationRepository;
         this.jwtUtil = jwtUtil;
     }
 
@@ -51,6 +47,10 @@ public class SecurityConfig {
             .and()
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/requests/**").hasAnyRole("CUSTOMER", "SERVICE_ADVISOR", "ADMIN")
+                .requestMatchers("/api/inventory/**").hasAnyRole("SERVICE_ADVISOR", "ADMIN")
+                .requestMatchers("/api/payments/**").hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers("/api/locations/**").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/customer").hasRole("CUSTOMER")
                 .requestMatchers("/api/dashboard/service-advisor").hasRole("SERVICE_ADVISOR")
@@ -78,10 +78,10 @@ public class SecurityConfig {
             System.out.println("Attempting to load user: " + identifier);
             return adminRepository.findByUsername(identifier)
                 .map(u -> {
-                    System.out.println("Found admin: " + u.getUsername() + ", password: " + u.getPassword());
+                    System.out.println("Found admin: " + u.getUsername());
                     return org.springframework.security.core.userdetails.User
                         .withUsername(u.getUsername())
-                        .password("{noop}" + u.getPassword()) // {noop} for already encoded password
+                        .password(u.getPassword())
                         .roles(u.getRole().name())
                         .build();
                 })
@@ -90,16 +90,16 @@ public class SecurityConfig {
                         System.out.println("Found customer: " + u.getUsername());
                         return org.springframework.security.core.userdetails.User
                             .withUsername(u.getUsername())
-                            .password("{noop}" + u.getPassword())
+                            .password(u.getPassword())
                             .roles(u.getRole().name())
                             .build();
                     }))
-                .or(() -> serviceAdvisorRepository.findByUsername(identifier)
+                .or(() -> serviceLocationRepository.findByAdvisorUsername(identifier)
                     .map(u -> {
-                        System.out.println("Found service advisor: " + u.getUsername());
+                        System.out.println("Found service advisor: " + u.getAdvisorUsername());
                         return org.springframework.security.core.userdetails.User
-                            .withUsername(u.getUsername())
-                            .password("{noop}" + u.getPassword())
+                            .withUsername(u.getAdvisorUsername())
+                            .password(u.getAdvisorPassword())
                             .roles(u.getRole().name())
                             .build();
                     }))
@@ -111,28 +111,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @PostConstruct
-    public void init() {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String plainPasswordAdvisor = "advisor123";
-        String newHashAdvisor = encoder.encode(plainPasswordAdvisor);
-        System.out.println("Newly generated hash for 'advisor123': " + newHashAdvisor);
-        boolean matchesAdvisor = encoder.matches(plainPasswordAdvisor, newHashAdvisor);
-        System.out.println("Does 'advisor123' match the new advisor hash? " + matchesAdvisor);
-
-        String plainPasswordAdmin = "admin123";
-        String newHashAdmin = encoder.encode(plainPasswordAdmin);
-        System.out.println("Newly generated hash for 'admin123': " + newHashAdmin);
-        boolean matchesAdmin = encoder.matches(plainPasswordAdmin, newHashAdmin);
-        System.out.println("Does 'admin123' match the new admin hash? " + matchesAdmin);
-
-        String plainPasswordCustomer = "customer123";
-        String newHashCustomer = encoder.encode(plainPasswordCustomer);
-        System.out.println("Newly generated hash for 'customer123': " + newHashCustomer);
-        boolean matchesCustomer = encoder.matches(plainPasswordCustomer, newHashCustomer);
-        System.out.println("Does 'customer123' match the new customer hash? " + matchesCustomer);
-    }
-    
     
 }

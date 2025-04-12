@@ -2370,3 +2370,214 @@ java.lang.ArrayIndexOutOfBoundsException: Index 1 out of bounds for length 1
 2025-04-12 13:14:14 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
 2025-04-12 13:14:14 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
 2025-04-12 13:14:14 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-04-12 20:36:54 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 20:36:54 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 20:36:54 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 20:36:54 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-04-12 20:36:54 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-04-12 20:36:56 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 20:36:56 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 20:36:56 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 20:36:56 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 20:36:56 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1613 ms
+2025-04-12 20:36:56 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 20:36:57 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 20:36:57 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 20:36:57 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 2.981 seconds (process running for 4.043)
+2025-04-12 20:37:48 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-12 20:37:48 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-12 20:37:48 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-04-12 21:36:27 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:36:28 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:36:28 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:36:28 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:36:28 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:36:28 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:36:28 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:36:28 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:36:28 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 496 ms
+2025-04-12 21:36:29 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:36:29 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:36:29 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:36:29 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.835 seconds (process running for 3578.783)
+2025-04-12 21:36:29 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:37:59 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:37:59 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:37:59 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:37:59 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:37:59 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:37:59 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:37:59 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:37:59 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:37:59 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 267 ms
+2025-04-12 21:37:59 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:38:00 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:38:00 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:38:00 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.477 seconds (process running for 3669.655)
+2025-04-12 21:38:00 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:38:11 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-12 21:38:11 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-12 21:38:11 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2025-04-12 21:38:35 [http-nio-8082-exec-4] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2025-04-12 21:38:58 [http-nio-8082-exec-6] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2025-04-12 21:39:08 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:39:08 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:39:08 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:39:08 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:39:08 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:39:08 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:39:08 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:39:08 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:39:08 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 309 ms
+2025-04-12 21:39:08 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:39:08 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:39:08 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:39:08 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.509 seconds (process running for 3738.224)
+2025-04-12 21:39:08 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:39:21 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:39:21 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:39:21 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:39:21 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:39:21 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:39:21 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:39:21 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:39:21 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:39:21 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 246 ms
+2025-04-12 21:39:21 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:39:21 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:39:21 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:39:21 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.384 seconds (process running for 3751.407)
+2025-04-12 21:39:21 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:39:23 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-12 21:39:23 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-12 21:39:23 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-04-12 21:39:23 [http-nio-8082-exec-1] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2025-04-12 21:42:20 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:42:20 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:42:20 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:42:20 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:42:20 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:42:20 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:42:20 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:42:21 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:42:21 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 287 ms
+2025-04-12 21:42:21 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:42:21 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:42:21 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:42:21 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.431 seconds (process running for 3930.672)
+2025-04-12 21:42:21 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:43:06 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:43:06 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:43:06 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:43:06 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:43:06 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:43:06 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:43:06 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:43:06 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:43:06 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 252 ms
+2025-04-12 21:43:06 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:43:06 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:43:06 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:43:06 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.401 seconds (process running for 3976.267)
+2025-04-12 21:43:06 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:43:10 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-12 21:43:10 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-12 21:43:10 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-04-12 21:44:10 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:44:10 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:44:10 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:44:10 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:44:10 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:44:10 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:44:10 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:44:10 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:44:10 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 226 ms
+2025-04-12 21:44:10 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:44:10 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:44:10 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:44:10 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.374 seconds (process running for 4040.107)
+2025-04-12 21:44:10 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:44:45 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:44:45 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:44:45 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:44:45 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:44:45 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:44:45 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:44:45 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:44:45 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:44:45 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 252 ms
+2025-04-12 21:44:45 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:44:45 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:44:45 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:44:45 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.387 seconds (process running for 4075.408)
+2025-04-12 21:44:45 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:45:16 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:45:16 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:45:16 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:45:16 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:45:16 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:45:16 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:45:16 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:45:16 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:45:16 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 250 ms
+2025-04-12 21:45:16 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:45:17 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:45:17 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:45:17 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.394 seconds (process running for 4106.581)
+2025-04-12 21:45:17 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:45:22 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-12 21:45:22 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-12 21:45:22 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2025-04-12 21:50:20 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:50:20 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:50:20 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:50:20 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:50:20 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:50:20 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:50:20 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:50:20 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:50:20 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 285 ms
+2025-04-12 21:50:20 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:50:20 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:50:20 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:50:20 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.482 seconds (process running for 4410.32)
+2025-04-12 21:50:20 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:50:26 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-12 21:50:26 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-12 21:50:26 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-04-12 21:52:49 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:52:49 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:52:49 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:52:49 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:52:49 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:52:49 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:52:49 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:52:49 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:52:49 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 246 ms
+2025-04-12 21:52:49 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:52:49 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:52:49 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:52:49 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.411 seconds (process running for 4559.205)
+2025-04-12 21:52:49 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:53:05 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-12 21:53:05 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-12 21:53:05 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2025-04-12 21:53:05 [http-nio-8082-exec-2] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2025-04-12 21:53:23 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-04-12 21:53:23 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Starting ServiceXpressFrontendApplication using Java 23.0.1 with PID 7052 (C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend\target\classes started by Boomika in C:\Users\Boomika\git\ServiceXpress\ServiceXpress_Frontend)
+2025-04-12 21:53:23 [restartedMain] DEBUG c.f.ServiceXpressFrontendApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2025-04-12 21:53:23 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - No active profile set, falling back to 1 default profile: "default"
+2025-04-12 21:53:24 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8082 (http)
+2025-04-12 21:53:24 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-04-12 21:53:24 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-04-12 21:53:24 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-04-12 21:53:24 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 401 ms
+2025-04-12 21:53:24 [restartedMain] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-04-12 21:53:24 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-04-12 21:53:24 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
+2025-04-12 21:53:24 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.562 seconds (process running for 4593.818)
+2025-04-12 21:53:24 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-12 21:53:25 [http-nio-8082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-04-12 21:53:25 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-04-12 21:53:25 [http-nio-8082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-04-12 21:53:25 [http-nio-8082-exec-2] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
