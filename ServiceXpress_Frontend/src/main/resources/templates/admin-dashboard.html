@@ -724,6 +724,11 @@
         alert("Sending advisor request to customer for ID: " + id);
     }
 </script>
+<script th:inline="javascript">
+        var token = /*[[${token}]]*/ null;
+        console.log("JWT Token: ", token);
+    </script>
+
 
 </body>
 </html>

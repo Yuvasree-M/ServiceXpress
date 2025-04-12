@@ -39,6 +39,15 @@ public class AdminController {
             model.addAttribute("error", "No authentication token found. Please log in.");
             return "index";
         }
+        
+        String url = backendApiUrl + "/dashboard/admin";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        DashboardData data = restTemplate.exchange(url, HttpMethod.GET, request, DashboardData.class).getBody();
+        model.addAttribute("dashboardData", data);
+        model.addAttribute("token", token); 
+        
         addMockData(model);
         return "admin-dashboard";
     }
@@ -73,4 +82,7 @@ public class AdminController {
         return "redirect:/";
     }
 }
+
+
+
 
