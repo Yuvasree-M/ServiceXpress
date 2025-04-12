@@ -121,9 +121,9 @@ public class HomeController {
                 String role = response.getRole();
                 
                 String redirectUrl = switch (role) {
-                    case "ADMIN" -> "/admin/dashboard";
-                    case "SERVICE_ADVISOR" -> "/service-advisor/dashboard";
-                    case "CUSTOMER" -> "/customer/dashboard";
+                    case "ADMIN" -> "/dashboard/admin";
+                    case "SERVICE_ADVISOR" -> "/dashboard/service-advisor";
+                    case "CUSTOMER" -> "/dashboard/customer";
                     default -> "/";
                 };
                 return "redirect:" + redirectUrl;

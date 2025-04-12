@@ -1,8 +1,14 @@
 package com.backend.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "customer_service_requests")
 public class CustomerServiceRequests {
@@ -19,11 +25,13 @@ public class CustomerServiceRequests {
     @JoinColumn(name = "advisor_id")
     private ServiceLocation advisor;
 
-    @Column(name = "vehicle_type_id")
-    private Integer vehicleTypeId;
+    @ManyToOne
+    @JoinColumn(name = "vehicle_type_id", nullable = false)
+    private VehicleType vehicleType;
 
-    @Column(name = "vehicle_model_id")
-    private Integer vehicleModelId;
+    @ManyToOne
+    @JoinColumn(name = "vehicle_model_id", nullable = false)
+    private VehicleModel vehicleModel;
 
     @Column(name = "customer_name")
     private String customerName;
@@ -54,35 +62,4 @@ public class CustomerServiceRequests {
 
     @Column(name = "completed_date")
     private LocalDateTime completedDate;
-
-    public Integer getRequestId() { return requestId; }
-    public void setRequestId(Integer requestId) { this.requestId = requestId; }
-    public Customer getCustomer() { return customer; }
-    public void setCustomer(Customer customer) { this.customer = customer; }
-    public ServiceLocation getAdvisor() { return advisor; }
-    public void setAdvisor(ServiceLocation advisor) { this.advisor = advisor; }
-    public Integer getVehicleTypeId() { return vehicleTypeId; }
-    public void setVehicleTypeId(Integer vehicleTypeId) { this.vehicleTypeId = vehicleTypeId; }
-    public Integer getVehicleModelId() { return vehicleModelId; }
-    public void setVehicleModelId(Integer vehicleModelId) { this.vehicleModelId = vehicleModelId; }
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-    public String getCustomerPhone() { return customerPhone; }
-    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
-    public String getCustomerAddress() { return customerAddress; }
-    public void setCustomerAddress(String customerAddress) { this.customerAddress = customerAddress; }
-    public String getServiceItem() { return serviceItem; }
-    public void setServiceItem(String serviceItem) { this.serviceItem = serviceItem; }
-    public String getServiceStatus() { return serviceStatus; }
-    public void setServiceStatus(String serviceStatus) { this.serviceStatus = serviceStatus; }
-    public String getPickDropOption() { return pickDropOption; }
-    public void setPickDropOption(String pickDropOption) { this.pickDropOption = pickDropOption; }
-    public String getPickupAddress() { return pickupAddress; }
-    public void setPickupAddress(String pickupAddress) { this.pickupAddress = pickupAddress; }
-    public String getDropAddress() { return dropAddress; }
-    public void setDropAddress(String dropAddress) { this.dropAddress = dropAddress; }
-    public LocalDateTime getRequestedDate() { return requestedDate; }
-    public void setRequestedDate(LocalDateTime requestedDate) { this.requestedDate = requestedDate; }
-    public LocalDateTime getCompletedDate() { return completedDate; }
-    public void setCompletedDate(LocalDateTime completedDate) { this.completedDate = completedDate; }
 }

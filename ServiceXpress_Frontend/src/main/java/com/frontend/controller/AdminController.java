@@ -32,7 +32,7 @@ public class AdminController {
         this.restTemplate = restTemplate;
     }
 
-    @GetMapping("/admin/dashboard")
+    @GetMapping("/dashboard/admin")
     public String showDashboard(Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
         if (token == null) {

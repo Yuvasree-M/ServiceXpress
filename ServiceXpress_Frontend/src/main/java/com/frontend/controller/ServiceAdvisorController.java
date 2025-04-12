@@ -44,7 +44,7 @@ public class ServiceAdvisorController {
         }
     }
 
-    @GetMapping("/service-advisor/dashboard")
+    @GetMapping("/dashboard/service-advisor")
     public String dashboard(Model model, HttpSession session) {
         if (session.getAttribute("token") == null) {
             model.addAttribute("error", "Session expired. Please login again.");
@@ -68,7 +68,7 @@ public class ServiceAdvisorController {
             model.addAttribute("token", token);
 
             // Make API call to backend
-            String url = backendApiUrl + "/dashboard/customer";
+            String url = backendApiUrl + "/dashboard/service-advisor";
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
             HttpEntity<String> request = new HttpEntity<>(headers);

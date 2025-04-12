@@ -33,7 +33,7 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @GetMapping("/customer/dashboard")
+    @GetMapping("/dashboard/customer")
     public String showDashboard(Model model, HttpSession session) {
         // Check if customer is logged in
         Customer customer = customerService.getLoggedInCustomer();
