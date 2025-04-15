@@ -5640,3 +5640,4 @@ java.lang.IllegalArgumentException: The 'request','session','servletContext' and
 2025-04-15 21:15:56 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8082 (http) with context path ''
 2025-04-15 21:15:56 [restartedMain] INFO  c.f.ServiceXpressFrontendApplication - Started ServiceXpressFrontendApplication in 0.36 seconds (process running for 5373.679)
 2025-04-15 21:15:56 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-04-15 21:18:26 [RMI TCP Connection(72)-127.0.0.1] INFO  o.s.b.a.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin - Application shutdown requested.

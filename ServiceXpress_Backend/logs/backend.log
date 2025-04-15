@@ -2971,3 +2971,9 @@ Caused by: java.lang.ClassNotFoundException: List
 2025-04-15T21:15:57.866+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
 2025-04-15T21:15:57.871+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] c.b.ServiceXpressBackendApplication      : Started ServiceXpressBackendApplication in 0.869 seconds (process running for 5379.037)
 2025-04-15T21:15:57.873+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2025-04-15T21:18:21.426+05:30  INFO 1200 --- [ServiceXpress_Backend] [RMI TCP Connection(73)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2025-04-15T21:18:21.427+05:30  INFO 1200 --- [ServiceXpress_Backend] [RMI TCP Connection(73)-127.0.0.1] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-04-15T21:18:21.511+05:30  INFO 1200 --- [ServiceXpress_Backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-04-15T21:18:21.514+05:30  INFO 1200 --- [ServiceXpress_Backend] [RMI TCP Connection(73)-127.0.0.1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-04-15T21:18:21.514+05:30  INFO 1200 --- [ServiceXpress_Backend] [RMI TCP Connection(73)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown initiated...
+2025-04-15T21:18:21.517+05:30  INFO 1200 --- [ServiceXpress_Backend] [RMI TCP Connection(73)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown completed.
