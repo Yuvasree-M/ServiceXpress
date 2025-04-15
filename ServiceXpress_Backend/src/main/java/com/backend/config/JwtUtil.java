@@ -9,7 +9,6 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    // Generate a secure key (you should store this securely in application.properties)
     private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 hours
 

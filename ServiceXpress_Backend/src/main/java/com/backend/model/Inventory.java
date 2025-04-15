@@ -1,5 +1,6 @@
 package com.backend.model;
 
+import java.time.LocalDate;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,19 +9,14 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "inventory")
 public class Inventory {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "workitems")
-    private String workitems;
-
-    @Column(name = "quantity")
-    private Integer quantity;
-
-    @Column(name = "prices")
-    private Double prices;
+    private String workitems;  // Name of the work item
+    private int quantity;      // Quantity of the item
+    private double prices;     // Price of the item
+    private LocalDate lastUpdated;  // The date the item was last updated
 }

@@ -2,6 +2,7 @@ package com.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -48,7 +49,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/requests/**").hasAnyRole("CUSTOMER", "SERVICE_ADVISOR", "ADMIN")
-                .requestMatchers("/api/inventory/**").hasAnyRole("SERVICE_ADVISOR", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/inventory/**").hasAnyRole("ADMIN", "SERVICE_ADVISOR")
+                .requestMatchers(HttpMethod.POST, "/api/inventory/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/inventory/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/inventory/**").hasRole("ADMIN")
+                .requestMatchers("/api/inventory/use/**").hasRole("SERVICE_ADVISOR")
                 .requestMatchers("/api/payments/**").hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers("/api/locations/**").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
@@ -75,34 +80,18 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return identifier -> {
-            System.out.println("Attempting to load user: " + identifier);
             return adminRepository.findByUsername(identifier)
-                .map(u -> {
-                    System.out.println("Found admin: " + u.getUsername());
-                    return org.springframework.security.core.userdetails.User
+                .map(u -> org.springframework.security.core.userdetails.User
                         .withUsername(u.getUsername())
                         .password(u.getPassword())
                         .roles(u.getRole().name())
-                        .build();
-                })
+                        .build())
                 .or(() -> customerRepository.findByUsername(identifier)
-                    .map(u -> {
-                        System.out.println("Found customer: " + u.getUsername());
-                        return org.springframework.security.core.userdetails.User
-                            .withUsername(u.getUsername())
-                            .password(u.getPassword())
-                            .roles(u.getRole().name())
-                            .build();
-                    }))
-                .or(() -> serviceLocationRepository.findByAdvisorUsername(identifier)
-                    .map(u -> {
-                        System.out.println("Found service advisor: " + u.getAdvisorUsername());
-                        return org.springframework.security.core.userdetails.User
-                            .withUsername(u.getAdvisorUsername())
-                            .password(u.getAdvisorPassword())
-                            .roles(u.getRole().name())
-                            .build();
-                    }))
+                    .map(u -> org.springframework.security.core.userdetails.User
+                        .withUsername(u.getUsername())
+                        .password(u.getPassword())
+                        .roles(u.getRole().name())
+                        .build()))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
         };
     }
@@ -111,5 +100,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
 }
