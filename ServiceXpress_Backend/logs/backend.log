@@ -2930,3 +2930,44 @@ Caused by: java.lang.ClassNotFoundException: List
 2025-04-15T20:21:46.847+05:30  INFO 1200 --- [ServiceXpress_Backend] [http-nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2025-04-15T20:21:46.847+05:30  INFO 1200 --- [ServiceXpress_Backend] [http-nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
 2025-04-15T21:10:01.154+05:30  WARN 1200 --- [ServiceXpress_Backend] [HikariPool-9 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-9 - Thread starvation or clock leap detected (housekeeper delta=26m43s255ms445µs700ns).
+2025-04-15T21:15:56.784+05:30  INFO 1200 --- [ServiceXpress_Backend] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 6 class path changes (0 additions, 3 deletions, 3 modifications)
+2025-04-15T21:15:56.786+05:30  INFO 1200 --- [ServiceXpress_Backend] [Thread-38] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-04-15T21:15:56.913+05:30  INFO 1200 --- [ServiceXpress_Backend] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-04-15T21:15:56.916+05:30  INFO 1200 --- [ServiceXpress_Backend] [Thread-38] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-04-15T21:15:56.917+05:30  INFO 1200 --- [ServiceXpress_Backend] [Thread-38] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown initiated...
+2025-04-15T21:15:56.920+05:30  INFO 1200 --- [ServiceXpress_Backend] [Thread-38] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown completed.
+2025-04-15T21:15:57.030+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] c.b.ServiceXpressBackendApplication      : Starting ServiceXpressBackendApplication using Java 17.0.11 with PID 1200 (C:\Users\ADMIN\git\ServiceXpress\ServiceXpress_Backend\target\classes started by ADMIN in C:\Users\ADMIN\git\ServiceXpress\ServiceXpress_Backend)
+2025-04-15T21:15:57.030+05:30 DEBUG 1200 --- [ServiceXpress_Backend] [restartedMain] c.b.ServiceXpressBackendApplication      : Running with Spring Boot v3.4.4, Spring v6.2.5
+2025-04-15T21:15:57.030+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] c.b.ServiceXpressBackendApplication      : No active profile set, falling back to 1 default profile: "default"
+2025-04-15T21:15:57.231+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-04-15T21:15:57.253+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 20 ms. Found 6 JPA repository interfaces.
+2025-04-15T21:15:57.358+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2025-04-15T21:15:57.359+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-04-15T21:15:57.359+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-04-15T21:15:57.394+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-04-15T21:15:57.394+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 362 ms
+2025-04-15T21:15:57.436+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-04-15T21:15:57.440+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-04-15T21:15:57.449+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-04-15T21:15:57.450+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Starting...
+2025-04-15T21:15:57.455+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-10 - Added connection com.mysql.cj.jdbc.ConnectionImpl@646062ed
+2025-04-15T21:15:57.456+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Start completed.
+2025-04-15T21:15:57.456+05:30  WARN 1200 --- [ServiceXpress_Backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-04-15T21:15:57.456+05:30  WARN 1200 --- [ServiceXpress_Backend] [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-04-15T21:15:57.457+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-10)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-04-15T21:15:57.553+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-04-15T21:15:57.585+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-04-15T21:15:57.707+05:30  WARN 1200 --- [ServiceXpress_Backend] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-04-15T21:15:57.714+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-04-15T21:15:57.724+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2025-04-15T21:15:57.853+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-04-15T21:15:57.866+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+2025-04-15T21:15:57.871+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] c.b.ServiceXpressBackendApplication      : Started ServiceXpressBackendApplication in 0.869 seconds (process running for 5379.037)
+2025-04-15T21:15:57.873+05:30  INFO 1200 --- [ServiceXpress_Backend] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
