@@ -83,54 +83,6 @@ public class ServiceAdvisorController {
         return "service-advisor-dashboard";
     }
 
-    @PostMapping("/service-advisor/startService/{vehicleId}")
-    public String startService(@PathVariable String vehicleId) {
-        vehicles.stream().filter(v -> v.getId().equals(vehicleId)).findFirst().ifPresent(v -> v.setStatus("In Progress"));
-        return "redirect:/service-advisor-dashboard";
-    }
-
-    @PostMapping("/service-advisor/addServiceItem/{vehicleId}")
-    public String addServiceItem(@PathVariable String vehicleId,
-                                 @RequestParam String serviceItem,
-                                 @RequestParam int quantity) {
-        Vehicle vehicle = vehicles.stream().filter(v -> v.getId().equals(vehicleId)).findFirst().orElse(null);
-        if (vehicle != null) {
-            String[] parts = serviceItem.split(" - ");
-            double cost = Double.parseDouble(parts[1]);
-            vehicle.getServiceItems().add(new ServiceItem(parts[0], quantity, cost));
-            vehicle.setTotalCost(vehicle.getServiceItems().stream().mapToDouble(ServiceItem::getTotalCost).sum());
-        }
-        return "redirect:/service-advisor-dashboard";
-    }
-
-    @PostMapping("/service-advisor/markComplete/{vehicleId}")
-    public String markComplete(@PathVariable String vehicleId) {
-        Vehicle vehicle = vehicles.stream().filter(v -> v.getId().equals(vehicleId)).findFirst().orElse(null);
-        if (vehicle != null) {
-            vehicle.setStatus("Completed");
-            vehicle.setCompletionDate(new Date());
-            completedVehicles.add(vehicle);
-            vehicles.remove(vehicle);
-        }
-        return "redirect:/service-advisor-dashboard";
-    }
-
-    @PostMapping("/service-advisor/raiseToAdmin/{vehicleId}")
-    public String raiseToAdmin(@PathVariable String vehicleId,
-                               @RequestParam String serviceItem,
-                               @RequestParam int quantity) {
-        Vehicle vehicle = vehicles.stream().filter(v -> v.getId().equals(vehicleId)).findFirst().orElse(null);
-        if (vehicle != null) {
-            String[] parts = serviceItem.split(" - ");
-            double cost = Double.parseDouble(parts[1]);
-            Vehicle request = new Vehicle(vehicleId, vehicle.getDetails(), vehicle.getCustomerName(), new Date(), parts[0], "Requested");
-            request.getServiceItems().add(new ServiceItem(parts[0], quantity, cost));
-            request.setTotalCost(cost * quantity);
-            adminRequests.add(request);
-        }
-        return "redirect:/service-advisor-dashboard";
-    }
-
     @GetMapping("/service-advisor/logout")
     public String logout(HttpSession session) {
         session.invalidate();

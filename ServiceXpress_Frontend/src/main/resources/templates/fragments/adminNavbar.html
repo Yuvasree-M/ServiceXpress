@@ -1,0 +1,57 @@
+<!-- fragments/navbar.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<link rel="stylesheet" th:href="@{/css/theme.css}">
+</head>
+<body>
+    <th:block th:fragment="navbar">
+       <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom fixed-top" aria-label="Main navigation">
+    <div class="container-fluid col-11 mx-auto">
+        <a class="navbar-brand" th:href="@{/dashboard/admin}" aria-label="ServiceXpress Home">
+            <img src="/images/logo.jpg" style="height: 40px;" alt="ServiceXpress Logo"
+                 onerror="this.src='https://via.placeholder.com/40';">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/dashboard/admin}" aria-label="Dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/inventory}" aria-label="Inventory">Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/service-centers}" aria-label="Service Centers">Service Centers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/master-data}" aria-label="Manage Data">Manage Data</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="ms-3">
+            <div class="dropdown">
+                <a href="#" class="text-dark dropdown-toggle d-flex align-items-center"
+                   data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Profile">
+                    <div class="profile-circle me-2" th:text="${#strings.substring(profileName, 0, 1)}" aria-hidden="true">U</div>
+                    <span class="fw-medium" th:text="${profileName}">User</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item" th:href="@{/history}">History</a></li>
+                    <li><a class="dropdown-item" th:href="@{/profile}">Profile</a></li>
+                    <li><a class="dropdown-item text-danger" th:href="@{/admin/logout}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+    </th:block>
+</body>
+</html>

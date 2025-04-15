@@ -1,10 +1,14 @@
 package com.frontend.model;
 
-import lombok.Data;
 import java.time.LocalDate;
 
-@Data
-public class ServiceItem {
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Inventory {
     private Long id;
     private String workitems;
     private int quantity;
