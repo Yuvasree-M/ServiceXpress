@@ -1,5 +1,7 @@
 package com.backend.model;
 
+import com.backend.enums.Role;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
