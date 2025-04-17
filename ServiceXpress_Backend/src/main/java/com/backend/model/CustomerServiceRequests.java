@@ -23,7 +23,7 @@ public class CustomerServiceRequests {
 
     @ManyToOne
     @JoinColumn(name = "advisor_id")
-    private ServiceLocation advisor;
+    private Advisor advisor;
 
     @ManyToOne
     @JoinColumn(name = "vehicle_type_id", nullable = false)

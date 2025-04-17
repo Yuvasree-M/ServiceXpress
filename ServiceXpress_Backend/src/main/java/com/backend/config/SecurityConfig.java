@@ -14,6 +14,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.backend.repository.AdminRepository;
 import com.backend.repository.CustomerRepository;
 import com.backend.repository.ServiceLocationRepository;
+import com.backend.service.TokenBlacklistService;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,16 +29,19 @@ public class SecurityConfig {
     private final CustomerRepository customerRepository;
     private final ServiceLocationRepository serviceLocationRepository;
     private final JwtUtil jwtUtil;
-
+    private final TokenBlacklistService tokenBlacklistService;
+    
     public SecurityConfig(AdminRepository adminRepository,
-                         CustomerRepository customerRepository,
-                         ServiceLocationRepository serviceLocationRepository,
-                         JwtUtil jwtUtil) {
-        this.adminRepository = adminRepository;
-        this.customerRepository = customerRepository;
-        this.serviceLocationRepository = serviceLocationRepository;
-        this.jwtUtil = jwtUtil;
-    }
+            CustomerRepository customerRepository,
+            ServiceLocationRepository serviceLocationRepository,
+            JwtUtil jwtUtil,
+            TokenBlacklistService tokenBlacklistService) {
+this.adminRepository = adminRepository;
+this.customerRepository = customerRepository;
+this.serviceLocationRepository = serviceLocationRepository;
+this.jwtUtil = jwtUtil;
+this.tokenBlacklistService = tokenBlacklistService;
+}
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,6 +53,7 @@ public class SecurityConfig {
             .and()
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/service-centers/**").hasRole("ADMIN")
                 .requestMatchers("/api/requests/**").hasAnyRole("CUSTOMER", "SERVICE_ADVISOR", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/inventory/**").hasAnyRole("ADMIN", "SERVICE_ADVISOR")
                 .requestMatchers(HttpMethod.POST, "/api/inventory/**").hasRole("ADMIN")
@@ -61,8 +67,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/dashboard/service-advisor").hasRole("SERVICE_ADVISOR")
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService()), 
-                           UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService),
+                    UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

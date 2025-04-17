@@ -2,7 +2,7 @@ package com.backend.service;
 
 import com.backend.model.Admin;
 import com.backend.model.Customer;
-import com.backend.model.ServiceLocation;
+import com.backend.model.Advisor;
 import com.backend.repository.AdminRepository;
 import com.backend.repository.CustomerRepository;
 import com.backend.repository.ServiceLocationRepository;
@@ -61,12 +61,12 @@ public class UserService {
         return customerRepository.save(customer);
     }
 
-    public ServiceLocation createServiceLocation(ServiceLocation location) {
+    public Advisor createServiceLocation(Advisor location) {
         location.setAdvisorPassword(passwordEncoder.encode(location.getAdvisorPassword()));
         return serviceLocationRepository.save(location);
     }
 
-    public List<ServiceLocation> getAllServiceLocations() {
+    public List<Advisor> getAllServiceLocations() {
         return serviceLocationRepository.findAll();
     }
 }
