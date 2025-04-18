@@ -89,12 +89,25 @@
     <artifactId>spring-boot-starter-mail</artifactId>
 </dependency>
 
+<dependency>
+    <groupId>com.twilio.sdk</groupId>
+    <artifactId>twilio</artifactId>
+    <version>10.0.0</version>
+</dependency>
+
     	<dependency>
     		<groupId>com.frontend</groupId>
     		<artifactId>ServiceXpress_Frontend</artifactId>
     		<version>0.0.1-SNAPSHOT</version>
     	</dependency>
     </dependencies>
+    
+    <repositories>
+    <repository>
+        <id>central</id>
+        <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+</repositories>
 
     <build>
         <plugins>

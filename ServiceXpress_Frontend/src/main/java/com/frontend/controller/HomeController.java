@@ -1,36 +1,30 @@
 package com.frontend.controller;
 
 import com.frontend.model.AuthResponse;
-import com.frontend.model.DashboardData;
 import com.frontend.model.LoginRequest;
 import com.frontend.model.ProcessStep;
 import com.frontend.model.Review;
 import com.frontend.model.Service;
 import com.frontend.model.SocialLink;
-
 import jakarta.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
 import java.util.Arrays;
 import java.util.List;
 
 @Controller
 public class HomeController {
-    
+
     @Value("${backend.api.url}")
     private String backendApiUrl;
-    
+
     private final RestTemplate restTemplate;
 
     public HomeController(RestTemplate restTemplate) {
@@ -105,21 +99,19 @@ public class HomeController {
     }
 
     @PostMapping("/login")
-    public String login(String identifier, String password, Model model, HttpSession session) {
+    public String login(@RequestParam String identifier, @RequestParam String password, Model model, HttpSession session) {
         try {
             String url = backendApiUrl + "/auth/login";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
             LoginRequest loginRequest = new LoginRequest(identifier, password);
             HttpEntity<LoginRequest> request = new HttpEntity<>(loginRequest, headers);
             AuthResponse response = restTemplate.postForObject(url, request, AuthResponse.class);
 
             if (response != null && response.getToken() != null && response.getRole() != null) {
                 String token = response.getToken();
-                session.setAttribute("token", token); // Store token in session
+                session.setAttribute("token", token);
                 String role = response.getRole();
-                
                 String redirectUrl = switch (role) {
                     case "ADMIN" -> "/dashboard/admin";
                     case "SERVICE_ADVISOR" -> "/dashboard/service-advisor";
@@ -136,5 +128,57 @@ public class HomeController {
         }
     }
 
+    @PostMapping("/auth/send-otp")
+    @ResponseBody
+    public ResponseEntity<?> sendOtp(@RequestBody OtpRequest request) {
+        try {
+            String url = backendApiUrl + "/auth/customer/send-otp";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<OtpRequest> httpRequest = new HttpEntity<>(request, headers);
+            return restTemplate.postForEntity(url, httpRequest, String.class);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to send OTP: " + e.getMessage());
+        }
+    }
 
+    @PostMapping("/auth/verify-otp")
+    public String verifyOtp(@RequestBody VerifyOtpRequest request, HttpSession session, Model model) {
+        try {
+            String url = backendApiUrl + "/auth/customer/verify-otp";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<VerifyOtpRequest> httpRequest = new HttpEntity<>(request, headers);
+            ResponseEntity<AuthResponse> response = restTemplate.postForEntity(url, httpRequest, AuthResponse.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                AuthResponse authResponse = response.getBody();
+                if (authResponse.getToken() != null && "CUSTOMER".equals(authResponse.getRole())) {
+                    session.setAttribute("token", authResponse.getToken());
+                    return "redirect:/dashboard/customer";
+                }
+            }
+            model.addAttribute("error", "Invalid OTP or role");
+            return "index";
+        } catch (Exception e) {
+            model.addAttribute("error", "Verification failed: " + e.getMessage());
+            return "index";
+        }
+    }
+
+
+    public static class OtpRequest {
+        private String phoneNumber;
+        public String getPhoneNumber() { return phoneNumber; }
+        public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    }
+
+    public static class VerifyOtpRequest {
+        private String phoneNumber;
+        private String otp;
+        public String getPhoneNumber() { return phoneNumber; }
+        public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+        public String getOtp() { return otp; }
+        public void setOtp(String otp) { this.otp = otp; }
+    }
 }
