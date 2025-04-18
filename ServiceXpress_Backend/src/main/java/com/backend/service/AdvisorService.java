@@ -14,34 +14,43 @@ public class AdvisorService {
     @Autowired
     private AdvisorRepository advisorRepository;
 
-    public List<Advisor> getAllAdvisors() {
+    // Fetch all advisors
+    public List<Advisor> findAll() {
         return advisorRepository.findAll();
     }
 
-    public Optional<Advisor> getAdvisorById(Long id) {
+    // Fetch advisor by ID
+    public Optional<Advisor> findById(Long id) {
         return advisorRepository.findById(id);
     }
 
-    public Advisor createAdvisor(Advisor advisor) {
+    // Create a new advisor
+    public Advisor save(Advisor advisor) {
         return advisorRepository.save(advisor);
     }
 
-    public Advisor updateAdvisor(Advisor advisor) {
+    // Update an existing advisor
+    public Advisor update(Long id, Advisor advisor) {
+        // Optionally, you can add logic here to check if the advisor exists before updating
         return advisorRepository.save(advisor);
     }
 
-    public void deleteAdvisor(Long id) {
+    // Delete an advisor by ID
+    public void delete(Long id) {
         advisorRepository.deleteById(id);
     }
-    
+
+    // Find advisor by username
     public Optional<Advisor> findAdvisorByUsername(String username) {
         return advisorRepository.findByUsername(username);
     }
 
+    // Find advisor by email
     public Optional<Advisor> findAdvisorByEmail(String email) {
         return advisorRepository.findByEmail(email);
     }
 
+    // Find advisor by phone number
     public Optional<Advisor> findAdvisorByPhoneNumber(String phoneNumber) {
         return advisorRepository.findByPhoneNumber(phoneNumber);
     }

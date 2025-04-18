@@ -53,32 +53,44 @@ public class SecurityConfig {
             .cors().configurationSource(corsConfigurationSource())
             .and()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                // Public access
+                .requestMatchers("/api/auth/**").permitAll() // Auth endpoints open for everyone
+                
+                // Admin specific access
                 .requestMatchers("/api/service-centers/**").hasRole("ADMIN")
-                .requestMatchers("/api/requests/**").hasAnyRole("CUSTOMER", "SERVICE_ADVISOR", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/inventory/**").hasAnyRole("ADMIN", "SERVICE_ADVISOR")
+                .requestMatchers(HttpMethod.GET, "/api/inventory/**").hasAnyRole("ADMIN", "SERVICE_ADVISOR") // Read-only access for admins and service advisors
                 .requestMatchers(HttpMethod.POST, "/api/inventory/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/inventory/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/inventory/**").hasRole("ADMIN")
-                .requestMatchers("/api/inventory/use/**").hasRole("SERVICE_ADVISOR")
-                .requestMatchers("/api/payments/**").hasAnyRole("CUSTOMER", "ADMIN")
-                .requestMatchers("/api/locations/**").hasRole("ADMIN")
+                .requestMatchers("/api/advisors/**").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
+                .requestMatchers("/api/locations/**").hasRole("ADMIN")
+
+                // Customer and Admin access to dashboard
                 .requestMatchers("/api/dashboard/customer").hasRole("CUSTOMER")
+                .requestMatchers("/api/payments/**").hasAnyRole("CUSTOMER", "ADMIN") // Payments accessible to both Customer and Admin
+
+                // Service Advisor access to inventory usage and dashboard
+                .requestMatchers("/api/inventory/use/**").hasRole("SERVICE_ADVISOR")
                 .requestMatchers("/api/dashboard/service-advisor").hasRole("SERVICE_ADVISOR")
-                .requestMatchers(HttpMethod.GET, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/advisors/**").hasRole("ADMIN")
+                
+                // Access for all roles to view resources
+                .requestMatchers("/api/requests/**").hasAnyRole("CUSTOMER", "SERVICE_ADVISOR", "ADMIN") // Requests are available for all roles
+                .requestMatchers("/api/advisors/**").hasRole("ADMIN") // Admin controls advisors
+                
+                // Generic access for all authenticated users
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/service-advisor/**").hasRole("SERVICE_ADVISOR")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
+
+                // Any other request needs authentication
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService),
-                    UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService), UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class VehicleTypeService {
@@ -14,23 +13,26 @@ public class VehicleTypeService {
     @Autowired
     private VehicleTypeRepository vehicleTypeRepository;
 
-    public List<VehicleType> getAllVehicleTypes() {
+    public List<VehicleType> findAll() {
         return vehicleTypeRepository.findAll();
     }
 
-    public Optional<VehicleType> getVehicleTypeById(Integer id) {
-        return vehicleTypeRepository.findById(id);
+    public VehicleType findById(Integer id) {
+        return vehicleTypeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("VehicleType not found with ID: " + id));
     }
 
-    public VehicleType createVehicleType(VehicleType vehicleType) {
+    public VehicleType save(VehicleType vehicleType) {
         return vehicleTypeRepository.save(vehicleType);
     }
 
-    public VehicleType updateVehicleType(VehicleType vehicleType) {
-        return vehicleTypeRepository.save(vehicleType);
+    public VehicleType update(Integer id, VehicleType updatedType) {
+        VehicleType existingType = findById(id);
+        existingType.setTypeName(updatedType.getTypeName());
+        return vehicleTypeRepository.save(existingType);
     }
 
-    public void deleteVehicleType(Integer id) {
+    public void delete(Integer id) {
         vehicleTypeRepository.deleteById(id);
     }
 }
