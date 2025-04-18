@@ -14,41 +14,40 @@ import java.util.List;
 @Service
 public class UserService {
     private final AdminRepository adminRepository;
-    private final CustomerRepository customerRepository;
-    private final AdvisorRepository advisorRepository;  // Replaced with AdvisorRepository
+    public final CustomerRepository customerRepository;
+    private final AdvisorRepository advisorRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(AdminRepository adminRepository,
-                      CustomerRepository customerRepository,
-                      AdvisorRepository advisorRepository,  // Replaced parameter with AdvisorRepository
-                      PasswordEncoder passwordEncoder) {
+                       CustomerRepository customerRepository,
+                       AdvisorRepository advisorRepository,
+                       PasswordEncoder passwordEncoder) {
         this.adminRepository = adminRepository;
         this.customerRepository = customerRepository;
-        this.advisorRepository = advisorRepository;  // Updated field assignment
+        this.advisorRepository = advisorRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     public String authenticate(String identifier, String password) {
         System.out.println("Authenticating identifier: " + identifier);
         return adminRepository.findByUsername(identifier)
-            .filter(user -> passwordEncoder.matches(password, user.getPassword()))
-            .map(user -> {
-                System.out.println("Admin authentication success for: " + user.getUsername());
-                return user.getRole().name();
-            })
-            .or(() -> customerRepository.findByUsername(identifier)
                 .filter(user -> passwordEncoder.matches(password, user.getPassword()))
                 .map(user -> {
-                    System.out.println("Customer authentication success for: " + user.getUsername());
+                    System.out.println("Admin authentication success for: " + user.getUsername());
                     return user.getRole().name();
-                }))
-            .or(() -> advisorRepository.findByUsername(identifier)  // Updated to use AdvisorRepository
-                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
-                .map(user -> {
-                    System.out.println("Service Advisor authentication success for: " + user.getUsername());
-                    return user.getRole().name();
-                }))
-            .orElse(null);
+                })
+                .or(() -> customerRepository.findByPhoneNumber(identifier) // Use phone number for customers
+                        .map(user -> {
+                            System.out.println("Customer found for phone: " + user.getPhoneNumber());
+                            return user.getRole().name(); // No password check for customers
+                        }))
+                .or(() -> advisorRepository.findByUsername(identifier)
+                        .filter(user -> passwordEncoder.matches(password, user.getPassword()))
+                        .map(user -> {
+                            System.out.println("Service Advisor authentication success for: " + user.getUsername());
+                            return user.getRole().name();
+                        }))
+                .orElse(null);
     }
 
     public Admin createAdmin(Admin admin) {
@@ -57,16 +56,16 @@ public class UserService {
     }
 
     public Customer createCustomer(Customer customer) {
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+        // No password encoding for customers (optional, since OTP-based)
         return customerRepository.save(customer);
     }
 
-    public Advisor createAdvisor(Advisor advisor) {  // Updated method name to match "Advisor"
-        advisor.setPassword(passwordEncoder.encode(advisor.getPassword()));  // Updated to match "Advisor" entity
-        return advisorRepository.save(advisor);  // Updated repository usage
+    public Advisor createAdvisor(Advisor advisor) {
+        advisor.setPassword(passwordEncoder.encode(advisor.getPassword()));
+        return advisorRepository.save(advisor);
     }
 
     public List<Advisor> getAllAdvisors() {
-        return advisorRepository.findAll();  // Updated to use AdvisorRepository
+        return advisorRepository.findAll();
     }
 }
