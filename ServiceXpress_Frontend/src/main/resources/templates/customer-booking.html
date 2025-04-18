@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiceXpress - Book a Service</title>
+<!-- Bootstrap CSS -->
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+<!-- Google Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet">
+<!-- Google Fonts -->
+<link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap"
+    rel="stylesheet">
+<style>
+:root {
+    --primary-color: #343a40;
+    --secondary-color: #F97316;
+    --background-color: #F3F4F6;
+    --text-color: #4B5563;
+    --white: #FFFFFF;
+    --gradient-primary: linear-gradient(135deg, #343a40, #636363);
+    --gradient-secondary: linear-gradient(135deg, #F97316, #FB923C);
+    --primary-orange: #ff6200;
+    --dark-gray: #343a40;
+    --light-gray: #e9ecef;
+    --soft-orange: #ff8c40;
+    --gray-hover: #495057;
+    --light-background: #F4F4F4;
+    --medium-gray: #6c757d;
+    --dark-theme-bg: #2a2e33;
+    --dark-theme-text: #d3d7db;
+}
+
+* {
+    transition: all 0.3s ease;
+}
+
+body {
+    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background: var(--white);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 60px;
+    width: 250px;
+    object-fit: contain;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-link {
+    color: var(--primary-color);
+    font-weight: 500;
+    position: relative;
+    margin-left: 20px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background: var(--secondary-color);
+    transition: width 0.3s;
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: 100%;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--secondary-color);
+}
+
+.profile-dropdown {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-left: 20px;
+}
+
+.profile-dropdown .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.profile-badge {
+    width: 32px;
+    height: 32px;
+    background: var(--primary-color);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: 8px;
+    text-transform: uppercase;
+}
+
+.username {
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.dropdown-toggle::after {
+    border: none;
+    content: 'expand_more';
+    font-family: 'Material Icons';
+    vertical-align: middle;
+    color: var(--primary-color);
+    font-size: 20px;
+}
+
+.dropdown-menu {
+    background: var(--white);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+    min-width: 200px;
+}
+
+.dropdown-item {
+    color: var(--primary-color);
+    font-weight: 500;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(145deg, #F9FAFB, #F3F4F6);
+    color: var(--secondary-color);
+}
+
+.dropdown-item .material-icons {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    padding: 60px 15px;
+    flex: 1;
+}
+
+h1, h3 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 42px;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+}
+
+h3 {
+    font-weight: 600;
+    font-size: 32px;
+    margin: 50px 0 30px;
+    position: relative;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+h3::before, h3::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30%;
+    height: 2px;
+    background: var(--gradient-secondary);
+}
+
+h3::before {
+    left: 0;
+}
+
+h3::after {
+    right: 0;
+}
+
+p.text-muted {
+    font-size: 18px;
+    text-align: center;
+}
+
+.vehicle-card, .model-card, .service-card, .engine-card,
+    .confirmation-card {
+    background: linear-gradient(145deg, #FFFFFF, #F9FAFB);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+    transform: perspective(1000px);
+    transition: all 0.4s ease;
+}
+
+.vehicle-card:hover, .model-card:hover, .engine-card:hover {
+    transform: translateY(-5px) rotateX(5deg);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.vehicle-card img, .model-card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.vehicle-card:hover img, .model-card:hover img {
+    transform: scale(1.05);
+}
+
+.vehicle-card.selected, .model-card.selected, .engine-card.selected {
+    border: 3px solid var(--secondary-color);
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
+
+.card-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.vehicle-card h5, .model-card h5, .service-card h5, .engine-card h5 {
+    color: var(--primary-color);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.vehicle-card p, .model-card p, .service-card p, .engine-card p {
+    color: var(--text-color);
+    font-size: 16px;
+    margin: 0;
+}
+
+.engine-card {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.engine-card .icon {
+    margin-right: 15px;
+    color: var(--primary-color);
+    font-size: 40px;
+}
+
+.service-card {
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.service-card:hover {
+    background: linear-gradient(145deg, #F9FAFB, #F3F4F6);
+    transform: translateX(5px);
+}
+
+.service-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.service-card input[type="checkbox"] {
+    margin-right: 15px;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.service-card input[type="checkbox"]:checked {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.service-card input[type="checkbox"]:checked::after {
+    content: '✔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
+.service-card .toggle-icon {
+    cursor: pointer;
+    color: var(--primary-color);
+    font-size: 28px;
+    transition: transform 0.3s ease;
+}
+
+.service-card .toggle-icon:hover {
+    color: var(--secondary-color);
+    transform: rotate(180deg);
+}
+
+.service-details {
+    display: block;
+    padding: 15px;
+    background: #F9FAFB;
+    border-top: 1px solid #E5E7EB;
+    margin-top: 10px;
+    border-radius: 0 0 15px 15px;
+}
+
+.service-details h6 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.service-details-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: #FFFFFF;
+    border-radius: 6px;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.service-details-item ul {
+    margin: 0;
+    padding-left: 20px;
+    text-align: right;
+}
+
+.btn-book {
+    background: var(--gradient-secondary);
+    color: var(--white);
+    border: none;
+    padding: 12px 40px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-book:hover {
+    background: linear-gradient(135deg, #EA580C, #F97316);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(234, 88, 12, 0.4);
+}
+
+.btn-cart {
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    padding: 12px 40px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3);
+    transition: all 0.3s ease;
+    margin-right: 20px;
+}
+
+.btn-cart:hover {
+    background: linear-gradient(135deg, #1E3A8A, #2563EB);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(30, 58, 138, 0.4);
+}
+
+.btn-back {
+    background: var(--gradient-primary);
+    color: var(--white);
+    border: none;
+    padding: 12px 40px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3);
+    transition: all 0.3s ease;
+    margin-top: 30px;
+}
+
+.btn-back:hover {
+    background: linear-gradient(135deg, #1E3A8A, #2563EB);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(30, 58, 138, 0.4);
+}
+
+.modal-content {
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: var(--gradient-primary);
+    color: var(--white);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.modal-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 5px rgba(249, 115, 22, 0.3);
+}
+
+#pickupDropoffType, #pickupAddress, #dropoffAddress {
+    display: none;
+}
+
+.confirmation-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    flex-direction: column;
+}
+
+.confirmation-card {
+    padding: 40px;
+    background: linear-gradient(145deg, #FFFFFF, #F9FAFB);
+    border-radius: 25px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    max-width: 700px;
+    width: 100%;
+    text-align: center;
+    border: 3px solid var(--secondary-color);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+keyframes fadeIn {from { opacity:0;
+    transform: translateY(20px);
+}
+
+to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}
+.confirmation-card h5 {
+    color: var(--primary-color);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    margin-bottom: 30px;
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.confirmation-card p {
+    margin: 12px 0;
+    font-size: 18px;
+    display: block;
+    color: var(--text-color);
+}
+
+.confirmation-card p strong {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+.location-selection {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.location-selection select {
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    transition: border-color 0.3s ease;
+}
+
+.location-selection select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 5px rgba(249, 115, 22, 0.3);
+    outline: none;
+}
+
+.cart-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #F9FAFB;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.cart-section h4 {
+    color: var(--primary-color);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.cart-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.cart-section li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+footer {
+    background-color: var(--dark-gray);
+    color: white;
+    padding: 60px 20px 40px;
+    flex-shrink: 0;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+footer h5 {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: var(--primary-orange);
+}
+
+footer p, footer a {
+    font-size: 0.95rem;
+    color: white;
+    transition: color 0.3s ease;
+    margin-bottom: 10px;
+}
+
+footer .contact-link {
+    color: white;
+    text-decoration: none;
+}
+
+footer .contact-link:hover {
+    color: var(--primary-orange);
+}
+
+footer .quick-links a {
+    display: block;
+    margin-bottom: 10px;
+    color: white;
+    text-decoration: none;
+}
+
+footer .quick-links a:hover {
+    color: var(--primary-orange);
+}
+
+.social-icons {
+    display: flex;
+    gap: 25px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.social-icon {
+    color: white;
+    font-size: 26px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.social-icon:hover {
+    color: var(--primary-orange);
+    transform: scale(1.2);
+}
+
+footer .footer-bottom {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+footer .footer-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+footer .footer-column.follow-us {
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    footer .text-center-mobile {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    footer .footer-column {
+        align-items: center;
+    }
+    footer .social-icons {
+        justify-content: center;
+    }
+    footer {
+        padding: 40px 15px 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 32px;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h3::before, h3::after {
+        width: 20%;
+    }
+    .vehicle-card img, .model-card img {
+        height: 200px;
+    }
+    .service-card {
+        padding: 15px;
+    }
+    .btn-book, .btn-back, .btn-cart {
+        padding: 10px 30px;
+        font-size: 16px;
+    }
+    .confirmation-card {
+        padding: 25px;
+        max-width: 90%;
+    }
+    .confirmation-card h5 {
+        font-size: 24px;
+    }
+    .confirmation-card p {
+        font-size: 16px;
+    }
+    .username {
+        font-size: 14px;
+    }
+    .profile-badge {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    .navbar-nav .nav-link {
+        margin-left: 10px;
+    }
+    .profile-dropdown {
+        margin-left: 10px;
+    }
+    .location-selection select {
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"> <img
+                th:src="@{/images/logo.jpg}" style="height: 40px;" class="logo-img"
+                alt="ServiceXpress Logo">
+            </a>
+            <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end"
+                id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link"
+                        th:href="@{/customer-dashboard}" aria-current="page"> <span
+                            class="material-icons align-middle me-1">home</span> Dashboard
+                    </a></li>
+                    <li class="nav-item"><a class="nav-link"
+                        th:href="@{/customer-services}"> <span
+                            class="material-icons align-middle me-1">build</span> Services
+                    </a></li>
+                    <li class="nav-item"><a class="nav-link active"
+                        th:href="@{/customer-booking}"> <span
+                            class="material-icons align-middle me-1">calendar_month</span>
+                            Booking
+                    </a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"> <span
+                            class="material-icons align-middle me-1">contact_support</span>
+                            Contact
+                    </a></li>
+                    <!-- Profile Dropdown -->
+                    <li class="nav-item dropdown profile-dropdown"><a
+                        class="nav-link dropdown-toggle" href="#" id="profileDropdown"
+                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="profile-badge" id="profileBadge"
+                            th:text="${#strings.substring(session.customer?.name, 0, 2)?.toUpperCase()}"></span>
+                            <span class="username" th:text="${session.customer?.name}">Vaishya
+                                R</span>
+                    </a>
+                        <ul class="dropdown-menu dropdown-menu-end"
+                            aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" th:href="@{/service-history}">
+                                    <span class="material-icons">history</span> Service History
+                            </a></li>
+                            <li><a class="dropdown-item"
+                                th:href="@{/profile-management}"> <span
+                                    class="material-icons">manage_accounts</span> Profile
+                                    Management
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                    <span class="material-icons">logout</span> Logout
+                            </a></li>
+                        </ul></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Book a Service</h1>
+        <p class="text-center text-muted mb-5">Select your location,
+            vehicle, and services to get started</p>
+
+        <!-- Location Selection -->
+        <div class="location-selection" id="location-selection">
+            <h3>Select Your Location</h3>
+            <select id="location" th:field="*{booking.location}">
+                <option th:each="loc : ${locations}" th:value="${loc}"
+                    th:text="${loc}" th:selected="${loc == defaultLocation}"></option>
+            </select>
+        </div>
+
+        <!-- Vehicle Selection -->
+        <div class="row justify-content-center" id="vehicle-selection">
+            <div class="col-md-5" th:each="vehicle : ${vehicles}">
+                <div class="vehicle-card" th:data-type="${vehicle.type}">
+                    <img th:src="${vehicle.imageUrl}" alt="Vehicle">
+                    <div class="card-content">
+                        <h5 th:text="${vehicle.type}">Vehicle Type</h5>
+                        <p th:text="${vehicle.description}">Vehicle Description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Selection -->
+        <div class="model-section" id="model-section" style="display: none;">
+            <h3>Select Your Model</h3>
+            <div class="row" id="model-container"></div>
+        </div>
+
+        <!-- Engine Type Selection -->
+        <div class="engine-type-section" id="engine-type-section"
+            style="display: none;">
+            <h3>Select Engine Type</h3>
+            <div class="row">
+                <div class="col-md-4" th:each="engine : ${engineTypes}">
+                    <div class="engine-card" th:data-engine-type="${engine.type}">
+                        <span class="material-icons icon" th:text="${engine.icon}"></span>
+                        <div>
+                            <h5 th:text="${engine.type}">Engine Name</h5>
+                            <p class="text-muted mb-0" th:text="${engine.description}">Engine
+                                Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Selection -->
+        <div class="service-section" id="service-section"
+            style="display: none;">
+            <h3>Available Services</h3>
+            <div class="row">
+                <div class="col-md-4" th:each="service : ${services}">
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="d-flex align-items-center">
+                                <input type="checkbox" th:id="'service_' + ${service.id}"
+                                    th:name="'service'" th:value="${service.name}"> <label
+                                    th:for="'service_' + ${service.id}">
+                                    <h5 th:text="${service.name}">Service Name</h5> <small
+                                    class="text-muted"
+                                    th:text="'Regular maintenance - $' + ${service.price}">Price</small>
+                                </label>
+                            </div>
+                            <span class="material-icons toggle-icon"
+                                th:data-target="'service_' + ${service.id} + '_details'">expand_less</span>
+                        </div>
+                        <div class="service-details"
+                            th:id="'service_' + ${service.id} + '_details'">
+                            <h6 th:text="'Details for ' + ${service.name}">Service
+                                Details</h6>
+                            <div class="service-details-item">
+                                <span>Estimated Date</span> <strong
+                                    th:text="${service.estimatedDate}">Date</strong>
+                            </div>
+                            <div class="service-details-item">
+                                <span>Estimated Duration</span> <strong
+                                    th:text="${service.duration}">Duration</strong>
+                            </div>
+                            <div class="service-details-item">
+                                <span>Work to be Done</span>
+                                <ul class="list-unstyled text-end mb-0">
+                                    <li th:each="task : ${service.tasks}" th:text="${task}"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <button class="btn btn-cart" id="add-to-cart">
+                    <span class="material-icons align-middle me-2">add_shopping_cart</span>
+                    Add to Cart
+                </button>
+                <button class="btn btn-book" id="submit-booking"
+                    data-bs-toggle="modal" data-bs-target="#bookingModal">
+                    <span class="material-icons align-middle me-2">check_circle</span>
+                    Book Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Confirmation Section -->
+        <div class="confirmation-section" id="confirmation-section"
+            style="display: none;">
+            <div class="confirmation-card" id="confirmation-details"></div>
+            <button class="btn btn-back" id="back-button"
+                th:href="@{/customer-booking}">
+                <span class="material-icons align-middle me-2">arrow_back</span>
+                Back
+            </button>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1"
+        aria-labelledby="bookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingModalLabel">Complete Your
+                        Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm" th:action="@{/submit-booking}"
+                        th:object="${booking}" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Name</label> <input
+                                    type="text" class="form-control" id="name" th:field="*{name}"
+                                    required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label> <input
+                                    type="email" class="form-control" id="email"
+                                    th:field="*{email}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="mobile" class="form-label">Mobile Number</label> <input
+                                    type="tel" class="form-control" id="mobile"
+                                    th:field="*{mobile}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="vehicle" class="form-label">Vehicle</label> <input
+                                    type="text" class="form-control" id="vehicle"
+                                    th:field="*{vehicle}" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="model" class="form-label">Model</label> <input
+                                    type="text" class="form-control" id="model" th:field="*{model}"
+                                    readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="services" class="form-label">Selected
+                                    Services</label> <input type="text" class="form-control" id="services"
+                                    th:field="*{services}" readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" rows="3"
+                                th:field="*{address}" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pickupDropoff" class="form-label">Pick-up/Drop-off
+                                Required?</label> <select class="form-control" id="pickupDropoff"
+                                th:field="*{pickupDropoffOption}" required>
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="pickupDropoffType"
+                            th:if="${booking?.pickupDropoffOption == 'Yes'}">
+                            <label for="pickupDropoffOption" class="form-label">Pick-up/Drop-off
+                                Option</label> <select class="form-control" id="pickupDropoffOption"
+                                th:field="*{pickupDropoffOption}">
+                                <option value="pickup">Pick-up Only</option>
+                                <option value="dropoff">Drop-off Only</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="pickupAddress"
+                            th:if="${booking?.pickupDropoffOption == 'Yes' and (booking?.pickupDropoffOption == 'pickup' or booking?.pickupDropoffOption == 'both')}">
+                            <label for="pickupAddressInput" class="form-label">Pick-up
+                                Address</label>
+                            <textarea class="form-control" id="pickupAddressInput" rows="3"
+                                th:field="*{pickupAddress}"></textarea>
+                        </div>
+                        <div class="mb-3" id="dropoffAddress"
+                            th:if="${booking?.pickupDropoffOption == 'Yes' and (booking?.pickupDropoffOption == 'dropoff' or booking?.pickupDropoffOption == 'both')}">
+                            <label for="dropoffAddressInput" class="form-label">Drop-off
+                                Address</label>
+                            <textarea class="form-control" id="dropoffAddressInput" rows="3"
+                                th:field="*{dropoffAddress}"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-book">Confirm
+                                Booking</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container-fluid col-md-11 mx-auto">
+            <div class="row">
+                <div class="col-md-4 text-center-mobile footer-column">
+                    <h5>About</h5>
+                    <p>Your trusted partner in vehicle maintenance since 2025.</p>
+                </div>
+                <div class="col-md-2 text-center-mobile footer-column">
+                    <h5>Quick Links</h5>
+                    <div class="quick-links">
+                        <a th:href="@{/}">Home</a> <a th:href="@{/customer-services}">Services</a>
+                        <a th:href="@{/about}">About</a> <a th:href="@{/contact}">Contact</a>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center-mobile footer-column">
+                    <h5>Contact</h5>
+                    <p>
+                        <i class="fas fa-phone me-2"></i> <a href="tel:+12345678900"
+                            class="contact-link">+1 234 567 8900</a>
+                    </p>
+                    <p>
+                        <i class="fas fa-envelope me-2"></i> <a
+                            href="mailto:info@servicexpress.com" class="contact-link">info@servicexpress.com</a>
+                    </p>
+                    <p>
+                        <i class="fas fa-map-marker-alt me-2"></i> 123 Service St, Auto
+                        City
+                    </p>
+                </div>
+                <div class="col-md-3 text-center-mobile footer-column follow-us">
+                    <h5>Follow Us</h5>
+                    <div class="social-icons">
+                        <a href="https://facebook.com/servicexpress" target="_blank"
+                            class="social-icon"> <i class="fab fa-facebook-f"></i>
+                        </a> <a href="https://twitter.com/servicexpress" target="_blank"
+                            class="social-icon"> <i class="fab fa-twitter"></i>
+                        </a> <a href="https://instagram.com/servicexpress" target="_blank"
+                            class="social-icon"> <i class="fab fa-instagram"></i>
+                        </a> <a href="https://linkedin.com/company/servicexpress"
+                            target="_blank" class="social-icon"> <i
+                            class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="text-center mb-0">© 2025 ServiceXpress. All rights
+                    reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and Custom JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameElement = document.querySelector('.username');
+            const username = usernameElement.textContent.trim();
+            const firstTwoLetters = username.substring(0, 2).toUpperCase();
+            const profileBadge = document.getElementById('profileBadge');
+            profileBadge.textContent = firstTwoLetters;
+
+            const locationSelection = document.getElementById('location-selection');
+            const locationDropdown = document.getElementById('location');
+            const vehicleCards = document.querySelectorAll('.vehicle-card');
+            const vehicleSection = document.getElementById('vehicle-selection');
+            const modelSection = document.getElementById('model-section');
+            const modelContainer = document.getElementById('model-container');
+            const engineTypeSection = document.getElementById('engine-type-section');
+            const serviceSection = document.getElementById('service-section');
+            const confirmationSection = document.getElementById('confirmation-section');
+            const confirmationDetails = document.getElementById('confirmation-details');
+            const backButton = document.getElementById('back-button');
+            const addToCartButton = document.getElementById('add-to-cart');
+            const cartItems = document.getElementById('cart-items');
+
+            let selectedLocation = 'Coimbatore';
+            let selectedVehicle = '';
+            let selectedModel = '';
+            let selectedEngineType = '';
+            let cart = [];
+
+            vehicleSection.style.display = 'flex';
+
+            const models = {
+                bike: [
+                    { name: 'Honda CB500', image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80' },
+                    { name: 'Yamaha MT-07', image: '/images/motorBike.jpg' },
+                    { name: 'Kawasaki Ninja 400', image: 'https://images.unsplash.com/photo-1558981420-c532902e58b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80' }
+                ],
+                car: [
+                    { name: 'Toyota Corolla', image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80' },
+                    { name: 'Honda Civic', image: '/images/car.jpg' },
+                    { name: 'Ford Mustang', image: '/images/SeviceCenter1.jpg' }
+                ]
+            };
+
+            function resetToServicePage() {
+                selectedLocation = 'Coimbatore';
+                selectedVehicle = '';
+                selectedModel = '';
+                selectedEngineType = '';
+                cart = [];
+
+                locationDropdown.value = 'Coimbatore';
+                vehicleCards.forEach(card => card.classList.remove('selected'));
+                modelContainer.innerHTML = '';
+                document.querySelectorAll('.model-card').forEach(card => card.classList.remove('selected'));
+                document.querySelectorAll('.engine-card').forEach(card => card.classList.remove('selected'));
+                document.querySelectorAll('input[name="service"]').forEach(checkbox => checkbox.checked = false);
+                document.querySelectorAll('.service-details').forEach(details => details.style.display = 'block');
+                document.querySelectorAll('.toggle-icon').forEach(icon => icon.textContent = 'expand_less');
+                if (cartItems) cartItems.innerHTML = '';
+
+                confirmationSection.style.display = 'none';
+                modelSection.style.display = 'none';
+                engineTypeSection.style.display = 'none';
+                serviceSection.style.display = 'none';
+                vehicleSection.style.display = 'flex';
+                locationSelection.style.display = 'block';
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                history.replaceState(null, '', window.location.pathname);
+            }
+
+            function updateCart() {
+                if (cartItems) {
+                    cartItems.innerHTML = '';
+                    cart.forEach((service, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `${service} <button class="btn btn-sm btn-danger" data-index="${index}">Remove</button>`;
+                        cartItems.appendChild(li);
+                    });
+
+                    document.querySelectorAll('.cart-section .btn-danger').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const index = this.getAttribute('data-index');
+                            cart.splice(index, 1);
+                            updateCart();
+                        });
+                    });
+                }
+            }
+
+            locationDropdown.addEventListener('change', function() {
+                selectedLocation = this.value;
+            });
+
+            vehicleCards.forEach(card => {
+                card.addEventListener('click', function () {
+                    vehicleCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+
+                    selectedVehicle = this.getAttribute('data-type');
+                    const type = selectedVehicle.toLowerCase();
+                    modelContainer.innerHTML = '';
+                    models[type].forEach(model => {
+                        const modelCard = `
+                            <div class="col-md-4">
+                                <div class="model-card" data-model="${model.name}">
+                                    <img src="${model.image}" alt="${model.name}">
+                                    <div class="card-content">
+                                        <h5>${model.name}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        modelContainer.innerHTML += modelCard;
+                    });
+
+                    locationSelection.style.display = 'none';
+                    vehicleSection.style.display = 'none';
+                    modelSection.style.display = 'block';
+                    engineTypeSection.style.display = 'none';
+                    serviceSection.style.display = 'none';
+                    confirmationSection.style.display = 'none';
+
+                    document.querySelectorAll('.model-card').forEach(modelCard => {
+                        modelCard.addEventListener('click', function () {
+                            document.querySelectorAll('.model-card').forEach(mc => mc.classList.remove('selected'));
+                            this.classList.add('selected');
+                            selectedModel = this.getAttribute('data-model');
+
+                            modelSection.style.display = 'none';
+                            engineTypeSection.style.display = 'block';
+                            serviceSection.style.display = 'none';
+                            confirmationSection.style.display = 'none';
+                        });
+                    });
+                });
+            });
+
+            document.addEventListener('click', function(event) {
+                const engineCard = event.target.closest('.engine-card');
+                if (engineCard) {
+                    document.querySelectorAll('.engine-card').forEach(ec => ec.classList.remove('selected'));
+                    engineCard.classList.add('selected');
+                    selectedEngineType = engineCard.getAttribute('data-engine-type');
+
+                    engineTypeSection.style.display = 'none';
+                    serviceSection.style.display = 'block';
+                    confirmationSection.style.display = 'none';
+                }
+            });
+
+            document.querySelectorAll('.toggle-icon').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const details = document.getElementById(targetId);
+                    const isExpanded = details.style.display === 'block';
+                    details.style.display = isExpanded ? 'none' : 'block';
+                    this.textContent = isExpanded ? 'expand_more' : 'expand_less';
+                });
+            });
+
+            addToCartButton.addEventListener('click', function() {
+                const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked'))
+                    .map(checkbox => checkbox.value);
+                if (selectedServices.length === 0) {
+                    alert('Please select at least one service to add to cart.');
+                    return;
+                }
+                selectedServices.forEach(service => {
+                    if (!cart.includes(service)) {
+                        cart.push(service);
+                    }
+                });
+                updateCart();
+                document.querySelectorAll('input[name="service"]').forEach(checkbox => checkbox.checked = false);
+            });
+
+            const pickupDropoff = document.getElementById('pickupDropoff');
+            const pickupDropoffType = document.getElementById('pickupDropoffType');
+            const pickupAddress = document.getElementById('pickupAddress');
+            const dropoffAddress = document.getElementById('dropoffAddress');
+            const pickupDropoffOption = document.getElementById('pickupDropoffOption');
+
+            pickupDropoff.addEventListener('change', function() {
+                const isPickupDropoffYes = this.value === 'Yes';
+                pickupDropoffType.style.display = isPickupDropoffYes ? 'block' : 'none';
+                if (!isPickupDropoffYes) {
+                    pickupDropoffOption.value = 'No';
+                }
+            });
+
+            pickupDropoffOption.addEventListener('change', function() {
+                const option = this.value;
+                pickupAddress.style.display = (option === 'pickup' || option === 'both') ? 'block' : 'none';
+                dropoffAddress.style.display = (option === 'dropoff' || option === 'both') ? 'block' : 'none';
+            });
+
+            document.getElementById('bookingForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                if (!selectedLocation) {
+                    alert('Please select a service location.');
+                    return;
+                }
+                if (!selectedModel) {
+                    alert('Please select a vehicle model.');
+                    return;
+                }
+                if (!selectedEngineType) {
+                    alert('Please select an engine type.');
+                    return;
+                }
+                if (cart.length === 0) {
+                    alert('Your cart is empty. Please add services to book.');
+                    return;
+                }
+
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const mobile = document.getElementById('mobile').value;
+                const address = document.getElementById('address').value;
+                const pickupDropoffValue = pickupDropoff.value;
+                const pickupDropoffOptionValue = pickupDropoffOption.value;
+                const pickupAddressValue = document.getElementById('pickupAddressInput').value;
+                const dropoffAddressValue = document.getElementById('dropoffAddressInput').value;
+
+                confirmationDetails.innerHTML = `
+                    <h5>Booking Confirmed!</h5>
+                    <p><strong>Name:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Mobile Number:</strong> ${mobile}</p>
+                    <p><strong>Location:</strong> ${selectedLocation}</p>
+                    <p><strong>Vehicle:</strong> ${selectedVehicle.charAt(0).toUpperCase() + selectedVehicle.slice(1)}</p>
+                    <p><strong>Model:</strong> ${selectedModel}</p>
+                    <p><strong>Engine Type:</strong> ${selectedEngineType.charAt(0).toUpperCase() + selectedEngineType.slice(1)}</p>
+                    <p><strong>Services:</strong> ${cart.join(', ')}</p>
+                    <p><strong>Address:</strong> ${address}</p>
+                    <p><strong>Pick-up/Drop-off:</strong> ${pickupDropoffValue}</p>
+                    ${pickupDropoffValue === 'Yes' ? `
+                        <p><strong>Pick-up/Drop-off Option:</strong> ${pickupDropoffOptionValue === 'pickup' ? 'Pick-up Only' : pickupDropoffOptionValue === 'dropoff' ? 'Drop-off Only' : 'Both'}</p>
+                        ${pickupDropoffOptionValue === 'pickup' || pickupDropoffOptionValue === 'both' ? `<p><strong>Pick-up Address:</strong> ${pickupAddressValue}</p>` : ''}
+                        ${pickupDropoffOptionValue === 'dropoff' || pickupDropoffOptionValue === 'both' ? `<p><strong>Drop-off Address:</strong> ${dropoffAddressValue}</p>` : ''}
+                    ` : ''}
+                `;
+
+                vehicleSection.style.display = 'none';
+                modelSection.style.display = 'none';
+                engineTypeSection.style.display = 'none';
+                serviceSection.style.display = 'none';
+                locationSelection.style.display = 'none';
+                confirmationSection.style.display = 'flex';
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('bookingModal'));
+                modal.hide();
+            });
+
+            backButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                resetToServicePage();
+            });
+
+            document.getElementById('submit-booking').addEventListener('click', function() {
+                document.getElementById('vehicle').value = selectedVehicle ? selectedVehicle.charAt(0).toUpperCase() + selectedVehicle.slice(1) : '';
+                document.getElementById('model').value = selectedModel || '';
+                document.getElementById('services').value = cart.join(', ') || '';
+                document.getElementById('location').value = selectedLocation || 'Coimbatore'; // Sync location
+            });
+        });
+
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                window.location.href = "/index.html";
+            }
+        }
+    </script>
+</body>
+</html>

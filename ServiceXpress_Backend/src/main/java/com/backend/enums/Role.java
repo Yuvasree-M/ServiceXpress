@@ -1,5 +1,5 @@
 
-package com.backend.model;
+package com.backend.enums;
 
 public enum Role {
     ADMIN,

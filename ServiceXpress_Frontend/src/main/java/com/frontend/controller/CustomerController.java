@@ -1,15 +1,22 @@
 package com.frontend.controller;
 
+import com.frontend.model.Booking;
 import com.frontend.model.Customer;
 import com.frontend.model.ServiceStatus;
+import com.frontend.model.Vehicle;
+import com.frontend.model.VehicleType;
 import com.frontend.model.ServiceHistory;
 import com.frontend.model.CustomerService;
 import com.frontend.model.DashboardData;
+import com.frontend.model.EngineType;
+import com.frontend.model.VehicleService; // Updated import from Service to VehicleService
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.servlet.http.HttpSession;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -83,5 +91,113 @@ public class CustomerController {
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
+    }
+
+    @GetMapping("/customer-services")
+    public String showServicesPage(Model model, HttpSession session) {
+        // Check if customer is logged in
+        Customer customer = customerService.getLoggedInCustomer();
+        if (customer == null) {
+            model.addAttribute("error", "No logged-in customer found. Please log in.");
+            return "redirect:/login";
+        }
+
+        // Get token from session
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "No authentication token found. Please log in.");
+            return "redirect:/login";
+        }
+
+        // Add customer to model for username and initials
+        model.addAttribute("username", customer.getName()); // Adjust based on your Customer model
+        model.addAttribute("customer", customer);
+
+        try {
+            // Make API call to fetch available services
+            String url = backendApiUrl + "/services";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+            ResponseEntity<List<VehicleService>> response = restTemplate.exchange(
+                url, HttpMethod.GET, request, new ParameterizedTypeReference<List<VehicleService>>(){}); // Updated to VehicleService
+            List<VehicleService> services = response.getBody();
+
+            // Add services to model
+            model.addAttribute("services", services != null ? services : java.util.Collections.emptyList());
+        } catch (Exception e) {
+            model.addAttribute("error", "Unable to fetch services: " + e.getMessage());
+            model.addAttribute("services", java.util.Collections.emptyList()); // Fallback to empty list
+        }
+
+        return "customer-services"; // Refers to src/main/resources/templates/customer-services.html
+    }
+    
+    @GetMapping("/customer-booking")
+    public String showBookingPage(Model model, HttpSession session) {
+        Customer customer = customerService.getLoggedInCustomer();
+        if (customer == null) {
+            model.addAttribute("error", "No logged-in customer found. Please log in.");
+            return "redirect:/login";
+        }
+
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "No authentication token found. Please log in.");
+            return "redirect:/login";
+        }
+
+        model.addAttribute("locations", Arrays.asList("Coimbatore", "Chennai", "Madurai", "Trichy", "Salem"));
+        model.addAttribute("defaultLocation", "Coimbatore");
+        model.addAttribute("vehicles", Arrays.asList(
+            new VehicleType("Bike", "https://images.unsplash.com/photo-1558981403-c5f9899a28bc", "Two-wheeler service options"),
+            new VehicleType("Car", "https://images.unsplash.com/photo-1583121274602-3e2820c69888", "Four-wheeler service options")
+        ));
+        model.addAttribute("engineTypes", Arrays.asList(
+            new EngineType("petrol", "local_gas_station", "Standard combustion engine"),
+            new EngineType("diesel", "airport_shuttle", "High torque, fuel-efficient"),
+            new EngineType("electric", "electric_bolt", "Zero emission vehicle")
+        ));
+
+        try {
+            String url = backendApiUrl + "/services";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+            ResponseEntity<List<VehicleService>> response = restTemplate.exchange(
+                url, HttpMethod.GET, request, new ParameterizedTypeReference<List<VehicleService>>(){});
+            
+            List<VehicleService> services = response.getBody();
+            if (response.getStatusCode().is2xxSuccessful()) {
+                model.addAttribute("services", services != null ? services : java.util.Collections.emptyList());
+                System.out.println("VehicleServices fetched: " + (services != null ? services.size() : 0));
+            } else {
+                model.addAttribute("error", "API call failed with status: " + response.getStatusCode());
+                model.addAttribute("services", java.util.Collections.emptyList());
+                System.out.println("API error: " + response.getStatusCode() + " - " + response.getBody());
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", "Unable to fetch services: " + e.getMessage());
+            model.addAttribute("services", java.util.Collections.emptyList());
+            System.out.println("Exception: " + e.getMessage());
+        }
+
+        Booking booking = new Booking();
+        booking.setName("");
+        booking.setEmail("");
+        booking.setMobile("");
+        booking.setLocation("Coimbatore");
+        booking.setVehicle("");
+        booking.setModel("");
+        booking.setEngineType("");
+        booking.setServices(java.util.Collections.emptyList());
+        booking.setAddress("");
+        booking.setPickupDropoff("No");
+        booking.setPickupDropoffOption("No");
+        booking.setPickupAddress("");
+        booking.setDropoffAddress("");
+        model.addAttribute("booking", booking);
+
+        return "customer-booking";
     }
 }

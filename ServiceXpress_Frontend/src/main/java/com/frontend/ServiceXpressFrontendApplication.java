@@ -15,5 +15,4 @@ public class ServiceXpressFrontendApplication {
 	    public RestTemplate restTemplate() {
 	        return new RestTemplate();
 	    }
-
 }

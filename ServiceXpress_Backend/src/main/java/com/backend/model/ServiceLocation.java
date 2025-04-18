@@ -3,6 +3,8 @@ package com.backend.model;
 import jakarta.persistence.*;
 import java.util.Objects;
 
+import com.backend.enums.Role;
+
 @Entity
 @Table(name = "service_locations")
 public class ServiceLocation {
