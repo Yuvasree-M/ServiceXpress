@@ -5,7 +5,7 @@ import com.backend.model.Customer;
 import com.backend.model.Advisor;
 import com.backend.repository.AdminRepository;
 import com.backend.repository.CustomerRepository;
-import com.backend.repository.ServiceLocationRepository;
+import com.backend.repository.AdvisorRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,16 +15,16 @@ import java.util.List;
 public class UserService {
     private final AdminRepository adminRepository;
     private final CustomerRepository customerRepository;
-    private final ServiceLocationRepository serviceLocationRepository;
+    private final AdvisorRepository advisorRepository;  // Replaced with AdvisorRepository
     private final PasswordEncoder passwordEncoder;
 
     public UserService(AdminRepository adminRepository,
                       CustomerRepository customerRepository,
-                      ServiceLocationRepository serviceLocationRepository,
+                      AdvisorRepository advisorRepository,  // Replaced parameter with AdvisorRepository
                       PasswordEncoder passwordEncoder) {
         this.adminRepository = adminRepository;
         this.customerRepository = customerRepository;
-        this.serviceLocationRepository = serviceLocationRepository;
+        this.advisorRepository = advisorRepository;  // Updated field assignment
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -42,10 +42,10 @@ public class UserService {
                     System.out.println("Customer authentication success for: " + user.getUsername());
                     return user.getRole().name();
                 }))
-            .or(() -> serviceLocationRepository.findByAdvisorUsername(identifier)
-                .filter(user -> passwordEncoder.matches(password, user.getAdvisorPassword()))
+            .or(() -> advisorRepository.findByUsername(identifier)  // Updated to use AdvisorRepository
+                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
                 .map(user -> {
-                    System.out.println("Service Advisor authentication success for: " + user.getAdvisorUsername());
+                    System.out.println("Service Advisor authentication success for: " + user.getUsername());
                     return user.getRole().name();
                 }))
             .orElse(null);
@@ -61,12 +61,12 @@ public class UserService {
         return customerRepository.save(customer);
     }
 
-    public Advisor createServiceLocation(Advisor location) {
-        location.setAdvisorPassword(passwordEncoder.encode(location.getAdvisorPassword()));
-        return serviceLocationRepository.save(location);
+    public Advisor createAdvisor(Advisor advisor) {  // Updated method name to match "Advisor"
+        advisor.setPassword(passwordEncoder.encode(advisor.getPassword()));  // Updated to match "Advisor" entity
+        return advisorRepository.save(advisor);  // Updated repository usage
     }
 
-    public List<Advisor> getAllServiceLocations() {
-        return serviceLocationRepository.findAll();
+    public List<Advisor> getAllAdvisors() {
+        return advisorRepository.findAll();  // Updated to use AdvisorRepository
     }
 }

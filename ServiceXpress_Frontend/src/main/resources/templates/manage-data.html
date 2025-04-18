@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Data - ServiceXpress</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .orange-bar {
+            background-color: #ff6600;
+            color: white;
+            padding: 10px 20px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .sub-nav a {
+            color: white;
+            margin-right: 20px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .sub-nav a.active {
+            border-bottom: 3px solid white;
+        }
+
+        .table-action-btn {
+            margin-right: 5px;
+        }
+
+        .page-box {
+            background-color: #ff6600;
+            color: white;
+            border-radius: 5px;
+            padding: 2px 10px;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+        <a class="navbar-brand fw-bold text-warning" href="#">Service<span class="text-dark">Xpress</span></a>
+        <ul class="navbar-nav me-auto ms-4">
+            <li class="nav-item"><a class="nav-link" th:href="@{/admin/dashboard}">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/admin/inventory}">Inventory</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/admin/service-centers}">Service Centers</a></li>
+            <li class="nav-item"><a class="nav-link fw-bold text-warning" href="#">Manage Data</a></li>
+        </ul>
+        <div class="d-flex align-items-center">
+            <div class="bg-warning text-white fw-bold rounded-circle px-3 py-2 me-2">JD</div>
+            <span><a href="#" class="text-dark dropdown-toggle text-decoration-none">John Doe</a></span>
+        </div>
+    </nav>
+
+    <!-- Sub Nav Tabs -->
+    <div class="orange-bar d-flex justify-content-start align-items-center">
+        <div class="sub-nav d-flex">
+            <a href="#" class="active" onclick="showSection('vehicleTypes')">Vehicle Types</a>
+            <a href="#" onclick="showSection('vehicleModels')">Vehicle Models</a>
+            <a href="#" onclick="showSection('customers')">Customers</a>
+            <a href="#" onclick="showSection('advisors')">Advisors</a>
+            <a href="#" onclick="showSection('servicePackages')">Service Packages</a>
+        </div>
+    </div>
+
+    <div class="container my-4">
+        <!-- Vehicle Types Section -->
+        <div id="vehicleTypes" class="content-section active">
+            <h5>Vehicle Types</h5>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr><th>ID</th><th>Type Name</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Car</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                    <tr><td>2</td><td>Bike</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Vehicle Models Section -->
+        <div id="vehicleModels" class="content-section">
+            <h5>Vehicle Models</h5>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr><th>ID</th><th>Model Name</th><th>Type</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>i20</td><td>Car</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                    <tr><td>2</td><td>Pulsar</td><td>Bike</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Customers Section -->
+        <div id="customers" class="content-section">
+            <h5>Customers</h5>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Amit Kumar</td><td>amit@example.com</td><td>9876543210</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                    <tr><td>2</td><td>Rita Mehta</td><td>rita@example.com</td><td>9123456780</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Advisors Section -->
+        <div id="advisors" class="content-section">
+            <h5>Service Advisors</h5>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Suresh Verma</td><td>suresh@service.com</td><td>9988776655</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                    <tr><td>2</td><td>Kavita Rao</td><td>kavita@service.com</td><td>9090909090</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Service Packages Section -->
+        <div id="servicePackages" class="content-section">
+            <h5>Service Packages</h5>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr><th>ID</th><th>Package Name</th><th>Price</th><th>Details</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Basic Wash</td><td>₹300</td><td>Exterior Wash Only</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                    <tr><td>2</td><td>Premium Service</td><td>₹1500</td><td>Full Service with Interior</td><td><button class="btn btn-warning btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Script to Switch Sections -->
+    <script>
+        function showSection(id) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.sub-nav a').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

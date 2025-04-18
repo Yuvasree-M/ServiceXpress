@@ -11,9 +11,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import com.backend.repository.AdminRepository;
+import com.backend.repository.AdvisorRepository;
 import com.backend.repository.CustomerRepository;
-import com.backend.repository.ServiceLocationRepository;
 import com.backend.service.TokenBlacklistService;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,21 +28,21 @@ public class SecurityConfig {
 
     private final AdminRepository adminRepository;
     private final CustomerRepository customerRepository;
-    private final ServiceLocationRepository serviceLocationRepository;
+    private final AdvisorRepository advisorRepository;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
-    
+
     public SecurityConfig(AdminRepository adminRepository,
-            CustomerRepository customerRepository,
-            ServiceLocationRepository serviceLocationRepository,
-            JwtUtil jwtUtil,
-            TokenBlacklistService tokenBlacklistService) {
-this.adminRepository = adminRepository;
-this.customerRepository = customerRepository;
-this.serviceLocationRepository = serviceLocationRepository;
-this.jwtUtil = jwtUtil;
-this.tokenBlacklistService = tokenBlacklistService;
-}
+                          CustomerRepository customerRepository,
+                          AdvisorRepository advisorRepository,
+                          JwtUtil jwtUtil,
+                          TokenBlacklistService tokenBlacklistService) {
+        this.adminRepository = adminRepository;
+        this.customerRepository = customerRepository;
+        this.advisorRepository = advisorRepository;
+        this.jwtUtil = jwtUtil;
+        this.tokenBlacklistService = tokenBlacklistService;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -65,6 +66,13 @@ this.tokenBlacklistService = tokenBlacklistService;
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/customer").hasRole("CUSTOMER")
                 .requestMatchers("/api/dashboard/service-advisor").hasRole("SERVICE_ADVISOR")
+                .requestMatchers(HttpMethod.GET, "/api/advisors/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/advisors/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/advisors/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/advisors/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/service-advisor/**").hasRole("SERVICE_ADVISOR")
+                .requestMatchers("/customer/**").hasRole("CUSTOMER")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService),
@@ -93,6 +101,13 @@ this.tokenBlacklistService = tokenBlacklistService;
                         .roles(u.getRole().name())
                         .build())
                 .or(() -> customerRepository.findByUsername(identifier)
+                    .map(u -> org.springframework.security.core.userdetails.User
+                        .withUsername(u.getUsername())
+                        .password(u.getPassword())
+                        .roles(u.getRole().name())
+                        .build()))
+                .or(() -> advisorRepository.findByUsername(identifier)
+
                     .map(u -> org.springframework.security.core.userdetails.User
                         .withUsername(u.getUsername())
                         .password(u.getPassword())

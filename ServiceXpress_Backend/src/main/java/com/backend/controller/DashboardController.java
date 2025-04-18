@@ -27,8 +27,8 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getCustomerDashboardData());
     }
 
-    @GetMapping("/service-advisor")
-    public ResponseEntity<DashboardData> getServiceAdvisorDashboard() {
-        return ResponseEntity.ok(dashboardService.getServiceAdvisorDashboardData());
-    }
+//    @GetMapping("/service-advisor")
+//    public ResponseEntity<DashboardData> getServiceAdvisorDashboard() {
+//        return ResponseEntity.ok(dashboardService.getServiceAdvisorDashboardData());
+//    }
 }

@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.backend.enums.PickDropOption;
+import com.backend.enums.ServiceStatus;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -45,11 +48,13 @@ public class CustomerServiceRequests {
     @Column(name = "service_item", columnDefinition = "TEXT")
     private String serviceItem;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "service_status")
-    private String serviceStatus;
+    private ServiceStatus serviceStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "pick_drop_option")
-    private String pickDropOption;
+    private PickDropOption pickDropOption;
 
     @Column(name = "pickup_address", columnDefinition = "TEXT")
     private String pickupAddress;
@@ -63,3 +68,4 @@ public class CustomerServiceRequests {
     @Column(name = "completed_date")
     private LocalDateTime completedDate;
 }
+
