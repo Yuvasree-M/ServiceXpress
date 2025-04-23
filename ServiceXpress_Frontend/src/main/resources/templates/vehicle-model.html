@@ -2,15 +2,15 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Service Centers</title>
+  <title>Vehicle Models</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
   <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet"/>
   <link rel="stylesheet" th:href="@{/css/admincss.css}">
   <style>
-    #serviceCentersTable th:first-child,
-    #serviceCentersTable td:first-child {
+    #vehicleModelsTable th:first-child,
+    #vehicleModelsTable td:first-child {
       display: none; /* Hide ID column */
     }
   </style>
@@ -20,65 +20,67 @@
 <div th:replace="fragments/adminNavbar :: navbar"></div>
 <div class="container mt-4">
 
-  <!-- LIST -->
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Service Centers</h2>
-    <a th:href="@{/service-centers/add}" class="btn btn-primary">Add New Center</a>
+    <h2>Vehicle Models</h2>
+    <a th:href="@{/vehicle-model/add}" class="btn btn-primary">Add New Vehicle Model</a>
   </div>
 
   <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-  <table id="serviceCentersTable" class="table table-bordered table-striped">
+  <table id="vehicleModelsTable" class="table table-bordered table-striped">
     <thead>
       <tr>
         <th>ID</th>
-        <th>City</th>
-        <th>Center Name</th>
+        <th>Model Name</th>
+        <th>Vehicle Type</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr th:each="c : ${serviceCenters}" th:if="${c != null}">
-        <td th:text="${c.id}"></td>
-        <td th:text="${c.cityName}"></td>
-        <td th:text="${c.centerName}"></td>
+      <tr th:each="model : ${vehicleModels}" th:if="${model != null}">
+        <td th:text="${model.id}"></td>
+        <td th:text="${model.modelName}"></td>
+        <td th:text="${model.vehicleType?.typeName}"></td>
         <td>
-          <a th:href="@{/service-centers/edit/{id}(id=${c.id})}" class="btn btn-sm btn-warning">Edit</a>
-          <form th:action="@{/service-centers/delete/{id}(id=${c.id})}" method="post" style="display:inline;">
+          <a th:href="@{/vehicle-model/edit/{id}(id=${model.id})}" class="btn btn-sm btn-warning">Edit</a>
+          <form th:action="@{/vehicle-model/delete/{id}(id=${model.id})}" method="post" style="display:inline;">
             <input type="hidden" name="_method" value="delete"/>
-            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this service center?')">Delete</button>
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this vehicle model?')">Delete</button>
           </form>
         </td>
       </tr>
-      <tr th:if="${#lists.isEmpty(serviceCenters) || serviceCenters == null}">
-        <td colspan="4" class="text-center text-muted">No Service Centers Found.</td>
+      <tr th:if="${#lists.isEmpty(vehicleModels) || vehicleModels == null}">
+        <td colspan="4" class="text-center text-muted">No Vehicle Models Found.</td>
       </tr>
     </tbody>
   </table>
 
   <!-- ADD MODAL -->
-  <div class="modal fade" th:if="${formMode == 'add'}" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true" th:classappend="${formMode == 'add'} ? 'show d-block' : ''" style="background: rgba(0,0,0,0.5);">
+  <div class="modal fade" th:if="${formMode == 'add'}" th:classappend="${formMode == 'add'} ? 'show d-block' : ''" style="background: rgba(0,0,0,0.5);" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form th:action="@{/service-centers/add}" th:object="${serviceCenter}" method="post">
+        <form th:action="@{/vehicle-model/add}" th:object="${vehicleModel}" method="post">
           <div class="modal-header">
-            <h5 class="modal-title" id="addModalLabel">Add Service Center</h5>
-            <a th:href="@{/service-centers}" class="btn-close" aria-label="Close"></a>
+            <h5 class="modal-title">Add Vehicle Model</h5>
+            <a th:href="@{/vehicle-model}" class="btn-close" aria-label="Close"></a>
           </div>
           <div class="modal-body">
             <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
             <div class="form-group mb-3">
-              <label for="cityName">City Name</label>
-              <input type="text" id="cityName" th:field="*{cityName}" class="form-control" required/>
+              <label for="modelName">Model Name:</label>
+              <input type="text" id="modelName" th:field="*{modelName}" class="form-control" required />
             </div>
             <div class="form-group mb-3">
-              <label for="centerName">Center Name</label>
-              <input type="text" id="centerName" th:field="*{centerName}" class="form-control" required/>
+              <label for="vehicleType">Vehicle Type:</label>
+              <select id="vehicleType" th:field="*{vehicleType.id}" class="form-control" required>
+                <option value="">Select Vehicle Type</option>
+                <option th:each="type : ${vehicleTypes}" th:value="${type.id}" th:text="${type.typeName}"></option>
+              </select>
             </div>
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-success">Create</button>
-            <a th:href="@{/service-centers}" class="btn btn-secondary">Cancel</a>
+            <a th:href="@{/vehicle-model}" class="btn btn-secondary">Cancel</a>
           </div>
         </form>
       </div>
@@ -86,28 +88,31 @@
   </div>
 
   <!-- EDIT MODAL -->
-  <div class="modal fade" th:if="${formMode == 'edit'}" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true" th:classappend="${formMode == 'edit'} ? 'show d-block' : ''" style="background: rgba(0,0,0,0.5);">
+  <div class="modal fade" th:if="${formMode == 'edit'}" th:classappend="${formMode == 'edit'} ? 'show d-block' : ''" style="background: rgba(0,0,0,0.5);" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form th:action="@{/service-centers/edit/{id}(id=${serviceCenter.id})}" th:object="${serviceCenter}" method="post">
+        <form th:action="@{/vehicle-model/edit/{id}(id=${vehicleModel.id})}" th:object="${vehicleModel}" method="post">
           <div class="modal-header">
-            <h5 class="modal-title" id="editModalLabel">Edit Service Center</h5>
-            <a th:href="@{/service-centers}" class="btn-close" aria-label="Close"></a>
+            <h5 class="modal-title">Edit Vehicle Model</h5>
+            <a th:href="@{/vehicle-model}" class="btn-close" aria-label="Close"></a>
           </div>
           <div class="modal-body">
             <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
             <div class="form-group mb-3">
-              <label for="cityName">City Name</label>
-              <input type="text" id="cityName" th:field="*{cityName}" class="form-control" required/>
+              <label for="modelName">Model Name:</label>
+              <input type="text" id="modelName" th:field="*{modelName}" class="form-control" required />
             </div>
             <div class="form-group mb-3">
-              <label for="centerName">Center Name</label>
-              <input type="text" id="centerName" th:field="*{centerName}" class="form-control" required/>
+              <label for="vehicleType">Vehicle Type:</label>
+              <select id="vehicleType" th:field="*{vehicleType.id}" class="form-control" required>
+                <option value="">Select Vehicle Type</option>
+                <option th:each="type : ${vehicleTypes}" th:value="${type.id}" th:text="${type.typeName}"></option>
+              </select>
             </div>
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-success">Save</button>
-            <a th:href="@{/service-centers}" class="btn btn-secondary">Cancel</a>
+            <a th:href="@{/vehicle-model}" class="btn btn-secondary">Cancel</a>
           </div>
         </form>
       </div>
@@ -128,8 +133,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
   $(document).ready(function() {
-    if ($('#serviceCentersTable').length) {
-      $('#serviceCentersTable').DataTable({
+    if ($('#vehicleModelsTable').length) {
+      $('#vehicleModelsTable').DataTable({
         dom: 'Bfrtip',
         buttons: ['copy', 'csv', 'excel'],
         pageLength: 5,

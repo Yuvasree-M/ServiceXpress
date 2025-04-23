@@ -23,7 +23,7 @@ public class Advisor {
     private String centerName;
 
     @Column(name = "advisor_username", nullable = false, unique = true)
-    private String username; // Corresponds to 'advisor_username' column
+    private String username;
 
     @Column(name = "advisor_email", unique = true)
     private String email;
@@ -37,4 +37,7 @@ public class Advisor {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role = Role.SERVICE_ADVISOR;
+
+    @Column(name = "active", nullable = false)
+    private Boolean active = true; // Default to true (active)
 }

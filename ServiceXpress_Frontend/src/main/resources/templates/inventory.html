@@ -1,59 +1,136 @@
-<!-- src/main/resources/templates/inventory.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Inventory</title>
-     <link 
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    rel="stylesheet"/>
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
-    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/admincss.css}">
+  <meta charset="UTF-8">
+  <title>Inventory</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
+  <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" th:href="@{/css/admincss.css}">
+  <style>
+    #inventoryTable th:first-child,
+    #inventoryTable td:first-child {
+      display: none; /* Hide ID column */
+    }
+  </style>
 </head>
 <body>
-    <div th:replace="fragments/adminNavbar :: navbar"></div>
 
-    <div class="container mt-5">
-        <h2 class="mb-4">Inventory List</h2>
+<div th:replace="fragments/adminNavbar :: navbar"></div>
+<div class="container mt-4">
 
-        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <!-- LIST -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Inventory List</h2>
+    <a th:href="@{/inventory/add}" class="btn btn-primary">Add New Item</a>
+  </div>
 
-        <a class="btn btn-primary mb-3" th:href="@{/inventory/add}">Add New Item</a>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Last Updated</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item : ${inventoryList}">
-                    <td th:text="${item.workitems}"></td> <!-- Item Name -->
-                    <td th:text="${item.quantity}"></td> <!-- Quantity -->
-                    <td th:text="${item.prices}"></td> <!-- Price -->
-                    <td th:text="${item.lastUpdated}"></td> <!-- Last Updated -->
-                    <td>
-                        <!-- Edit Button -->
-                        <a th:href="@{'/inventory/edit/' + ${item.id}}" class="btn btn-warning btn-sm">Edit</a>
+  <table id="inventoryTable" class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Item Name</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Last Updated</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="item : ${inventoryList}" th:if="${item != null}">
+        <td th:text="${item.id}"></td>
+        <td th:text="${item.workitems} ?: 'N/A'"></td>
+        <td th:text="${item.quantity}"></td>
+        <td th:text="${item.prices}"></td>
+        <td th:text="${item.lastUpdated}"></td>
+        <td>
+          <a th:href="@{/inventory/edit/{id}(id=${item.id})}" class="btn btn-sm btn-warning">Edit</a>
+          <form th:action="@{/inventory/delete/{id}(id=${item.id})}" method="post" style="display:inline;">
+            <input type="hidden" name="_method" value="delete"/>
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(inventoryList) || inventoryList == null}">
+        <td colspan="6" class="text-center text-muted">No Inventory Items Found.</td>
+      </tr>
+    </tbody>
+  </table>
 
-                        <!-- Delete Button -->
-                        <a th:href="@{'/inventory/delete/' + ${item.id}}" class="btn btn-danger btn-sm"
-                           onclick="return confirm('Are you sure you want to delete this item?')">Delete</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+  <!-- ADD MODAL -->
+  <div class="modal fade" th:if="${formMode == 'add'}" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true" th:classappend="${formMode == 'add'} ? 'show d-block' : ''" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form th:action="@{/inventory/add}" th:object="${inventoryItem}" method="post">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addModalLabel">Add Inventory Item</h5>
+            <a th:href="@{/inventory}" class="btn-close" aria-label="Close"></a>
+          </div>
+          <div class="modal-body">
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <div class="form-group mb-3">
+              <label for="workitems">Item Name</label>
+              <input type="text" id="workitems" th:field="*{workitems}" class="form-control" required/>
+            </div>
+            <div class="form-group mb-3">
+              <label for="quantity">Quantity</label>
+              <input type="number" id="quantity" th:field="*{quantity}" class="form-control" required min="0"/>
+            </div>
+            <div class="form-group mb-3">
+              <label for="prices">Price</label>
+              <input type="number" step="0.01" id="prices" th:field="*{prices}" class="form-control" required min="0"/>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Create</button>
+            <a th:href="@{/inventory}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
     </div>
-     <div th:replace="fragments/footer :: footer"></div>
-     
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal fade" th:if="${formMode == 'edit'}" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true" th:classappend="${formMode == 'edit'} ? 'show d-block' : ''" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form th:action="@{/inventory/edit/{id}(id=${inventoryItem.id})}" th:object="${inventoryItem}" method="post">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">Edit Inventory Item</h5>
+            <a th:href="@{/inventory}" class="btn-close" aria-label="Close"></a>
+          </div>
+          <div class="modal-body">
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <div class="form-group mb-3">
+              <label for="workitems">Item Name</label>
+              <input type="text" id="workitems" th:field="*{workitems}" class="form-control" required/>
+            </div>
+            <div class="form-group mb-3">
+              <label for="quantity">Quantity</label>
+              <input type="number" id="quantity" th:field="*{quantity}" class="form-control" required min="0"/>
+            </div>
+            <div class="form-group mb-3">
+              <label for="prices">Price</label>
+              <input type="number" step="0.01" id="prices" th:field="*{prices}" class="form-control" required min="0"/>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Save</button>
+            <a th:href="@{/inventory}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -61,5 +138,23 @@
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+  $(document).ready(function() {
+    if ($('#inventoryTable').length) {
+      $('#inventoryTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel'],
+        pageLength: 5,
+        autoWidth: false,
+        ordering: true,
+        searching: true,
+        paging: true,
+        columnDefs: [
+          { targets: 0, visible: false } // Hide ID column explicitly
+        ]
+      });
+    }
+  });
+</script>
 </body>
 </html>
