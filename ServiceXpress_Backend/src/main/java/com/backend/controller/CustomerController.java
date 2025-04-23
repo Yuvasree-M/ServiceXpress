@@ -9,6 +9,7 @@ import com.backend.model.CustomerServiceRequests;
 import com.backend.repository.CustomerServiceRequestsRepository;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:8082")
 @RequestMapping("/customer")
 public class CustomerController {
 

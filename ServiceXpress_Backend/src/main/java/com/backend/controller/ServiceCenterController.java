@@ -2,12 +2,8 @@ package com.backend.controller;
 
 import com.backend.model.ServiceCenter;
 import com.backend.service.ServiceCenterService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -15,43 +11,36 @@ import java.util.List;
 @RequestMapping("/api/service-centers")
 public class ServiceCenterController {
 
-    @Autowired
-    private ServiceCenterService serviceCenterService;
+    private final ServiceCenterService service;
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
-    public List<ServiceCenter> getAllCenters() {
-        return serviceCenterService.getAllCenters();
+    public ServiceCenterController(ServiceCenterService service) {
+        this.service = service;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
+    public ResponseEntity<List<ServiceCenter>> getAllCenters() {
+        return ResponseEntity.ok(service.getAllCenters());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ServiceCenter> getCenterById(@PathVariable Long id) {
-        ServiceCenter center = serviceCenterService.getCenterById(id);
-        if (center == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(center);
+        ServiceCenter center = service.getCenterById(id);
+        return center != null ? ResponseEntity.ok(center) : ResponseEntity.notFound().build();
     }
-    
-    @PreAuthorize("hasRole('ADMIN')")
+
     @PostMapping
-    public ResponseEntity<ServiceCenter> createCenter(@RequestBody ServiceCenter serviceCenter) {
-        ServiceCenter createdCenter = serviceCenterService.createCenter(serviceCenter);
-        return new ResponseEntity<>(createdCenter, HttpStatus.CREATED);
+    public ResponseEntity<ServiceCenter> createCenter(@RequestBody ServiceCenter center) {
+        return ResponseEntity.ok(service.createCenter(center));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceCenter> updateCenter(@PathVariable Long id, @RequestBody ServiceCenter serviceCenter) {
-        ServiceCenter updatedCenter = serviceCenterService.updateCenter(id, serviceCenter);
-        return new ResponseEntity<>(updatedCenter, HttpStatus.OK);
+    public ResponseEntity<ServiceCenter> updateCenter(@PathVariable Long id, @RequestBody ServiceCenter center) {
+        return ResponseEntity.ok(service.updateCenter(id, center));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCenter(@PathVariable Long id) {
-        serviceCenterService.deleteCenter(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        service.deleteCenter(id);
+        return ResponseEntity.ok().build();
     }
 }

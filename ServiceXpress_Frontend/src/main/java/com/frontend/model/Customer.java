@@ -13,5 +13,6 @@ public class Customer {
     private Long id;
     private String name;
     private String initials;
-    // Getters and setters
+    private String email;
+    private String mobile;
 }
