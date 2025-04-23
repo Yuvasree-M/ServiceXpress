@@ -55,6 +55,7 @@ public class SecurityConfig {
             .cors().configurationSource(corsConfigurationSource())
             .and()
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow CORS preflight
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/service-centers/**").hasRole("ADMIN")
                 .requestMatchers("/api/requests/**").hasAnyRole("CUSTOMER", "SERVICE_ADVISOR", "ADMIN")
@@ -68,13 +69,19 @@ public class SecurityConfig {
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/customer").hasRole("CUSTOMER")
                 .requestMatchers("/api/dashboard/service-advisor").hasRole("SERVICE_ADVISOR")
-                .requestMatchers(HttpMethod.GET, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/advisors/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/advisor/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/advisor/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/advisor/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/advisor/**").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/service-advisor/**").hasRole("SERVICE_ADVISOR")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
+                // ---- CRUD for Vehicle Types, Models, Customers, Advisors, Packages ----
+                .requestMatchers("/api/vehicle-type/**").hasAnyRole("ADMIN", "CUSTOMER")
+                .requestMatchers("/api/vehicle-models/**").hasRole("ADMIN")
+                .requestMatchers("/api/customers/**").hasRole("ADMIN")
+                .requestMatchers("/api/advisors/**").hasRole("ADMIN")
+                .requestMatchers("/api/service-packages/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, tokenBlacklistService),
@@ -82,12 +89,12 @@ public class SecurityConfig {
         return http.build();
     }
 
- // In backend's SecurityConfig.java or similar
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:8082"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -111,7 +118,6 @@ public class SecurityConfig {
                         .roles(u.getRole().name())
                         .build()))
                 .or(() -> advisorRepository.findByUsername(identifier)
-
                     .map(u -> org.springframework.security.core.userdetails.User
                         .withUsername(u.getUsername())
                         .password(u.getPassword())
@@ -122,7 +128,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

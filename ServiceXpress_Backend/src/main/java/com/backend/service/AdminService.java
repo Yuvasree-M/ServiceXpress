@@ -73,7 +73,7 @@ public class AdminService {
         mailSender.send(message);
     }
     
-    public void deleteServicePackage(Integer id) {
+    public void deleteServicePackage(Long id) {
         servicePackageRepository.deleteById(id);
     }
 
