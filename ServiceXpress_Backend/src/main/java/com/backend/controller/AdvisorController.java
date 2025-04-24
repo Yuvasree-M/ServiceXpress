@@ -1,52 +1,48 @@
 package com.backend.controller;
 
 import com.backend.model.Advisor;
-import com.backend.model.CustomerServiceRequests;
-import com.backend.service.AdvisorService; // Import your service
-import com.backend.repository.CustomerServiceRequestsRepository;
+import com.backend.service.AdvisorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/advisor")
+@RequestMapping("/api/advisors")
+@CrossOrigin(origins = "http://localhost:8082")
 public class AdvisorController {
 
     @Autowired
-    private CustomerServiceRequestsRepository customerServiceRequestsRepository;
+    private AdvisorService advisorService;
 
-    @Autowired
-    private AdvisorService advisorService; // Injecting the AdvisorService to handle logic for Advisor
-
-    // Advisor can view their assigned service requests
-    @GetMapping("/service-requests")
-    public List<CustomerServiceRequests> getAssignedServiceRequests(@RequestParam Long advisorId) {
-        return customerServiceRequestsRepository.findByAdvisorId(advisorId); // Fetching service requests by Advisor ID
+    @GetMapping
+    public List<Advisor> getAllAdvisors() {
+        return advisorService.getAllAdvisors(); // Returns only active advisors
     }
 
-    // Fetch advisor by username
-    @GetMapping("/findByUsername/{username}")
-    public ResponseEntity<Advisor> getAdvisorByUsername(@PathVariable String username) {
-        return advisorService.findAdvisorByUsername(username)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/{id}")
+    public ResponseEntity<Advisor> getAdvisorById(@PathVariable Long id) {
+        Optional<Advisor> advisor = advisorService.getAdvisorById(id);
+        return advisor.map(ResponseEntity::ok)
+                      .orElse(ResponseEntity.notFound().build());
     }
 
-    // Fetch advisor by email
-    @GetMapping("/findByEmail/{email}")
-    public ResponseEntity<Advisor> getAdvisorByEmail(@PathVariable String email) {
-        return advisorService.findAdvisorByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @PostMapping
+    public Advisor createAdvisor(@RequestBody Advisor advisor) {
+        return advisorService.createAdvisor(advisor);
     }
 
-    // Fetch advisor by phone number
-    @GetMapping("/findByPhone/{phoneNumber}")
-    public ResponseEntity<Advisor> getAdvisorByPhoneNumber(@PathVariable String phoneNumber) {
-        return advisorService.findAdvisorByPhoneNumber(phoneNumber)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @PutMapping("/{id}")
+    public ResponseEntity<Advisor> updateAdvisor(@PathVariable Long id, @RequestBody Advisor updatedAdvisor) {
+        Optional<Advisor> updated = advisorService.updateAdvisor(id, updatedAdvisor);
+        return updated.map(ResponseEntity::ok)
+                      .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAdvisor(@PathVariable Long id) {
+        return advisorService.softDeleteAdvisor(id) ? ResponseEntity.ok().<Void>build() : ResponseEntity.notFound().build();
     }
 }

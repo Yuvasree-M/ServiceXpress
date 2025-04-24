@@ -30,13 +30,51 @@
             line-height: 1.6;
         }
 
-        .navbar-custom {
-            background-color: rgba(255, 255, 255, 0.95);
-            height: 90px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-        }
+      .navbar-custom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  z-index: 1030;
+  background-color: rgba(255,255,255,0.95);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
 
+/* sidebar slides in right below the navbar */
+.sidebar {
+  position: fixed;
+  top: 90px;             /* exactly navbar height */
+  left: 0;
+  bottom: 0;
+  width: 250px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+  z-index: 1020;         /* below navbar but above the content */
+  padding: 1rem 0;
+}
+/* your main content area */
+.content-wrapper {
+  margin-top: 90px;                         /* clear the navbar */
+  margin-left: 250px;                       /* clear the sidebar */
+  width: calc(100% - 250px);                /* fill remaining space */
+  padding: 1.5rem;                          /* some breathing room */
+  background: #F4F4F4;                      /* or whatever your bg is */
+  min-height: calc(100vh - 90px);           /* full height below navbar */
+}
+
+/* small tweak for responsiveness */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;           /* optionally narrower on mobile */
+  }
+  .content-wrapper {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+}
         .nav-link {
             font-size: 1.1rem;
             font-weight: 600;

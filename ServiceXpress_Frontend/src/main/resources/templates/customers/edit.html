@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Customer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .error { color: red; }
+        form { max-width: 400px; }
+        label { display: block; margin: 10px 0 5px; }
+        input { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { padding: 8px 16px; }
+    </style>
+</head>
+<body>
+    <h1>Edit Customer</h1>
+
+    <div th:if="${error}" class="error">
+        <p th:text="${error}"></p>
+    </div>
+
+    <form th:action="@{/customers/edit/{id}(id=${customer.id})}" th:object="${customer}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <label for="username">Username:</label>
+        <input type="text" id="username" th:field="*{username}" />
+        <button type="submit">Update Customer</button>
+    </form>
+    <br>
+    <a href="/customers">Back to Customer List</a>
+</body>
+</html>
