@@ -1,3 +1,4 @@
+
 package com.frontend.model;
 
 import lombok.*;
@@ -13,4 +14,5 @@ public class ServicePackage {
     private String description;
     private Double price;
     private VehicleType vehicleType;
+
 }

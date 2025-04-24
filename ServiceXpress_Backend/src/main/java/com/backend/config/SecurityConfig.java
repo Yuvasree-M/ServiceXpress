@@ -57,6 +57,15 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow CORS preflight
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/service-packages").permitAll()
+                .requestMatchers("/api/service-centers").permitAll()
+                .requestMatchers("/api/vehicle-types").permitAll()
+                .requestMatchers("/api/vehicle-models").permitAll()
+                .requestMatchers("/api/bookings/**").permitAll()
+                
+//                .requestMatchers(HttpMethod.POST, "/api/service-packages/**").hasRole("ADMIN")
+//                .requestMatchers(HttpMethod.PUT, "/api/service-packages/**").hasRole("ADMIN")
+//                .requestMatchers(HttpMethod.DELETE, "/api/service-packages/**").hasRole("ADMIN")
                 .requestMatchers("/api/service-centers/**").hasRole("ADMIN")
                 .requestMatchers("/api/requests/**").hasAnyRole("CUSTOMER", "SERVICE_ADVISOR", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/inventory/**").hasAnyRole("ADMIN", "SERVICE_ADVISOR")
@@ -89,7 +98,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -101,7 +109,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
+    
     @Bean
     public UserDetailsService userDetailsService() {
         return identifier -> {

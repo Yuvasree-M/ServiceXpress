@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.List;
-
 @Entity
 @Table(name = "vehicle_types")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
+@Builder
 public class VehicleType {
 
     @Id

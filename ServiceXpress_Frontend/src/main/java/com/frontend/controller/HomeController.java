@@ -4,7 +4,7 @@ import com.frontend.model.AuthResponse;
 import com.frontend.model.LoginRequest;
 import com.frontend.model.ProcessStep;
 import com.frontend.model.Review;
-import com.frontend.model.Service;
+import com.frontend.model.ServiceCard;
 import com.frontend.model.SocialLink;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,13 +42,13 @@ public class HomeController {
         model.addAttribute("servicesPart1", "Our");
         model.addAttribute("servicesPart2", "Services");
         model.addAttribute("servicesSubtitle", "Comprehensive Vehicle Care Solutions");
-        List<Service> services = Arrays.asList(
-            new Service("fas fa-gas-pump", "Car Oil Change", "Precision oil changes."),
-            new Service("fas fa-car-side", "Car Tire Service", "Tire rotation and balancing."),
-            new Service("fas fa-tools", "Car Brake Repair", "Brake system inspection."),
-            new Service("fas fa-link", "Bike Chain Maintenance", "Chain lubrication."),
-            new Service("fas fa-bicycle", "Bike Tune-Up", "Complete bike tune-up."),
-            new Service("fas fa-motorcycle", "Bike Brake Pad Replacement", "Brake pad replacement.")
+        List<ServiceCard> services = Arrays.asList(
+            new ServiceCard("fas fa-gas-pump", "Car Oil Change", "Precision oil changes."),
+            new ServiceCard("fas fa-car-side", "Car Tire Service", "Tire rotation and balancing."),
+            new ServiceCard("fas fa-tools", "Car Brake Repair", "Brake system inspection."),
+            new ServiceCard("fas fa-link", "Bike Chain Maintenance", "Chain lubrication."),
+            new ServiceCard("fas fa-bicycle", "Bike Tune-Up", "Complete bike tune-up."),
+            new ServiceCard("fas fa-motorcycle", "Bike Brake Pad Replacement", "Brake pad replacement.")
         );
         model.addAttribute("services", services);
 
