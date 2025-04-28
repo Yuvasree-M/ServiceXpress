@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public class ServiceItem {
     private Long id;
     private String workitems;
-    private int quantity;
-    private double prices;
+    private Integer quantity;
+    private Double prices;
     private LocalDate lastUpdated;
 }

@@ -1,36 +1,114 @@
 package com.backend.service;
 
 import com.backend.model.VehicleModel;
+import com.backend.dto.VehicleModelDTO;
+import com.backend.model.VehicleType;
+import com.backend.dto.VehicleTypeDTO;
 import com.backend.repository.VehicleModelRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class VehicleModelService {
 
-    @Autowired
-    private VehicleModelRepository vehicleModelRepository;
+    private static final Logger logger = LoggerFactory.getLogger(VehicleModelService.class);
 
-    public List<VehicleModel> getAllVehicleModels() {
-        return vehicleModelRepository.findAll();
+    private final VehicleModelRepository vehicleModelRepository;
+
+    public List<VehicleModelDTO> findAll() {
+        List<VehicleModel> models = vehicleModelRepository.findAll();
+        List<VehicleModelDTO> dtos = models.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        logger.info("Fetched {} vehicle models: {}", dtos.size(), dtos);
+        return dtos;
     }
 
-    public Optional<VehicleModel> getVehicleModelById(Integer id) {
-        return vehicleModelRepository.findById(id);
+    public VehicleModelDTO findById(Long id) {
+        VehicleModel model = vehicleModelRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("VehicleModel not found with ID: {}", id);
+                    return new RuntimeException("VehicleModel not found with ID: " + id);
+                });
+        VehicleModelDTO dto = toDTO(model);
+        logger.info("Fetched vehicle model by ID {}: {}", id, dto);
+        return dto;
     }
 
-    public VehicleModel createVehicleModel(VehicleModel vehicleModel) {
-        return vehicleModelRepository.save(vehicleModel);
+    public VehicleModelDTO save(VehicleModelDTO vehicleModelDTO) {
+        if (vehicleModelDTO.getModelName() == null || vehicleModelDTO.getModelName().trim().isEmpty()) {
+            logger.error("Cannot save vehicle model with empty modelName");
+            throw new IllegalArgumentException("Model name cannot be empty");
+        }
+        if (vehicleModelDTO.getVehicleType() == null || vehicleModelDTO.getVehicleType().getId() == null) {
+            logger.error("Cannot save vehicle model with invalid vehicleType");
+            throw new IllegalArgumentException("Vehicle type is required");
+        }
+        VehicleModel model = toEntity(vehicleModelDTO);
+        VehicleModel saved = vehicleModelRepository.save(model);
+        VehicleModelDTO result = toDTO(saved);
+        logger.info("Saved vehicle model: {}", result);
+        return result;
     }
 
-    public VehicleModel updateVehicleModel(VehicleModel vehicleModel) {
-        return vehicleModelRepository.save(vehicleModel);
+    public VehicleModelDTO update(Long id, VehicleModelDTO vehicleModelDTO) {
+        VehicleModel existingModel = vehicleModelRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("VehicleModel not found with ID: {}", id);
+                    return new RuntimeException("VehicleModel not found with ID: " + id);
+                });
+        if (vehicleModelDTO.getModelName() == null || vehicleModelDTO.getModelName().trim().isEmpty()) {
+            logger.error("Cannot update vehicle model with empty modelName");
+            throw new IllegalArgumentException("Model name cannot be empty");
+        }
+        if (vehicleModelDTO.getVehicleType() == null || vehicleModelDTO.getVehicleType().getId() == null) {
+            logger.error("Cannot update vehicle model with invalid vehicleType");
+            throw new IllegalArgumentException("Vehicle type is required");
+        }
+        existingModel.setModelName(vehicleModelDTO.getModelName());
+        existingModel.setVehicleType(new VehicleType(
+                vehicleModelDTO.getVehicleType().getId(),
+                vehicleModelDTO.getVehicleType().getTypeName(),
+                null // Avoid serializing vehicleModels
+        ));
+        VehicleModel updated = vehicleModelRepository.save(existingModel);
+        VehicleModelDTO result = toDTO(updated);
+        logger.info("Updated vehicle model: {}", result);
+        return result;
     }
 
-    public void deleteVehicleModel(Integer id) {
+    public void delete(Long id) {
+        if (!vehicleModelRepository.existsById(id)) {
+            logger.error("Cannot delete vehicle model with ID: {} - not found", id);
+            throw new RuntimeException("VehicleModel not found with ID: " + id);
+        }
         vehicleModelRepository.deleteById(id);
+        logger.info("Deleted vehicle model with ID: {}", id);
+    }
+
+    private VehicleModelDTO toDTO(VehicleModel model) {
+        return new VehicleModelDTO(
+                model.getId(),
+                model.getModelName(),
+                new VehicleTypeDTO(model.getVehicleType().getId(), model.getVehicleType().getTypeName())
+        );
+    }
+
+    private VehicleModel toEntity(VehicleModelDTO dto) {
+        VehicleModel model = new VehicleModel();
+        model.setId(dto.getId());
+        model.setModelName(dto.getModelName());
+        model.setVehicleType(new VehicleType(
+                dto.getVehicleType().getId(),
+                dto.getVehicleType().getTypeName(),
+                null // Avoid serializing vehicleModels
+        ));
+        return model;
     }
 }
