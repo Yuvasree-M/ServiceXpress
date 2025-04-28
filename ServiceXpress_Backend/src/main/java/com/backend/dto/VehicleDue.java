@@ -1,24 +1,21 @@
-package com.frontend.model;
-
-import java.time.LocalDate;
+package com.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VehicleCompleted {
+public class VehicleDue {
     private Long id;
     private String customerName;
     private String vehicleType;
     private String vehicleModel;
-    private String serviceCenter;
-    private String serviceAdvisor;
     private String services;
-    private LocalDate completedDate;
+    private String serviceCenter;
+    private Long serviceCenterId;
+    private LocalDate requestedDate;
     private String status;
-    private String billOfMaterials;
-    private boolean paymentRequested;
-    private boolean paymentReceived;
 }

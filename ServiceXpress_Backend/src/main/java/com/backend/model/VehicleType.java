@@ -2,6 +2,9 @@ package com.backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -21,7 +24,7 @@ public class VehicleType {
     @Column(name = "type_name", nullable = false)
     private String typeName;
 
-    @JsonIgnore // Ignore vehicleModels in JSON response
+    @JsonIgnore 
     @OneToMany(mappedBy = "vehicleType", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VehicleModel> vehicleModels;
 }

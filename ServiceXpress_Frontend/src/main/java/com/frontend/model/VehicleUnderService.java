@@ -2,16 +2,18 @@ package com.frontend.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class VehicleUnderService {
-	private String ownerName;
+    private Long id;
+    private String customerName;
     private String vehicleType;
     private String vehicleModel;
     private String serviceCenter;
     private String serviceAdvisor;
-    private String serviceAllocated;
+    private String services;
     private String status;
-
 }

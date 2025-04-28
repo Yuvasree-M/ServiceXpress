@@ -1,14 +1,13 @@
-package com.frontend.model;
-
-import java.time.LocalDate;
+package com.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VehicleCompleted {
+public class VehicleUnderService {
     private Long id;
     private String customerName;
     private String vehicleType;
@@ -16,9 +15,5 @@ public class VehicleCompleted {
     private String serviceCenter;
     private String serviceAdvisor;
     private String services;
-    private LocalDate completedDate;
     private String status;
-    private String billOfMaterials;
-    private boolean paymentRequested;
-    private boolean paymentReceived;
 }

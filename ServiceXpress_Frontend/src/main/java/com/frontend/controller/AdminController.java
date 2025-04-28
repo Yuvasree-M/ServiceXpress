@@ -29,86 +29,49 @@ public class AdminController {
 
     private final RestTemplate restTemplate;
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+
     public AdminController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-
     @GetMapping("/dashboard/admin")
     public String showDashboard(Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
+        logger.info("Token from session: {}", token);
         if (token == null) {
             model.addAttribute("error", "No authentication token found. Please log in.");
             return "index";
         }
-
         try {
             String url = backendApiUrl + "/dashboard/admin";
             HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
             HttpEntity<String> request = new HttpEntity<>(headers);
-
+            logger.info("Fetching dashboard data from: {}", url);
             DashboardData data = restTemplate.exchange(url, HttpMethod.GET, request, DashboardData.class).getBody();
-            model.addAttribute("dashboardData", data);
-            model.addAttribute("token", token);
-            // Set profileName from the fetched data
-            if (data != null && data.getProfileName() != null) {
-                model.addAttribute("profileName", data.getProfileName());
-            } else {
-                model.addAttribute("profileName", "Admin User"); // Fallback
+            logger.info("Received dashboard data: {}", data);
+            if (data != null) {
+                logger.info("Frontend - Vehicles Due: {}", data.getVehiclesDue());
+                logger.info("Frontend - Vehicles Under Service: {}", data.getVehiclesUnderService());
+                logger.info("Frontend - Vehicles Completed: {}", data.getVehiclesCompleted());
+                logger.info("Frontend - Available Advisors: {}", data.getAvailableAdvisors());
             }
-
+            if (data == null) {
+                model.addAttribute("error", "No dashboard data received from backend.");
+            } else {
+                model.addAttribute("dashboardData", data);
+                model.addAttribute("token", token);
+                model.addAttribute("profileName", data.getProfileName() != null ? data.getProfileName() : "Admin User");
+            }
         } catch (Exception e) {
+            logger.error("Error fetching dashboard data: ", e);
             model.addAttribute("error", "Failed to load dashboard: " + e.getMessage());
-            // Use mock data as a fallback
-            addMockData(model);
         }
-
         return "admin-dashboard";
     }
 
-    private void addMockData(Model model) {
-        // Create advisors list and filter active ones
-        List<Advisor> allAdvisors = Arrays.asList(
-                new Advisor(1L, "New York", "NY Center", "alice", "alice@example.com", "1234567890", "pass123", true),
-                new Advisor(2L, "Los Angeles", "LA Center", "bob", "bob@example.com", "0987654321", "pass456", false)
-        );
-
-        List<Advisor> activeAdvisors = allAdvisors.stream()
-                .filter(Advisor::getActive)
-                .collect(Collectors.toList());
-
-        DashboardData dashboardData = new DashboardData(
-                1, 1, 1, 1, "Admin User",
-                Arrays.asList(
-                        new VehicleDue(
-                                "John Doe",
-                                "Honda Civic",
-                                "Sedan",
-                                "Oil Change",
-                                "Bangalore",
-                                1L,
-                                activeAdvisors,
-                                new Date(),
-                                new Date(),
-                                "Requested"
-                        )
-                ),
-                Arrays.asList(
-                        new VehicleUnderService("Jane Smith", "Sedan", "Honda City", "Center A", "John Doe", "Engine Check", "In Progress")
-                ),
-                Arrays.asList(
-                        new VehicleCompleted(1L, "Sam White", "SUV", "Hyundai Creta", "Center A", "John Doe", "Oil Change, Brake Check",
-                                new Date(), "Completed", false, false)
-                ),
-                Arrays.asList(
-                        new AdvisorRequest(1L, "Mark Advisor", "Wheel Alignment", "Jane Smith", "SUV", "Mahindra XUV500", "Center A", "Pending")
-                )
-        );
-
-        model.addAttribute("dashboardData", dashboardData);
-        model.addAttribute("profileName", dashboardData.getProfileName());
-    }      
+   
     private List<ServiceItem> fetchInventoryList(String token) {
         String url = backendApiUrl + "/inventory";
         HttpHeaders headers = new HttpHeaders();

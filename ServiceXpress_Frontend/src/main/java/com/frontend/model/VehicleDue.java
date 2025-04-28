@@ -1,23 +1,23 @@
 package com.frontend.model;
 
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class VehicleDue {
-    private String ownerName;
-    private String vehicleModel;
+    private Long id;
+    private String customerName;
     private String vehicleType;
-    private String serviceNeeded;
-    private String location;
-    private Long serviceAdvisorId;
-    private List<Advisor> availableAdvisors;
-    private Date requestedDate;
-    private Date dueDate;
+    private String vehicleModel;
+    private String services;
+    private String serviceCenter;
+    private Long serviceCenterId;
+    private LocalDate requestedDate;
     private String status;
 }

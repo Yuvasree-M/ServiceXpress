@@ -15,7 +15,7 @@ public class CustomerService {
     public Customer getLoggedInCustomer() {
         Customer customer = new Customer();
         customer.setId(1L);
-        customer.setName("John Doe");
+        customer.setUsername("John Doe");
 //        customer.setInitials("JD");
         return customer;
     }

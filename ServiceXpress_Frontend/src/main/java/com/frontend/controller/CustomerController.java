@@ -102,7 +102,7 @@ public class CustomerController {
             return "redirect:/login";
         }
 
-        model.addAttribute("username", customer.getName());
+        model.addAttribute("username", customer.getUsername());
         model.addAttribute("customer", customer);
 
         try {
@@ -137,7 +137,7 @@ public class CustomerController {
                         sp.getPrice(),
                         duration,
                         tasks,
-                        sp.getVehicleType().getName()
+                        sp.getVehicleType().getTypeName()
                     );
                     services.add(service);
                 }
@@ -210,14 +210,14 @@ public class CustomerController {
         }
 
         Booking booking = new Booking();
-        booking.setCustomerName(customer.getName());
+        booking.setCustomerName(customer.getUsername());
         booking.setCustomerEmail(customer.getEmail());
-        booking.setCustomerPhone(customer.getMobile() != null ? customer.getMobile() : "");
+        booking.setCustomerPhone(customer.getPhoneNumber() != null ? customer.getPhoneNumber() : "");
         booking.setPickDropOption("NONE");
         booking.setPickupDropoffOption("");
         model.addAttribute("booking", booking);
         model.addAttribute("customer", customer);
-        model.addAttribute("initials", customer.getName() != null ? customer.getName().substring(0, Math.min(2, customer.getName().length())).toUpperCase() : "");
+        model.addAttribute("initials", customer.getUsername() != null ? customer.getUsername().substring(0, Math.min(2, customer.getUsername().length())).toUpperCase() : "");
 
         return "customer-booking";
     }
