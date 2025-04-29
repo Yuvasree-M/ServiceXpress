@@ -33,7 +33,7 @@ public class ServicePackageService {
     }
 
     // Fetch a service package by ID
-    public ServicePackageDTO findById(Long id) {
+    public ServicePackageDTO findById(Integer id) {
         ServicePackage servicePackage = servicePackageRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("ServicePackage not found with ID: {}", id);
@@ -62,7 +62,7 @@ public class ServicePackageService {
     }
 
     // Update an existing service package
-    public ServicePackageDTO update(Long id, ServicePackageDTO updatedPackageDTO) {
+    public ServicePackageDTO update(Integer id, ServicePackageDTO updatedPackageDTO) {
         ServicePackage existingPackage = servicePackageRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("ServicePackage not found with ID: {}", id);
@@ -81,8 +81,7 @@ public class ServicePackageService {
         existingPackage.setPrice(updatedPackageDTO.getPrice());
         existingPackage.setVehicleType(new VehicleType(
                 updatedPackageDTO.getVehicleType().getId(),
-                updatedPackageDTO.getVehicleType().getTypeName(),
-                null // Avoid serializing vehicleModels
+                updatedPackageDTO.getVehicleType().getName()
         ));
         ServicePackage updated = servicePackageRepository.save(existingPackage);
         ServicePackageDTO result = toDTO(updated);
@@ -91,7 +90,7 @@ public class ServicePackageService {
     }
 
     // Delete a service package by ID
-    public void delete(Long id) {
+    public void delete(Integer id) {
         if (!servicePackageRepository.existsById(id)) {
             logger.error("Cannot delete service package with ID: {} - not found", id);
             throw new RuntimeException("ServicePackage not found with ID: " + id);
@@ -106,7 +105,7 @@ public class ServicePackageService {
                 servicePackage.getPackageName(),
                 servicePackage.getDescription(),
                 servicePackage.getPrice(),
-                new VehicleTypeDTO(servicePackage.getVehicleType().getId(), servicePackage.getVehicleType().getTypeName())
+                new VehicleTypeDTO(servicePackage.getVehicleType().getId(), servicePackage.getVehicleType().getName())
         );
     }
 
@@ -118,8 +117,7 @@ public class ServicePackageService {
         servicePackage.setPrice(dto.getPrice());
         servicePackage.setVehicleType(new VehicleType(
                 dto.getVehicleType().getId(),
-                dto.getVehicleType().getTypeName(),
-                null // Avoid serializing vehicleModels
+                dto.getVehicleType().getName()
         ));
         return servicePackage;
     }

@@ -1,15 +1,31 @@
-
 package com.frontend.model;
 
-import lombok.*;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class VehicleType {
-    private Long id;
-    private String typeName;
+    private Integer id;
+    private String name; // Changed from typeName to match VehicleTypeDTO
 
+    public VehicleType() {
+        // Default constructor
+    }
+
+    public VehicleType(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

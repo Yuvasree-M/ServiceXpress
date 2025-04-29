@@ -29,7 +29,7 @@ public class VehicleTypeService {
         return dtos;
     }
 
-    public Optional<VehicleTypeDTO> findById(Long id) {
+    public Optional<VehicleTypeDTO> findById(Integer id) {
         Optional<VehicleTypeDTO> dto = vehicleTypeRepository.findById(id)
                 .map(this::toDTO);
         logger.info("Fetched vehicle type by ID {}: {}", id, dto);
@@ -44,19 +44,19 @@ public class VehicleTypeService {
         return result;
     }
 
-    public void delete(Long id) {
+    public void delete(Integer id) {
         vehicleTypeRepository.deleteById(id);
         logger.info("Deleted vehicle type with ID: {}", id);
     }
 
     private VehicleTypeDTO toDTO(VehicleType vehicleType) {
-        return new VehicleTypeDTO(vehicleType.getId(), vehicleType.getTypeName());
+        return new VehicleTypeDTO(vehicleType.getId(), vehicleType.getName());
     }
 
     private VehicleType toEntity(VehicleTypeDTO dto) {
         VehicleType vehicleType = new VehicleType();
         vehicleType.setId(dto.getId());
-        vehicleType.setTypeName(dto.getTypeName());
+        vehicleType.setName(dto.getName());
         return vehicleType;
     }
 }

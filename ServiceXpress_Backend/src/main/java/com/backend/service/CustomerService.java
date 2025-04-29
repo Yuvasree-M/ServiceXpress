@@ -1,12 +1,13 @@
 package com.backend.service;
 
+import com.backend.exception.CustomerNotFoundException;
 import com.backend.model.Customer;
 import com.backend.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
@@ -14,25 +15,25 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    public List<Customer> getActiveCustomers() {
-        return customerRepository.findAll().stream()
-                .filter(Customer::getActive)
-                .collect(Collectors.toList());
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public Page<Customer> getActiveCustomers(Pageable pageable) {
+        return customerRepository.findByActive(true, pageable);
     }
 
-    public List<Customer> getInactiveCustomers() {
-        return customerRepository.findAll().stream()
-                .filter(customer -> !customer.getActive())
-                .collect(Collectors.toList());
+    public Page<Customer> getInactiveCustomers(Pageable pageable) {
+        return customerRepository.findByActive(false, pageable);
     }
 
     public Customer getCustomerById(Long id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + id));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + id));
     }
 
     public Customer addCustomer(Customer customer) {
-        customer.setActive(true); // Ensure new customers are active
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+        customer.setActive(true);
         return customerRepository.save(customer);
     }
 
@@ -42,7 +43,7 @@ public class CustomerService {
         customer.setEmail(updatedCustomer.getEmail());
         customer.setPhoneNumber(updatedCustomer.getPhoneNumber());
         if (updatedCustomer.getPassword() != null && !updatedCustomer.getPassword().isEmpty()) {
-            customer.setPassword(updatedCustomer.getPassword());
+            customer.setPassword(passwordEncoder.encode(updatedCustomer.getPassword()));
         }
         return customerRepository.save(customer);
     }

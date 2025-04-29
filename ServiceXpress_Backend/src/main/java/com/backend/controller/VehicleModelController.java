@@ -35,19 +35,19 @@ public class VehicleModelController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
-    public ResponseEntity<VehicleModelDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<VehicleModelDTO> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(modelService.findById(id));
     }
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<VehicleModelDTO> update(@PathVariable Long id, @RequestBody VehicleModelDTO modelDTO) {
+    public ResponseEntity<VehicleModelDTO> update(@PathVariable Integer id, @RequestBody VehicleModelDTO modelDTO) {
         return ResponseEntity.ok(modelService.update(id, modelDTO));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
         modelService.delete(id);
         return ResponseEntity.noContent().build();
     }

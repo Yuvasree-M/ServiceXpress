@@ -28,7 +28,7 @@
 
   <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-  <table id="advisorsTable" class="table table-bordered table-striped table-hover">
+  <table id="advisorsTable" class="table table-bordered table-striped">
     <thead>
       <tr>
         <th>ID</th>
@@ -169,7 +169,7 @@
     if ($('#advisorsTable').length) {
       $('#advisorsTable').DataTable({
         dom: 'Bfrtip',
-        buttons: ['copy', 'csv', 'excel'],
+        buttons: ['csv', 'excel'],
         pageLength: 5,
         autoWidth: false,
         ordering: true,

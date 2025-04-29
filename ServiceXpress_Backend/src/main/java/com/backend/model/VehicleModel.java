@@ -14,7 +14,7 @@ public class VehicleModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "vehicle_model_id")
-    private Long id;
+    private Integer vehicleModelId;
 
     @ManyToOne
     @JoinColumn(name = "vehicle_type_id", nullable = false)

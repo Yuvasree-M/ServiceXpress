@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VehicleModelDTO {
-    private Long id;
+    private Integer id;
     private String modelName;
     private VehicleTypeDTO vehicleType;
 }

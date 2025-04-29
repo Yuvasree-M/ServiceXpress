@@ -14,10 +14,11 @@ public class AdvisorService {
 
     @Autowired
     private AdvisorRepository advisorRepository;
-
+    private final BCryptPasswordEncoder passwordEncoder;
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
+    public AdvisorService(BCryptPasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
     public List<Advisor> getAllAdvisors() {
         return advisorRepository.findAllActive(); // Fetch only active advisors
     }

@@ -1,4 +1,3 @@
-
 package com.frontend.model;
 
 import com.frontend.model.Customer;
@@ -15,7 +14,7 @@ public class CustomerService {
     public Customer getLoggedInCustomer() {
         Customer customer = new Customer();
         customer.setId(1L);
-        customer.setUsername("John Doe");
+        customer.setName("John Doe");
 //        customer.setInitials("JD");
         return customer;
     }

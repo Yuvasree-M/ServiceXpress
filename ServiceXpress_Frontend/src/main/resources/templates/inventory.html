@@ -13,6 +13,7 @@
     #inventoryTable td:first-child {
       display: none; /* Hide ID column */
     }
+ 
   </style>
 </head>
 <body>
@@ -42,10 +43,10 @@
     <tbody>
       <tr th:each="item : ${inventoryList}" th:if="${item != null}">
         <td th:text="${item.id}"></td>
-        <td th:text="${item.workitems} ?: 'N/A'"></td>
+        <td th:text="${item.workitems} ?: 'Unknown Item'"></td>
         <td th:text="${item.quantity}"></td>
-        <td th:text="${item.prices}"></td>
-        <td th:text="${item.lastUpdated}"></td>
+        <td th:text="${#numbers.formatDecimal(item.prices, 1, 2)}"></td>
+        <td th:text="${#temporals.format(item.lastUpdated, 'yyyy-MM-dd')}"></td>
         <td>
           <a th:href="@{/inventory/edit/{id}(id=${item.id})}" class="btn btn-sm btn-warning">Edit</a>
           <form th:action="@{/inventory/delete/{id}(id=${item.id})}" method="post" style="display:inline;">
@@ -143,15 +144,12 @@
     if ($('#inventoryTable').length) {
       $('#inventoryTable').DataTable({
         dom: 'Bfrtip',
-        buttons: ['copy', 'csv', 'excel'],
+        buttons: ['csv', 'excel'],
         pageLength: 5,
         autoWidth: false,
         ordering: true,
         searching: true,
-        paging: true,
-        columnDefs: [
-          { targets: 0, visible: false } // Hide ID column explicitly
-        ]
+        paging: true
       });
     }
   });

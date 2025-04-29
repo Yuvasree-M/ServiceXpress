@@ -1,4 +1,3 @@
-
 package com.frontend.controller;
 
 import com.frontend.model.Booking;
@@ -9,7 +8,7 @@ import com.frontend.model.ServiceStatus;
 import com.frontend.model.ServiceHistory;
 import com.frontend.model.Service;
 import com.frontend.model.ServicePackage;
-import com.frontend.model.VehicleType;
+import com.frontend.model.VehicleTypeDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -102,7 +101,7 @@ public class CustomerController {
             return "redirect:/login";
         }
 
-        model.addAttribute("username", customer.getUsername());
+        model.addAttribute("username", customer.getName());
         model.addAttribute("customer", customer);
 
         try {
@@ -137,7 +136,7 @@ public class CustomerController {
                         sp.getPrice(),
                         duration,
                         tasks,
-                        sp.getVehicleType().getTypeName()
+                        sp.getVehicleType().getName()
                     );
                     services.add(service);
                 }
@@ -175,11 +174,11 @@ public class CustomerController {
             // Fetch vehicle types
             String vehicleTypeUrl = backendApiUrl + "/vehicle-types";
             HttpEntity<String> request = new HttpEntity<>(new HttpHeaders()); // No token needed
-            ResponseEntity<List<VehicleType>> vehicleTypeResponse = restTemplate.exchange(
-                vehicleTypeUrl, HttpMethod.GET, request, new ParameterizedTypeReference<List<VehicleType>>(){}
+            ResponseEntity<List<VehicleTypeDTO>> vehicleTypeResponse = restTemplate.exchange(
+                vehicleTypeUrl, HttpMethod.GET, request, new ParameterizedTypeReference<List<VehicleTypeDTO>>(){}
             );
-            List<VehicleType> vehicleTypes = vehicleTypeResponse.getBody();
-            if (vehicleTypes == null || vehicleTypes.isEmpty()) {
+            List<VehicleTypeDTO> vehicleTypeDTOs = vehicleTypeResponse.getBody();
+            if (vehicleTypeDTOs == null || vehicleTypeDTOs.isEmpty()) {
                 System.err.println("No vehicle types returned from " + vehicleTypeUrl);
                 model.addAttribute("error", "No vehicle types available. Please try again later.");
             }
@@ -195,7 +194,7 @@ public class CustomerController {
                 model.addAttribute("error", "No service packages available. Please try again later.");
             }
 
-            model.addAttribute("vehicleTypes", vehicleTypes != null ? vehicleTypes : Collections.emptyList());
+            model.addAttribute("vehicleTypes", vehicleTypeDTOs != null ? vehicleTypeDTOs : Collections.emptyList());
             model.addAttribute("servicePackages", servicePackages != null ? servicePackages : Collections.emptyList());
         } catch (HttpClientErrorException e) {
             System.err.println("HTTP error fetching data: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
@@ -210,14 +209,14 @@ public class CustomerController {
         }
 
         Booking booking = new Booking();
-        booking.setCustomerName(customer.getUsername());
+        booking.setCustomerName(customer.getName());
         booking.setCustomerEmail(customer.getEmail());
-        booking.setCustomerPhone(customer.getPhoneNumber() != null ? customer.getPhoneNumber() : "");
+        booking.setCustomerPhone(customer.getMobile() != null ? customer.getMobile() : "");
         booking.setPickDropOption("NONE");
         booking.setPickupDropoffOption("");
         model.addAttribute("booking", booking);
         model.addAttribute("customer", customer);
-        model.addAttribute("initials", customer.getUsername() != null ? customer.getUsername().substring(0, Math.min(2, customer.getUsername().length())).toUpperCase() : "");
+        model.addAttribute("initials", customer.getName() != null ? customer.getName().substring(0, Math.min(2, customer.getName().length())).toUpperCase() : "");
 
         return "customer-booking";
     }

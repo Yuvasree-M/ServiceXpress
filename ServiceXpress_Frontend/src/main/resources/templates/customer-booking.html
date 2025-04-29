@@ -798,10 +798,10 @@
             </div>
             <div class="col-md-4" th:each="vehicleType : ${vehicleTypes}">
                 <div class="vehicle-card" th:data-id="${vehicleType.id}">
-                    <img th:src="${vehicleType.imageUrl ?: 'https://via.placeholder.com/300'}" alt="Vehicle Type" class="img-fluid">
+                    <img th:src="@{/images/qualitywork.jpg}"alt="Vehicle Type" class="img-fluid">
                     <div class="card-content">
                         <h5 th:text="${vehicleType.name}">Vehicle Type</h5>
-                        <p th:text="${vehicleType.description ?: 'No description available'}">Vehicle Description</p>
+                       
                     </div>
                 </div>
             </div>

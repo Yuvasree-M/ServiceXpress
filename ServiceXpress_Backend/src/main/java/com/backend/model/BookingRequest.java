@@ -3,7 +3,7 @@ package com.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "booking_requests")
@@ -25,10 +25,10 @@ public class BookingRequest {
     private Long serviceCenterId;
 
     @Column(nullable = false)
-    private Long vehicleTypeId;
+    private Integer vehicleTypeId;
 
     @Column(nullable = false)
-    private Long vehicleModelId;
+    private Integer vehicleModelId;
 
     @Column(nullable = false)
     private String customerName;
@@ -56,11 +56,14 @@ public class BookingRequest {
     private String pickupDropoffOption;
 
     @Column(nullable = false)
-    private LocalDate requestedDate;
+    private LocalDateTime requestedDate;
 
     @Column(nullable = false)
     private String status = "PENDING";
 
     @Column(nullable = false)
-    private LocalDate updatedAt;
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 }

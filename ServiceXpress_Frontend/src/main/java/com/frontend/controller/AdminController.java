@@ -55,7 +55,7 @@ public class AdminController {
                 logger.info("Frontend - Vehicles Due: {}", data.getVehiclesDue());
                 logger.info("Frontend - Vehicles Under Service: {}", data.getVehiclesUnderService());
                 logger.info("Frontend - Vehicles Completed: {}", data.getVehiclesCompleted());
-                logger.info("Frontend - Available Advisors: {}", data.getAvailableAdvisors());
+//                logger.info("Frontend - Available Advisors: {}", data.getAvailableAdvisors());
             }
             if (data == null) {
                 model.addAttribute("error", "No dashboard data received from backend.");
@@ -70,8 +70,7 @@ public class AdminController {
         }
         return "admin-dashboard";
     }
-
-   
+    
     private List<ServiceItem> fetchInventoryList(String token) {
         String url = backendApiUrl + "/inventory";
         HttpHeaders headers = new HttpHeaders();
@@ -81,16 +80,25 @@ public class AdminController {
 
         try {
             ResponseEntity<String> rawResponse = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-            logger.info("Raw JSON response from /api/inventory: {}", rawResponse.getBody());
-
             ResponseEntity<ServiceItem[]> response = restTemplate.exchange(url, HttpMethod.GET, request, ServiceItem[].class);
-            return response.getBody() != null ? Arrays.asList(response.getBody()) : List.of();
+            List<ServiceItem> inventoryList = response.getBody() != null ? Arrays.asList(response.getBody()) : List.of();
+            return inventoryList;
         } catch (HttpClientErrorException e) {
             logger.error("HTTP error fetching inventory: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            return List.of();
+            return Arrays.asList(
+                new ServiceItem(1L, "Oil Change", 50, 29.99, LocalDate.parse("2025-04-28")),
+                new ServiceItem(2L, "Tire Rotation", 20, 19.99, LocalDate.parse("2025-04-28")),
+                new ServiceItem(3L, "Brake Pad Replacement", 10, 49.99, LocalDate.parse("2025-04-28")),
+                new ServiceItem(4L, "Bike Chain", 52, 200.0, LocalDate.parse("2025-04-28"))
+            );
         } catch (Exception e) {
             logger.error("Error fetching inventory: {}", e.getMessage(), e);
-            return List.of();
+            return Arrays.asList(
+                new ServiceItem(1L, "Oil Change", 50, 29.99, LocalDate.parse("2025-04-28")),
+                new ServiceItem(2L, "Tire Rotation", 20, 19.99, LocalDate.parse("2025-04-28")),
+                new ServiceItem(3L, "Brake Pad Replacement", 10, 49.99, LocalDate.parse("2025-04-28")),
+                new ServiceItem(4L, "Bike Chain", 52, 200.0, LocalDate.parse("2025-04-28"))
+            );
         }
     }
 
@@ -140,7 +148,7 @@ public class AdminController {
             return "inventory";
         }
 
-        if (item.getQuantity() == null || item.getQuantity() < 0) {
+        if (item.getQuantity() == 0 || item.getQuantity() < 0) {
             model.addAttribute("error", "Quantity must be a non-negative number.");
             model.addAttribute("formMode", "add");
             model.addAttribute("inventoryList", fetchInventoryList(token));
@@ -148,7 +156,7 @@ public class AdminController {
             return "inventory";
         }
 
-        if (item.getPrices() == null || item.getPrices() < 0) {
+        if (item.getPrices() == 0 || item.getPrices() < 0) {
             model.addAttribute("error", "Price must be a non-negative number.");
             model.addAttribute("formMode", "add");
             model.addAttribute("inventoryList", fetchInventoryList(token));
@@ -165,10 +173,8 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-            logger.info("Sending add inventory request: {}", item);
             HttpEntity<ServiceItem> request = new HttpEntity<>(item, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-            logger.info("Add inventory response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
 
             return "redirect:/inventory";
         } catch (HttpClientErrorException e) {
@@ -241,7 +247,7 @@ public class AdminController {
             return "inventory";
         }
 
-        if (item.getQuantity() == null || item.getQuantity() < 0) {
+        if (item.getQuantity() == 0 || item.getQuantity() < 0) {
             model.addAttribute("error", "Quantity must be a non-negative number.");
             model.addAttribute("formMode", "edit");
             model.addAttribute("inventoryList", fetchInventoryList(token));
@@ -249,7 +255,7 @@ public class AdminController {
             return "inventory";
         }
 
-        if (item.getPrices() == null || item.getPrices() < 0) {
+        if (item.getPrices() == 0 || item.getPrices() < 0) {
             model.addAttribute("error", "Price must be a non-negative number.");
             model.addAttribute("formMode", "edit");
             model.addAttribute("inventoryList", fetchInventoryList(token));
@@ -258,7 +264,7 @@ public class AdminController {
         }
 
         try {
-            item.setLastUpdated(LocalDate.now()); // Update lastUpdated to current date
+            item.setLastUpdated(LocalDate.now());
 
             String url = backendApiUrl + "/inventory/" + id;
             HttpHeaders headers = new HttpHeaders();
@@ -266,10 +272,8 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-            logger.info("Sending edit inventory request: {}", item);
             HttpEntity<ServiceItem> request = new HttpEntity<>(item, headers);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
-            logger.info("Edit inventory response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
 
             return "redirect:/inventory";
         } catch (HttpClientErrorException e) {
@@ -304,9 +308,7 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             HttpEntity<String> request = new HttpEntity<>(headers);
 
-            logger.info("Sending delete inventory request for ID: {}", id);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, request, String.class);
-            logger.info("Delete inventory response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
 
             return "redirect:/inventory";
         } catch (HttpClientErrorException e) {
@@ -326,7 +328,6 @@ public class AdminController {
         }
     }
 
-    // SERVICE CENTER MODULE
     private String serviceCenterUrl() {
         return backendApiUrl + "/service-centers";
     }
@@ -389,7 +390,6 @@ public class AdminController {
         }
     }
 
-
     @GetMapping("/service-centers/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
@@ -431,27 +431,42 @@ public class AdminController {
         restTemplate.exchange(serviceCenterUrl() + "/" + id, HttpMethod.DELETE, request, Void.class);
         return "redirect:/service-centers";
     }
- // VEHICLE TYPE MODULE
+    
+    // VEHICLE TYPE MODULE
     private String vehicleTypeUrl() {
-        return backendApiUrl + "/vehicle-type";
+        return backendApiUrl + "/vehicle-types";
     }
 
     private List<VehicleType> fetchVehicleTypes(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            logger.error("No JWT token found in session.");
+            throw new RuntimeException("No authentication token found. Please log in again.");
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<String> request = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> rawResponse = restTemplate.exchange(
-                    vehicleTypeUrl(), HttpMethod.GET, request, String.class);
-            logger.info("Raw JSON response from /api/vehicle-type: {}", rawResponse.getBody());
+            logger.info("Fetching vehicle types with token: {}", token);
+            ResponseEntity<VehicleTypeDTO[]> response = restTemplate.exchange(
+                    vehicleTypeUrl(), HttpMethod.GET, request, VehicleTypeDTO[].class);
+            logger.info("Successfully fetched vehicle types: {}", response.getBody());
+            if (response.getBody() == null) {
+                return List.of();
+            }
 
-            ResponseEntity<VehicleType[]> response = restTemplate.exchange(
-                    vehicleTypeUrl(), HttpMethod.GET, request, VehicleType[].class);
-            return response.getBody() != null ? Arrays.asList(response.getBody()) : List.of();
+            // Map VehicleTypeDTO to VehicleType
+            return Arrays.stream(response.getBody())
+                    .map(dto -> new VehicleType(dto.getId(), dto.getName()))
+                    .collect(Collectors.toList());
         } catch (HttpClientErrorException e) {
             logger.error("HTTP error fetching vehicle types: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                logger.warn("Token might be invalid or expired, redirecting to login.");
+                throw new RuntimeException("Authentication failed. Please log in again.");
+            }
             throw new RuntimeException("Failed to fetch vehicle types: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             logger.error("Error fetching vehicle types: {}", e.getMessage(), e);
@@ -462,7 +477,9 @@ public class AdminController {
     @GetMapping("/vehicle-type")
     public String listVehicleTypes(Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
+        logger.info("Token retrieved from session: {}", token);
         if (token == null) {
+            logger.warn("No token found in session. Redirecting to login.");
             model.addAttribute("error", "Please log in to access this page.");
             return "redirect:/";
         }
@@ -470,14 +487,25 @@ public class AdminController {
         try {
             List<VehicleType> vehicleTypes = fetchVehicleTypes(token);
             model.addAttribute("vehicleTypes", vehicleTypes);
-        } catch (Exception e) {
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                logger.error("Invalid or expired token. Redirecting to logout.");
+                session.invalidate(); // Invalidate session on 403
+                return "redirect:/logout";
+            }
+            logger.error("Error in listVehicleTypes: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to fetch vehicle types: " + e.getMessage());
+            model.addAttribute("vehicleTypes", Collections.emptyList()); // Fallback to empty list
+        } catch (Exception e) {
+            logger.error("Error in listVehicleTypes: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to fetch vehicle types: " + e.getMessage());
+            model.addAttribute("vehicleTypes", Collections.emptyList()); // Fallback to empty list
         }
         model.addAttribute("vehicleType", new VehicleType());
         model.addAttribute("formMode", "none");
         return "vehicle-type";
     }
-
+    
     @GetMapping("/vehicle-type/add")
     public String showAddVehicleTypeForm(Model model) {
         model.addAttribute("vehicleType", new VehicleType());
@@ -493,7 +521,7 @@ public class AdminController {
             return "redirect:/";
         }
 
-        if (vehicleType.getTypeName() == null || vehicleType.getTypeName().trim().isEmpty()) {
+        if (vehicleType.getName() == null || vehicleType.getName().trim().isEmpty()) {
             model.addAttribute("error", "Vehicle Type name cannot be empty.");
             model.addAttribute("formMode", "add");
             try {
@@ -580,7 +608,7 @@ public class AdminController {
             return "redirect:/";
         }
 
-        if (vehicleType.getTypeName() == null || vehicleType.getTypeName().trim().isEmpty()) {
+        if (vehicleType.getName() == null || vehicleType.getName().trim().isEmpty()) {
             model.addAttribute("error", "Vehicle Type name cannot be empty.");
             model.addAttribute("formMode", "edit");
             try {
@@ -667,7 +695,7 @@ public class AdminController {
             return "vehicle-type";
         }
     }
-    
+
  // VEHICLE MODEL MODULE
     private String vehicleModelUrl() {
         return backendApiUrl + "/vehicle-models";
@@ -684,9 +712,22 @@ public class AdminController {
                     vehicleModelUrl(), HttpMethod.GET, request, String.class);
             logger.info("Raw JSON response from /api/vehicle-models: {}", rawResponse.getBody());
 
-            ResponseEntity<VehicleModel[]> response = restTemplate.exchange(
-                    vehicleModelUrl(), HttpMethod.GET, request, VehicleModel[].class);
-            return response.getBody() != null ? Arrays.asList(response.getBody()) : List.of();
+            ResponseEntity<VehicleModelDTO[]> response = restTemplate.exchange(
+                    vehicleModelUrl(), HttpMethod.GET, request, VehicleModelDTO[].class);
+            if (response.getBody() == null) {
+                return List.of();
+            }
+
+            // Map VehicleModelDTO to VehicleModel
+            return Arrays.stream(response.getBody())
+                    .map(dto -> {
+                        VehicleType vehicleType = new VehicleType(
+                                dto.getVehicleType().getId(),
+                                dto.getVehicleType().getName()
+                        );
+                        return new VehicleModel(dto.getId(), vehicleType, dto.getModelName());
+                    })
+                    .collect(Collectors.toList());
         } catch (HttpClientErrorException e) {
             logger.error("HTTP error fetching vehicle models: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("Failed to fetch vehicle models: " + e.getResponseBodyAsString(), e);
@@ -772,8 +813,17 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-            logger.info("Sending add vehicle model request: {}", vehicleModel);
-            HttpEntity<VehicleModel> request = new HttpEntity<>(vehicleModel, headers);
+            // Convert VehicleModel to VehicleModelDTO
+            VehicleModelDTO vehicleModelDTO = new VehicleModelDTO();
+            vehicleModelDTO.setModelName(vehicleModel.getModelName());
+            VehicleTypeDTO vehicleTypeDTO = new VehicleTypeDTO();
+            vehicleTypeDTO.setId(vehicleModel.getVehicleType().getId());
+            // Fetch vehicle type name if needed (optional, since backend only needs ID)
+            vehicleTypeDTO.setName(vehicleModel.getVehicleType().getName());
+            vehicleModelDTO.setVehicleType(vehicleTypeDTO);
+
+            logger.info("Sending add vehicle model request: {}", vehicleModelDTO);
+            HttpEntity<VehicleModelDTO> request = new HttpEntity<>(vehicleModelDTO, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(vehicleModelUrl(), request, String.class);
             logger.info("Add vehicle model response: {}", response.getBody());
 
@@ -804,7 +854,7 @@ public class AdminController {
     }
 
     @GetMapping("/vehicle-model/edit/{id}")
-    public String showEditVehicleModelForm(@PathVariable Long id, Model model, HttpSession session) {
+    public String showEditVehicleModelForm(@PathVariable Integer id, Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
         if (token == null) {
             model.addAttribute("error", "Please log in to access this page.");
@@ -817,9 +867,22 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             HttpEntity<String> request = new HttpEntity<>(headers);
 
-            ResponseEntity<VehicleModel> response = restTemplate.exchange(
-                    vehicleModelUrl() + "/" + id, HttpMethod.GET, request, VehicleModel.class);
-            model.addAttribute("vehicleModel", response.getBody());
+            ResponseEntity<VehicleModelDTO> response = restTemplate.exchange(
+                    vehicleModelUrl() + "/" + id, HttpMethod.GET, request, VehicleModelDTO.class);
+            VehicleModelDTO dto = response.getBody();
+            if (dto == null) {
+                throw new RuntimeException("Vehicle model not found");
+            }
+
+            VehicleModel vehicleModel = new VehicleModel();
+            vehicleModel.setId(dto.getId());
+            vehicleModel.setModelName(dto.getModelName());
+            VehicleType vehicleType = new VehicleType();
+            vehicleType.setId(dto.getVehicleType().getId());
+            vehicleType.setName(dto.getVehicleType().getName());
+            vehicleModel.setVehicleType(vehicleType);
+
+            model.addAttribute("vehicleModel", vehicleModel);
             model.addAttribute("formMode", "edit");
             model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
             model.addAttribute("vehicleModels", fetchVehicleModels(token));
@@ -839,7 +902,7 @@ public class AdminController {
     }
 
     @PostMapping("/vehicle-model/edit/{id}")
-    public String editVehicleModel(@PathVariable Long id, @ModelAttribute VehicleModel vehicleModel, HttpSession session, Model model) {
+    public String editVehicleModel(@PathVariable Integer id, @ModelAttribute VehicleModel vehicleModel, HttpSession session, Model model) {
         String token = (String) session.getAttribute("token");
         if (token == null) {
             model.addAttribute("error", "Please log in to access this page.");
@@ -876,8 +939,17 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-            logger.info("Sending edit vehicle model request: {}", vehicleModel);
-            HttpEntity<VehicleModel> request = new HttpEntity<>(vehicleModel, headers);
+            // Convert VehicleModel to VehicleModelDTO
+            VehicleModelDTO vehicleModelDTO = new VehicleModelDTO();
+            vehicleModelDTO.setId(id); // Use the Integer id directly
+            vehicleModelDTO.setModelName(vehicleModel.getModelName());
+            VehicleTypeDTO vehicleTypeDTO = new VehicleTypeDTO();
+            vehicleTypeDTO.setId(vehicleModel.getVehicleType().getId());
+            vehicleTypeDTO.setName(vehicleModel.getVehicleType().getName());
+            vehicleModelDTO.setVehicleType(vehicleTypeDTO);
+
+            logger.info("Sending edit vehicle model request: {}", vehicleModelDTO);
+            HttpEntity<VehicleModelDTO> request = new HttpEntity<>(vehicleModelDTO, headers);
             ResponseEntity<String> response = restTemplate.exchange(
                     vehicleModelUrl() + "/" + id, HttpMethod.PUT, request, String.class);
             logger.info("Edit vehicle model response: {}", response.getBody());
@@ -909,7 +981,7 @@ public class AdminController {
     }
 
     @PostMapping("/vehicle-model/delete/{id}")
-    public String deleteVehicleModel(@PathVariable Long id, HttpSession session, Model model) {
+    public String deleteVehicleModel(@PathVariable Integer id, HttpSession session, Model model) {
         String token = (String) session.getAttribute("token");
         if (token == null) {
             model.addAttribute("error", "Please log in to access this page.");
@@ -951,6 +1023,7 @@ public class AdminController {
         }
     }
     
+ // SERVICE PACKAGE MODULE
     private String servicePackageUrl() {
         return backendApiUrl + "/service-packages";
     }
@@ -966,15 +1039,34 @@ public class AdminController {
                     servicePackageUrl(), HttpMethod.GET, request, String.class);
             logger.info("Raw JSON response from /api/service-packages: {}", rawResponse.getBody());
 
-            ResponseEntity<ServicePackage[]> response = restTemplate.exchange(
-                    servicePackageUrl(), HttpMethod.GET, request, ServicePackage[].class);
-            return response.getBody() != null ? Arrays.asList(response.getBody()) : List.of();
+            ResponseEntity<ServicePackageDTO[]> response = restTemplate.exchange(
+                    servicePackageUrl(), HttpMethod.GET, request, ServicePackageDTO[].class);
+            if (response.getBody() == null) {
+                return List.of();
+            }
+
+            // Map ServicePackageDTO to ServicePackage
+            return Arrays.stream(response.getBody())
+                    .map(dto -> {
+                        ServicePackage.VehicleType vehicleType = new ServicePackage.VehicleType(
+                                dto.getVehicleType().getId(),
+                                dto.getVehicleType().getName()
+                        );
+                        return new ServicePackage(
+                                dto.getId(),
+                                dto.getPackageName(),
+                                dto.getDescription(),
+                                dto.getPrice(),
+                                vehicleType
+                        );
+                    })
+                    .collect(Collectors.toList());
         } catch (HttpClientErrorException e) {
             logger.error("HTTP error fetching service packages: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            return List.of();
+            throw new RuntimeException("Failed to fetch service packages: " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             logger.error("Error fetching service packages: {}", e.getMessage(), e);
-            return List.of();
+            throw new RuntimeException("Failed to fetch service packages: " + e.getMessage(), e);
         }
     }
 
@@ -986,8 +1078,12 @@ public class AdminController {
             return "redirect:/";
         }
 
-        model.addAttribute("servicePackages", fetchServicePackages(token));
-        model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+        try {
+            model.addAttribute("servicePackages", fetchServicePackages(token));
+            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+        } catch (Exception e) {
+            model.addAttribute("error", "Failed to fetch service packages: " + e.getMessage());
+        }
         model.addAttribute("servicePackage", new ServicePackage());
         model.addAttribute("formMode", "none");
         return "service-package";
@@ -1003,8 +1099,12 @@ public class AdminController {
 
         model.addAttribute("servicePackage", new ServicePackage());
         model.addAttribute("formMode", "add");
-        model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-        model.addAttribute("servicePackages", fetchServicePackages(token));
+        try {
+            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+            model.addAttribute("servicePackages", fetchServicePackages(token));
+        } catch (Exception e) {
+            model.addAttribute("error", "Failed to fetch data: " + e.getMessage());
+        }
         return "service-package";
     }
 
@@ -1019,16 +1119,36 @@ public class AdminController {
         if (servicePackage.getPackageName() == null || servicePackage.getPackageName().trim().isEmpty()) {
             model.addAttribute("error", "Package name is required and cannot be empty.");
             model.addAttribute("formMode", "add");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception e) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+            }
             return "service-package";
         }
 
         if (servicePackage.getVehicleType() == null || servicePackage.getVehicleType().getId() == null) {
             model.addAttribute("error", "Please select a valid vehicle type.");
             model.addAttribute("formMode", "add");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception e) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+            }
+            return "service-package";
+        }
+
+        if (servicePackage.getPrice() == null || servicePackage.getPrice() < 0) {
+            model.addAttribute("error", "Price must be a non-negative number.");
+            model.addAttribute("formMode", "add");
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception e) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+            }
             return "service-package";
         }
 
@@ -1038,8 +1158,18 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-            logger.info("Sending add service package request: {}", servicePackage);
-            HttpEntity<ServicePackage> request = new HttpEntity<>(servicePackage, headers);
+            // Convert ServicePackage to ServicePackageDTO
+            ServicePackageDTO servicePackageDTO = new ServicePackageDTO();
+            servicePackageDTO.setPackageName(servicePackage.getPackageName());
+            servicePackageDTO.setDescription(servicePackage.getDescription());
+            servicePackageDTO.setPrice(servicePackage.getPrice());
+            VehicleTypeDTO vehicleTypeDTO = new VehicleTypeDTO();
+            vehicleTypeDTO.setId(servicePackage.getVehicleType().getId());
+            vehicleTypeDTO.setName(servicePackage.getVehicleType().getName());
+            servicePackageDTO.setVehicleType(vehicleTypeDTO);
+
+            logger.info("Sending add service package request: {}", servicePackageDTO);
+            HttpEntity<ServicePackageDTO> request = new HttpEntity<>(servicePackageDTO, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(servicePackageUrl(), request, String.class);
             logger.info("Add service package response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
 
@@ -1048,21 +1178,29 @@ public class AdminController {
             logger.error("HTTP error adding service package: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
             model.addAttribute("error", "Failed to create service package: " + e.getResponseBodyAsString());
             model.addAttribute("formMode", "add");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
             return "service-package";
         } catch (Exception e) {
             logger.error("Error adding service package: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to create service package: " + e.getMessage());
             model.addAttribute("formMode", "add");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
             return "service-package";
         }
     }
 
     @GetMapping("/service-package/edit/{id}")
-    public String showEditServicePackageForm(@PathVariable Long id, Model model, HttpSession session) {
+    public String showEditServicePackageForm(@PathVariable Integer id, Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
         if (token == null) {
             model.addAttribute("error", "Please log in to access this page.");
@@ -1075,9 +1213,24 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             HttpEntity<String> request = new HttpEntity<>(headers);
 
-            ResponseEntity<ServicePackage> response = restTemplate.exchange(
-                    servicePackageUrl() + "/" + id, HttpMethod.GET, request, ServicePackage.class);
-            model.addAttribute("servicePackage", response.getBody());
+            ResponseEntity<ServicePackageDTO> response = restTemplate.exchange(
+                    servicePackageUrl() + "/" + id, HttpMethod.GET, request, ServicePackageDTO.class);
+            ServicePackageDTO dto = response.getBody();
+            if (dto == null) {
+                throw new RuntimeException("Service package not found");
+            }
+
+            ServicePackage servicePackage = new ServicePackage();
+            servicePackage.setId(dto.getId());
+            servicePackage.setPackageName(dto.getPackageName());
+            servicePackage.setDescription(dto.getDescription());
+            servicePackage.setPrice(dto.getPrice());
+            ServicePackage.VehicleType vehicleType = new ServicePackage.VehicleType();
+            vehicleType.setId(dto.getVehicleType().getId());
+            vehicleType.setName(dto.getVehicleType().getName());
+            servicePackage.setVehicleType(vehicleType);
+
+            model.addAttribute("servicePackage", servicePackage);
             model.addAttribute("formMode", "edit");
             model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
             model.addAttribute("servicePackages", fetchServicePackages(token));
@@ -1085,21 +1238,29 @@ public class AdminController {
             logger.error("HTTP error fetching service package for edit: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
             model.addAttribute("error", "Failed to fetch service package: " + e.getResponseBodyAsString());
             model.addAttribute("formMode", "none");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
         } catch (Exception e) {
             logger.error("Error fetching service package for edit: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to fetch service package: " + e.getMessage());
             model.addAttribute("formMode", "none");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
         }
 
         return "service-package";
     }
 
     @PostMapping("/service-package/edit/{id}")
-    public String editServicePackage(@PathVariable Long id, @ModelAttribute ServicePackage servicePackage, HttpSession session, Model model) {
+    public String editServicePackage(@PathVariable Integer id, @ModelAttribute ServicePackage servicePackage, HttpSession session, Model model) {
         String token = (String) session.getAttribute("token");
         if (token == null) {
             model.addAttribute("error", "Please log in to access this page.");
@@ -1109,16 +1270,36 @@ public class AdminController {
         if (servicePackage.getPackageName() == null || servicePackage.getPackageName().trim().isEmpty()) {
             model.addAttribute("error", "Package name is required and cannot be empty.");
             model.addAttribute("formMode", "edit");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception e) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+            }
             return "service-package";
         }
 
         if (servicePackage.getVehicleType() == null || servicePackage.getVehicleType().getId() == null) {
             model.addAttribute("error", "Please select a valid vehicle type.");
             model.addAttribute("formMode", "edit");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception e) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+            }
+            return "service-package";
+        }
+
+        if (servicePackage.getPrice() == null || servicePackage.getPrice() < 0) {
+            model.addAttribute("error", "Price must be a non-negative number.");
+            model.addAttribute("formMode", "edit");
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception e) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+            }
             return "service-package";
         }
 
@@ -1128,8 +1309,19 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-            logger.info("Sending edit service package request: {}", servicePackage);
-            HttpEntity<ServicePackage> request = new HttpEntity<>(servicePackage, headers);
+            // Convert ServicePackage to ServicePackageDTO
+            ServicePackageDTO servicePackageDTO = new ServicePackageDTO();
+            servicePackageDTO.setId(id);
+            servicePackageDTO.setPackageName(servicePackage.getPackageName());
+            servicePackageDTO.setDescription(servicePackage.getDescription());
+            servicePackageDTO.setPrice(servicePackage.getPrice());
+            VehicleTypeDTO vehicleTypeDTO = new VehicleTypeDTO();
+            vehicleTypeDTO.setId(servicePackage.getVehicleType().getId());
+            vehicleTypeDTO.setName(servicePackage.getVehicleType().getName());
+            servicePackageDTO.setVehicleType(vehicleTypeDTO);
+
+            logger.info("Sending edit service package request: {}", servicePackageDTO);
+            HttpEntity<ServicePackageDTO> request = new HttpEntity<>(servicePackageDTO, headers);
             ResponseEntity<String> response = restTemplate.exchange(
                     servicePackageUrl() + "/" + id, HttpMethod.PUT, request, String.class);
             logger.info("Edit service package response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
@@ -1139,21 +1331,29 @@ public class AdminController {
             logger.error("HTTP error editing service package: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
             model.addAttribute("error", "Failed to update service package: " + e.getResponseBodyAsString());
             model.addAttribute("formMode", "edit");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
             return "service-package";
         } catch (Exception e) {
             logger.error("Error editing service package: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to update service package: " + e.getMessage());
             model.addAttribute("formMode", "edit");
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
             return "service-package";
         }
     }
 
     @PostMapping("/service-package/delete/{id}")
-    public String deleteServicePackage(@PathVariable Long id, HttpSession session, Model model) {
+    public String deleteServicePackage(@PathVariable Integer id, HttpSession session, Model model) {
         String token = (String) session.getAttribute("token");
         if (token == null) {
             model.addAttribute("error", "Please log in to access this page.");
@@ -1175,18 +1375,311 @@ public class AdminController {
         } catch (HttpClientErrorException e) {
             logger.error("HTTP error deleting service package: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
             model.addAttribute("error", "Failed to delete service package: " + e.getResponseBodyAsString());
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
             return "service-package";
         } catch (Exception e) {
             logger.error("Error deleting service package: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to delete service package: " + e.getMessage());
-            model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
-            model.addAttribute("servicePackages", fetchServicePackages(token));
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("servicePackages", fetchServicePackages(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
             return "service-package";
         }
     }
+
+    // CUSTOMER MODULE
+    private String customerUrl() {
+        return backendApiUrl + "/customers";
+    }
+
+    private List<CustomerManagement> fetchCustomersList(String token, boolean active) {
+        String url = active ? customerUrl() + "/active" : customerUrl() + "/inactive";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<String> request = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<CustomerManagement[]> response = restTemplate.exchange(url, HttpMethod.GET, request, CustomerManagement[].class);
+            return response.getBody() != null ? Arrays.asList(response.getBody()) : List.of();
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error fetching customers (active={}): Status {}, Response: {}", active, e.getStatusCode(), e.getResponseBodyAsString());
+            return List.of();
+        } catch (Exception e) {
+            logger.error("Error fetching customers (active={}): {}", active, e.getMessage(), e);
+            return List.of();
+        }
+    }
+
+    private boolean validateCustomer(CustomerManagement customer, Model model, String formMode, String token) {
+        if (customer.getUsername() == null || customer.getUsername().trim().isEmpty()) {
+            model.addAttribute("error", "Username cannot be empty.");
+            setCommonModelAttributes(model, formMode, token, customer);
+            return false;
+        }
+        if (customer.getEmail() == null || customer.getEmail().trim().isEmpty()) {
+            model.addAttribute("error", "Email cannot be empty.");
+            setCommonModelAttributes(model, formMode, token, customer);
+            return false;
+        }
+        if (customer.getPhoneNumber() == null || customer.getPhoneNumber().trim().isEmpty()) {
+            model.addAttribute("error", "Phone number cannot be empty.");
+            setCommonModelAttributes(model, formMode, token, customer);
+            return false;
+        }
+        if (formMode.equals("add") && (customer.getPassword() == null || customer.getPassword().trim().isEmpty())) {
+            model.addAttribute("error", "Password cannot be empty.");
+            setCommonModelAttributes(model, formMode, token, customer);
+            return false;
+        }
+        return true;
+    }
+
+    private void setCommonModelAttributes(Model model, String formMode, String token, CustomerManagement customer) {
+        model.addAttribute("formMode", formMode);
+        model.addAttribute("token", token);
+        model.addAttribute("backendApiUrl", backendApiUrl);
+        model.addAttribute("profileName", "Admin");
+        model.addAttribute("customer", customer);
+    }
+
+    @GetMapping("/customers")
+    public String showCustomers(Model model, HttpSession session) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "Please log in to access this page.");
+            return "redirect:/";
+        }
+
+        model.addAttribute("token", token);
+        model.addAttribute("backendApiUrl", backendApiUrl);
+        model.addAttribute("customer", new CustomerManagement());
+        model.addAttribute("formMode", "none");
+        model.addAttribute("profileName", "Admin");
+        return "customers";
+    }
+
+    @GetMapping("/customers/add")
+    public String showAddCustomerForm(Model model, HttpSession session) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "Please log in to access this page.");
+            return "redirect:/";
+        }
+
+        model.addAttribute("customer", new CustomerManagement());
+        model.addAttribute("formMode", "add");
+        model.addAttribute("token", token);
+        model.addAttribute("backendApiUrl", backendApiUrl);
+        model.addAttribute("profileName", "Admin");
+        return "customers";
+    }
+
+    @PostMapping("/customers/add")
+    public String addCustomer(@ModelAttribute("customer") CustomerManagement customer, HttpSession session, Model model) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "Please log in to access this page.");
+            return "redirect:/";
+        }
+
+        if (!validateCustomer(customer, model, "add", token)) {
+            return "customers";
+        }
+
+        try {
+            customer.setActive(true);
+            String url = customerUrl();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+            logger.info("Sending add customer request: {}", customer);
+            HttpEntity<CustomerManagement> request = new HttpEntity<>(customer, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            logger.info("Add customer response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
+
+            return "redirect:/customers";
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error adding customer: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            model.addAttribute("error", "Failed to create customer: " + e.getResponseBodyAsString());
+            setCommonModelAttributes(model, "add", token, customer);
+            return "customers";
+        } catch (Exception e) {
+            logger.error("Error adding customer: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to create customer: " + e.getMessage());
+            setCommonModelAttributes(model, "add", token, customer);
+            return "customers";
+        }
+    }
+
+    @GetMapping("/customers/edit/{id}")
+    public String showEditCustomer(@PathVariable Long id, Model model, HttpSession session) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "Please log in to access this page.");
+            return "redirect:/";
+        }
+
+        try {
+            String url = customerUrl() + "/" + id;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            ResponseEntity<CustomerManagement> response = restTemplate.exchange(url, HttpMethod.GET, request, CustomerManagement.class);
+            model.addAttribute("customer", response.getBody());
+            model.addAttribute("formMode", "edit");
+            model.addAttribute("token", token);
+            model.addAttribute("backendApiUrl", backendApiUrl);
+            model.addAttribute("profileName", "Admin");
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error fetching customer for edit: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            model.addAttribute("error", "Failed to fetch customer: " + e.getResponseBodyAsString());
+            model.addAttribute("formMode", "none");
+            model.addAttribute("token", token);
+            model.addAttribute("backendApiUrl", backendApiUrl);
+            model.addAttribute("profileName", "Admin");
+        } catch (Exception e) {
+            logger.error("Error fetching customer for edit: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to fetch customer: " + e.getMessage());
+            model.addAttribute("formMode", "none");
+            model.addAttribute("token", token);
+            model.addAttribute("backendApiUrl", backendApiUrl);
+            model.addAttribute("profileName", "Admin");
+        }
+
+        return "customers";
+    }
+
+    @PostMapping("/customers/edit/{id}")
+    public String editCustomer(@PathVariable Long id, @ModelAttribute("customer") CustomerManagement customer, HttpSession session, Model model) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "Please log in to access this page.");
+            return "redirect:/";
+        }
+
+        if (!validateCustomer(customer, model, "edit", token)) {
+            return "customers";
+        }
+
+        try {
+            String url = customerUrl() + "/" + id;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+            logger.info("Sending edit customer request: {}", customer);
+            HttpEntity<CustomerManagement> request = new HttpEntity<>(customer, headers);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
+            logger.info("Edit customer response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
+
+            return "redirect:/customers";
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error editing customer: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            model.addAttribute("error", "Failed to update customer: " + e.getResponseBodyAsString());
+            setCommonModelAttributes(model, "edit", token, customer);
+            return "customers";
+        } catch (Exception e) {
+            logger.error("Error editing customer: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to update customer: " + e.getMessage());
+            setCommonModelAttributes(model, "edit", token, customer);
+            return "customers";
+        }
+    }
+
+    @PostMapping("/customers/deactivate/{id}")
+    public String deactivateCustomer(@PathVariable Long id, HttpSession session, Model model) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "Please log in to access this page.");
+            return "redirect:/";
+        }
+
+        try {
+            String url = customerUrl() + "/" + id + "/deactivate";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            logger.info("Sending deactivate customer request for ID: {}", id);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
+            logger.info("Deactivate customer response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
+
+            return "redirect:/customers";
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error deactivating customer: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            model.addAttribute("error", "Failed to deactivate customer: " + e.getResponseBodyAsString());
+            model.addAttribute("formMode", "none");
+            model.addAttribute("token", token);
+            model.addAttribute("backendApiUrl", backendApiUrl);
+            model.addAttribute("profileName", "Admin");
+            return "customers";
+        } catch (Exception e) {
+            logger.error("Error deactivating customer: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to deactivate customer: " + e.getMessage());
+            model.addAttribute("formMode", "none");
+            model.addAttribute("token", token);
+            model.addAttribute("backendApiUrl", backendApiUrl);
+            model.addAttribute("profileName", "Admin");
+            return "customers";
+        }
+    }
+
+    @PostMapping("/customers/reactivate/{id}")
+    public String reactivateCustomer(@PathVariable Long id, HttpSession session, Model model) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            model.addAttribute("error", "Please log in to access this page.");
+            return "redirect:/";
+        }
+
+        try {
+            String url = customerUrl() + "/" + id + "/reactivate";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            logger.info("Sending reactivate customer request for ID: {}", id);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
+            logger.info("Reactivate customer response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
+
+            return "redirect:/customers";
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error reactivating customer: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            model.addAttribute("error", "Failed to reactivate customer: " + e.getResponseBodyAsString());
+            model.addAttribute("formMode", "none");
+            model.addAttribute("token", token);
+            model.addAttribute("backendApiUrl", backendApiUrl);
+            model.addAttribute("profileName", "Admin");
+            return "customers";
+        } catch (Exception e) {
+            logger.error("Error reactivating customer: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to reactivate customer: " + e.getMessage());
+            model.addAttribute("formMode", "none");
+            model.addAttribute("token", token);
+            model.addAttribute("backendApiUrl", backendApiUrl);
+            model.addAttribute("profileName", "Admin");
+            return "customers";
+        }
+    }
     
+    
+
     private List<Advisor> fetchAdvisorsList(String token) {
         String url = backendApiUrl + "/advisors";
         HttpHeaders headers = new HttpHeaders();
@@ -1472,330 +1965,6 @@ public class AdminController {
             return "advisors";
         }
     }
-   
- // CUSTOMER MODULE
-    private String customerUrl() {
-        return backendApiUrl + "/customers";
-    }
-
-    private List<Customer> fetchCustomersList(String token, boolean active) {
-        String url = active ? customerUrl() + "/active" : customerUrl() + "/inactive";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        HttpEntity<String> request = new HttpEntity<>(headers);
-
-        try {
-            ResponseEntity<String> rawResponse = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-            logger.info("Raw JSON response from /api/customers/{}: {}", active ? "active" : "inactive", rawResponse.getBody());
-
-            ResponseEntity<Customer[]> response = restTemplate.exchange(url, HttpMethod.GET, request, Customer[].class);
-            return response.getBody() != null ? Arrays.asList(response.getBody()) : List.of();
-        } catch (HttpClientErrorException e) {
-            logger.error("HTTP error fetching customers (active={}): Status {}, Response: {}", active, e.getStatusCode(), e.getResponseBodyAsString());
-            return List.of();
-        } catch (Exception e) {
-            logger.error("Error fetching customers (active={}): {}", active, e.getMessage(), e);
-            return List.of();
-        }
-    }
-
-    @GetMapping("/customers")
-    public String showCustomers(Model model, HttpSession session) {
-        String token = (String) session.getAttribute("token");
-        if (token == null) {
-            model.addAttribute("error", "Please log in to access this page.");
-            return "redirect:/";
-        }
-
-        model.addAttribute("token", token);
-        model.addAttribute("backendApiUrl", backendApiUrl);
-        model.addAttribute("customer", new Customer());
-        model.addAttribute("formMode", "none");
-        model.addAttribute("profileName", "Admin");
-        return "customers";
-    }
-
-    @GetMapping("/customers/add")
-    public String showAddCustomerForm(Model model, HttpSession session) {
-        String token = (String) session.getAttribute("token");
-        if (token == null) {
-            model.addAttribute("error", "Please log in to access this page.");
-            return "redirect:/";
-        }
-
-        model.addAttribute("customer", new Customer());
-        model.addAttribute("formMode", "add");
-        model.addAttribute("token", token);
-        model.addAttribute("backendApiUrl", backendApiUrl);
-        model.addAttribute("profileName", "Admin");
-        return "customers";
-    }
-
-    @PostMapping("/customers/add")
-    public String addCustomer(@ModelAttribute("customer") Customer customer, HttpSession session, Model model) {
-        String token = (String) session.getAttribute("token");
-        if (token == null) {
-            model.addAttribute("error", "Please log in to access this page.");
-            return "redirect:/";
-        }
-
-        // Validation
-        if (customer.getUsername() == null || customer.getUsername().trim().isEmpty()) {
-            model.addAttribute("error", "Username cannot be empty.");
-            model.addAttribute("formMode", "add");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-
-        if (customer.getEmail() == null || customer.getEmail().trim().isEmpty()) {
-            model.addAttribute("error", "Email cannot be empty.");
-            model.addAttribute("formMode", "add");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-
-        if (customer.getPhoneNumber() == null || customer.getPhoneNumber().trim().isEmpty()) {
-            model.addAttribute("error", "Phone number cannot be empty.");
-            model.addAttribute("formMode", "add");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-
-        if (customer.getPassword() == null || customer.getPassword().trim().isEmpty()) {
-            model.addAttribute("error", "Password cannot be empty.");
-            model.addAttribute("formMode", "add");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-
-        try {
-            customer.setActive(true); // New customers are active by default
-
-            String url = customerUrl();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-
-            logger.info("Sending add customer request: {}", customer);
-            HttpEntity<Customer> request = new HttpEntity<>(customer, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-            logger.info("Add customer response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
-
-            return "redirect:/customers";
-        } catch (HttpClientErrorException e) {
-            logger.error("HTTP error adding customer: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            model.addAttribute("error", "Failed to create customer: " + e.getResponseBodyAsString());
-            model.addAttribute("formMode", "add");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        } catch (Exception e) {
-            logger.error("Error adding customer: {}", e.getMessage(), e);
-            model.addAttribute("error", "Failed to create customer: " + e.getMessage());
-            model.addAttribute("formMode", "add");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-    }
-
-    @GetMapping("/customers/edit/{id}")
-    public String showEditCustomer(@PathVariable Long id, Model model, HttpSession session) {
-        String token = (String) session.getAttribute("token");
-        if (token == null) {
-            model.addAttribute("error", "Please log in to access this page.");
-            return "redirect:/";
-        }
-
-        try {
-            String url = customerUrl() + "/" + id;
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-            HttpEntity<String> request = new HttpEntity<>(headers);
-
-            ResponseEntity<Customer> response = restTemplate.exchange(url, HttpMethod.GET, request, Customer.class);
-            model.addAttribute("customer", response.getBody());
-            model.addAttribute("formMode", "edit");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-        } catch (HttpClientErrorException e) {
-            logger.error("HTTP error fetching customer for edit: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            model.addAttribute("error", "Failed to fetch customer: " + e.getResponseBodyAsString());
-            model.addAttribute("formMode", "none");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-        } catch (Exception e) {
-            logger.error("Error fetching customer for edit: {}", e.getMessage(), e);
-            model.addAttribute("error", "Failed to fetch customer: " + e.getMessage());
-            model.addAttribute("formMode", "none");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-        }
-
-        return "customers";
-    }
-
-    @PostMapping("/customers/edit/{id}")
-    public String editCustomer(@PathVariable Long id, @ModelAttribute("customer") Customer customer, HttpSession session, Model model) {
-        String token = (String) session.getAttribute("token");
-        if (token == null) {
-            model.addAttribute("error", "Please log in to access this page.");
-            return "redirect:/";
-        }
-
-        // Validation
-        if (customer.getUsername() == null || customer.getUsername().trim().isEmpty()) {
-            model.addAttribute("error", "Username cannot be empty.");
-            model.addAttribute("formMode", "edit");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-
-        if (customer.getEmail() == null || customer.getEmail().trim().isEmpty()) {
-            model.addAttribute("error", "Email cannot be empty.");
-            model.addAttribute("formMode", "edit");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-
-        if (customer.getPhoneNumber() == null || customer.getPhoneNumber().trim().isEmpty()) {
-            model.addAttribute("error", "Phone number cannot be empty.");
-            model.addAttribute("formMode", "edit");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-
-        try {
-            String url = customerUrl() + "/" + id;
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-
-            logger.info("Sending edit customer request: {}", customer);
-            HttpEntity<Customer> request = new HttpEntity<>(customer, headers);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
-            logger.info("Edit customer response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
-
-            return "redirect:/customers";
-        } catch (HttpClientErrorException e) {
-            logger.error("HTTP error editing customer: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            model.addAttribute("error", "Failed to update customer: " + e.getResponseBodyAsString());
-            model.addAttribute("formMode", "edit");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        } catch (Exception e) {
-            logger.error("Error editing customer: {}", e.getMessage(), e);
-            model.addAttribute("error", "Failed to update customer: " + e.getMessage());
-            model.addAttribute("formMode", "edit");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-    }
-
-    @PostMapping("/customers/deactivate/{id}")
-    public String deactivateCustomer(@PathVariable Long id, HttpSession session, Model model) {
-        String token = (String) session.getAttribute("token");
-        if (token == null) {
-            model.addAttribute("error", "Please log in to access this page.");
-            return "redirect:/";
-        }
-
-        try {
-            String url = customerUrl() + "/" + id + "/deactivate";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-            HttpEntity<String> request = new HttpEntity<>(headers);
-
-            logger.info("Sending deactivate customer request for ID: {}", id);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
-            logger.info("Deactivate customer response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
-
-            return "redirect:/customers";
-        } catch (HttpClientErrorException e) {
-            logger.error("HTTP error deactivating customer: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            model.addAttribute("error", "Failed to deactivate customer: " + e.getResponseBodyAsString());
-            model.addAttribute("formMode", "none");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        } catch (Exception e) {
-            logger.error("Error deactivating customer: {}", e.getMessage(), e);
-            model.addAttribute("error", "Failed to deactivate customer: " + e.getMessage());
-            model.addAttribute("formMode", "none");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-    }
-
-    @PostMapping("/customers/reactivate/{id}")
-    public String reactivateCustomer(@PathVariable Long id, HttpSession session, Model model) {
-        String token = (String) session.getAttribute("token");
-        if (token == null) {
-            model.addAttribute("error", "Please log in to access this page.");
-            return "redirect:/";
-        }
-
-        try {
-            String url = customerUrl() + "/" + id + "/reactivate";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-            HttpEntity<String> request = new HttpEntity<>(headers);
-
-            logger.info("Sending reactivate customer request for ID: {}", id);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
-            logger.info("Reactivate customer response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
-
-            return "redirect:/customers";
-        } catch (HttpClientErrorException e) {
-            logger.error("HTTP error reactivating customer: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            model.addAttribute("error", "Failed to reactivate customer: " + e.getResponseBodyAsString());
-            model.addAttribute("formMode", "none");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        } catch (Exception e) {
-            logger.error("Error reactivating customer: {}", e.getMessage(), e);
-            model.addAttribute("error", "Failed to reactivate customer: " + e.getMessage());
-            model.addAttribute("formMode", "none");
-            model.addAttribute("token", token);
-            model.addAttribute("backendApiUrl", backendApiUrl);
-            model.addAttribute("profileName", "Admin");
-            return "customers";
-        }
-    }
     
     // LOGOUT
     @GetMapping("/admin/logout")
@@ -1803,5 +1972,4 @@ public class AdminController {
         session.invalidate();
         return "redirect:/";
     }
-
 }
