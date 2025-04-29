@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServicePackageDTO {
-    private Long id;
+    private Integer id;
     private String packageName;
     private String description;
     private Double price;

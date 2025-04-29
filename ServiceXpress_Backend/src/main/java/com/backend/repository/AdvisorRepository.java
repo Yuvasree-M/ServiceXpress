@@ -15,4 +15,6 @@ public interface AdvisorRepository extends JpaRepository<Advisor, Long> {
 
     @Query("SELECT a FROM Advisor a WHERE a.active = true")
     List<Advisor> findAllActive();
+    
+    List<Advisor> findByCenterNameAndActiveTrue(String centerName);
 }

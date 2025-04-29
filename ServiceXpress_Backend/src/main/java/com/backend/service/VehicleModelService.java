@@ -30,11 +30,11 @@ public class VehicleModelService {
         return dtos;
     }
 
-    public VehicleModelDTO findById(Long id) {
+    public VehicleModelDTO findById(Integer id) {
         VehicleModel model = vehicleModelRepository.findById(id)
                 .orElseThrow(() -> {
-                    logger.error("VehicleModel not found with ID: {}", id);
-                    return new RuntimeException("VehicleModel not found with ID: " + id);
+                    logger.error("VehicleModelDTO not found with ID: {}", id);
+                    return new RuntimeException("VehicleModelDTO not found with ID: " + id);
                 });
         VehicleModelDTO dto = toDTO(model);
         logger.info("Fetched vehicle model by ID {}: {}", id, dto);
@@ -57,11 +57,11 @@ public class VehicleModelService {
         return result;
     }
 
-    public VehicleModelDTO update(Long id, VehicleModelDTO vehicleModelDTO) {
+    public VehicleModelDTO update(Integer id, VehicleModelDTO vehicleModelDTO) {
         VehicleModel existingModel = vehicleModelRepository.findById(id)
                 .orElseThrow(() -> {
-                    logger.error("VehicleModel not found with ID: {}", id);
-                    return new RuntimeException("VehicleModel not found with ID: " + id);
+                    logger.error("VehicleModelDTO not found with ID: {}", id);
+                    return new RuntimeException("VehicleModelDTO not found with ID: " + id);
                 });
         if (vehicleModelDTO.getModelName() == null || vehicleModelDTO.getModelName().trim().isEmpty()) {
             logger.error("Cannot update vehicle model with empty modelName");
@@ -74,8 +74,7 @@ public class VehicleModelService {
         existingModel.setModelName(vehicleModelDTO.getModelName());
         existingModel.setVehicleType(new VehicleType(
                 vehicleModelDTO.getVehicleType().getId(),
-                vehicleModelDTO.getVehicleType().getTypeName(),
-                null // Avoid serializing vehicleModels
+                vehicleModelDTO.getVehicleType().getName()
         ));
         VehicleModel updated = vehicleModelRepository.save(existingModel);
         VehicleModelDTO result = toDTO(updated);
@@ -83,10 +82,10 @@ public class VehicleModelService {
         return result;
     }
 
-    public void delete(Long id) {
+    public void delete(Integer id) {
         if (!vehicleModelRepository.existsById(id)) {
             logger.error("Cannot delete vehicle model with ID: {} - not found", id);
-            throw new RuntimeException("VehicleModel not found with ID: " + id);
+            throw new RuntimeException("VehicleModelDTO not found with ID: " + id);
         }
         vehicleModelRepository.deleteById(id);
         logger.info("Deleted vehicle model with ID: {}", id);
@@ -94,20 +93,19 @@ public class VehicleModelService {
 
     private VehicleModelDTO toDTO(VehicleModel model) {
         return new VehicleModelDTO(
-                model.getId(),
+                model.getVehicleModelId(),
                 model.getModelName(),
-                new VehicleTypeDTO(model.getVehicleType().getId(), model.getVehicleType().getTypeName())
+                new VehicleTypeDTO(model.getVehicleType().getId(), model.getVehicleType().getName())
         );
     }
 
     private VehicleModel toEntity(VehicleModelDTO dto) {
         VehicleModel model = new VehicleModel();
-        model.setId(dto.getId());
+        model.setVehicleModelId(dto.getId());
         model.setModelName(dto.getModelName());
         model.setVehicleType(new VehicleType(
                 dto.getVehicleType().getId(),
-                dto.getVehicleType().getTypeName(),
-                null // Avoid serializing vehicleModels
+                dto.getVehicleType().getName()
         ));
         return model;
     }

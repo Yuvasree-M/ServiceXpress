@@ -11,12 +11,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Customer {
     private Long id;
-
-    private String username;
+    private String name;
+    private String initials;
     private String email;
-    private String phoneNumber;
-    private String password;
-    private boolean active;
-    private String role; // To match the backend's role field (optional, can be ignored if not displayed)
-
+    private String mobile;
+    
 }

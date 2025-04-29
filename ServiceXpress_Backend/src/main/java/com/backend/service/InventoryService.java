@@ -26,6 +26,7 @@ public class InventoryService {
     }
 
     public Inventory saveInventory(Inventory inventory) {
+        inventory.setLastUpdated(LocalDate.now()); // Ensure lastUpdated is set
         return inventoryRepository.save(inventory);
     }
 
@@ -35,10 +36,10 @@ public class InventoryService {
 
     public Inventory updateInventory(Long id, Inventory inventory) {
         inventory.setId(id);
+        inventory.setLastUpdated(LocalDate.now()); // Set lastUpdated on update
         return inventoryRepository.save(inventory);
     }
 
-    // Deduct inventory when service advisor uses an item
     public boolean useItem(Long id, int quantityUsed) {
         Optional<Inventory> inventoryOpt = inventoryRepository.findById(id);
         if (inventoryOpt.isPresent()) {

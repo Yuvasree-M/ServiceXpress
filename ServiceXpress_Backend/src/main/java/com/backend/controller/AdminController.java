@@ -22,14 +22,14 @@ public class AdminController {
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/service-packages/{id}")
-    public ServicePackage updateServicePackage(@PathVariable Long id, @RequestBody ServicePackage servicePackage) {
+    public ServicePackage updateServicePackage(@PathVariable Integer id, @RequestBody ServicePackage servicePackage) {
         servicePackage.setId(id);
         return adminService.saveServicePackage(servicePackage);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/service-packages/{id}")
-    public void deleteServicePackage(@PathVariable Long id) {
+    public void deleteServicePackage(@PathVariable Integer id) {
         adminService.deleteServicePackage(id);
     }
 

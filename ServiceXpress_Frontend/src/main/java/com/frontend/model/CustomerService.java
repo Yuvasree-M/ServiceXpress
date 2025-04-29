@@ -1,4 +1,3 @@
-
 package com.frontend.model;
 
 import com.frontend.model.Customer;

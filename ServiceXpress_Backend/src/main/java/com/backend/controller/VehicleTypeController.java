@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/vehicle-type")
+@RequestMapping("/api/vehicle-types")
 @RequiredArgsConstructor
 public class VehicleTypeController {
 
@@ -24,7 +24,7 @@ public class VehicleTypeController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VehicleTypeDTO> create(@RequestBody VehicleTypeDTO vehicleTypeDTO) {
-        if (vehicleTypeDTO.getTypeName() == null || vehicleTypeDTO.getTypeName().trim().isEmpty()) {
+        if (vehicleTypeDTO.getName() == null || vehicleTypeDTO.getName().trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
         VehicleTypeDTO saved = vehicleTypeService.save(vehicleTypeDTO);
@@ -40,15 +40,15 @@ public class VehicleTypeController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
-    public ResponseEntity<VehicleTypeDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<VehicleTypeDTO> getById(@PathVariable Integer id) {
         Optional<VehicleTypeDTO> vehicleType = vehicleTypeService.findById(id);
         return vehicleType.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<VehicleTypeDTO> update(@PathVariable Long id, @RequestBody VehicleTypeDTO vehicleTypeDTO) {
-        if (vehicleTypeDTO.getTypeName() == null || vehicleTypeDTO.getTypeName().trim().isEmpty()) {
+    public ResponseEntity<VehicleTypeDTO> update(@PathVariable Integer id, @RequestBody VehicleTypeDTO vehicleTypeDTO) {
+        if (vehicleTypeDTO.getName() == null || vehicleTypeDTO.getName().trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
         Optional<VehicleTypeDTO> existingType = vehicleTypeService.findById(id);
@@ -60,7 +60,7 @@ public class VehicleTypeController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
         Optional<VehicleTypeDTO> existingType = vehicleTypeService.findById(id);
         if (existingType.isPresent()) {
             vehicleTypeService.delete(id);

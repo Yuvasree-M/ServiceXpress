@@ -1,4 +1,3 @@
-
 package com.frontend.controller;
 
 import com.frontend.model.Booking;
@@ -9,7 +8,7 @@ import com.frontend.model.ServiceStatus;
 import com.frontend.model.ServiceHistory;
 import com.frontend.model.Service;
 import com.frontend.model.ServicePackage;
-import com.frontend.model.VehicleType;
+import com.frontend.model.VehicleTypeDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -175,11 +174,11 @@ public class CustomerController {
             // Fetch vehicle types
             String vehicleTypeUrl = backendApiUrl + "/vehicle-types";
             HttpEntity<String> request = new HttpEntity<>(new HttpHeaders()); // No token needed
-            ResponseEntity<List<VehicleType>> vehicleTypeResponse = restTemplate.exchange(
-                vehicleTypeUrl, HttpMethod.GET, request, new ParameterizedTypeReference<List<VehicleType>>(){}
+            ResponseEntity<List<VehicleTypeDTO>> vehicleTypeResponse = restTemplate.exchange(
+                vehicleTypeUrl, HttpMethod.GET, request, new ParameterizedTypeReference<List<VehicleTypeDTO>>(){}
             );
-            List<VehicleType> vehicleTypes = vehicleTypeResponse.getBody();
-            if (vehicleTypes == null || vehicleTypes.isEmpty()) {
+            List<VehicleTypeDTO> vehicleTypeDTOs = vehicleTypeResponse.getBody();
+            if (vehicleTypeDTOs == null || vehicleTypeDTOs.isEmpty()) {
                 System.err.println("No vehicle types returned from " + vehicleTypeUrl);
                 model.addAttribute("error", "No vehicle types available. Please try again later.");
             }
@@ -195,7 +194,7 @@ public class CustomerController {
                 model.addAttribute("error", "No service packages available. Please try again later.");
             }
 
-            model.addAttribute("vehicleTypes", vehicleTypes != null ? vehicleTypes : Collections.emptyList());
+            model.addAttribute("vehicleTypes", vehicleTypeDTOs != null ? vehicleTypeDTOs : Collections.emptyList());
             model.addAttribute("servicePackages", servicePackages != null ? servicePackages : Collections.emptyList());
         } catch (HttpClientErrorException e) {
             System.err.println("HTTP error fetching data: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
