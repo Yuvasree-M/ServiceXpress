@@ -431,7 +431,7 @@ public class AdminController {
         restTemplate.exchange(serviceCenterUrl() + "/" + id, HttpMethod.DELETE, request, Void.class);
         return "redirect:/service-centers";
     }
-    
+
     // VEHICLE TYPE MODULE
     private String vehicleTypeUrl() {
         return backendApiUrl + "/vehicle-types";
@@ -1972,4 +1972,5 @@ public class AdminController {
         session.invalidate();
         return "redirect:/";
     }
+
 }
