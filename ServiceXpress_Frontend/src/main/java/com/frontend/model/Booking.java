@@ -3,16 +3,17 @@ package com.frontend.model;
 import java.time.LocalDateTime;
 
 public class Booking {
+    private Long id;
     private Long customerId;
-    private Long serviceCenterId;
-    private Integer vehicleTypeId;
-    private Integer vehicleModelId;
-    private String vehicleRegistrationNumber; // New field
+    private String serviceCenterId; // Changed to String
+    private String vehicleTypeId;   // Changed to String
+    private String vehicleModelId;  // Changed to String
+    private String vehicleRegistrationNumber;
     private String customerName;
     private String customerPhone;
     private String customerEmail;
     private String address;
-    private String services;
+    private String services; // Assuming comma-separated string
     private String pickDropOption;
     private String pickupAddress;
     private String dropAddress;
@@ -22,18 +23,17 @@ public class Booking {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Constructors
-    public Booking() {}
-
     // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public Long getCustomerId() { return customerId; }
     public void setCustomerId(Long customerId) { this.customerId = customerId; }
-    public Long getServiceCenterId() { return serviceCenterId; }
-    public void setServiceCenterId(Long serviceCenterId) { this.serviceCenterId = serviceCenterId; }
-    public Integer getVehicleTypeId() { return vehicleTypeId; }
-    public void setVehicleTypeId(Integer vehicleTypeId) { this.vehicleTypeId = vehicleTypeId; }
-    public Integer getVehicleModelId() { return vehicleModelId; }
-    public void setVehicleModelId(Integer vehicleModelId) { this.vehicleModelId = vehicleModelId; }
+    public String getServiceCenterId() { return serviceCenterId; }
+    public void setServiceCenterId(String serviceCenterId) { this.serviceCenterId = serviceCenterId; }
+    public String getVehicleTypeId() { return vehicleTypeId; }
+    public void setVehicleTypeId(String vehicleTypeId) { this.vehicleTypeId = vehicleTypeId; }
+    public String getVehicleModelId() { return vehicleModelId; }
+    public void setVehicleModelId(String vehicleModelId) { this.vehicleModelId = vehicleModelId; }
     public String getVehicleRegistrationNumber() { return vehicleRegistrationNumber; }
     public void setVehicleRegistrationNumber(String vehicleRegistrationNumber) { this.vehicleRegistrationNumber = vehicleRegistrationNumber; }
     public String getCustomerName() { return customerName; }
