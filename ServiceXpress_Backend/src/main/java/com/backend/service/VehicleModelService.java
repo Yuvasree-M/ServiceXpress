@@ -41,6 +41,15 @@ public class VehicleModelService {
         return dto;
     }
 
+    public List<VehicleModelDTO> findByVehicleTypeId(Integer vehicleTypeId) {
+        List<VehicleModel> models = vehicleModelRepository.findByVehicleTypeId(vehicleTypeId);
+        List<VehicleModelDTO> dtos = models.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        logger.info("Fetched {} vehicle models for vehicle type ID {}: {}", dtos.size(), vehicleTypeId, dtos);
+        return dtos;
+    }
+
     public VehicleModelDTO save(VehicleModelDTO vehicleModelDTO) {
         if (vehicleModelDTO.getModelName() == null || vehicleModelDTO.getModelName().trim().isEmpty()) {
             logger.error("Cannot save vehicle model with empty modelName");
@@ -100,13 +109,10 @@ public class VehicleModelService {
     }
 
     private VehicleModel toEntity(VehicleModelDTO dto) {
-        VehicleModel model = new VehicleModel();
-        model.setVehicleModelId(dto.getId());
-        model.setModelName(dto.getModelName());
-        model.setVehicleType(new VehicleType(
-                dto.getVehicleType().getId(),
-                dto.getVehicleType().getName()
-        ));
-        return model;
+        return VehicleModel.builder()
+                .vehicleModelId(dto.getId())
+                .modelName(dto.getModelName())
+                .vehicleType(new VehicleType(dto.getVehicleType().getId(), dto.getVehicleType().getName()))
+                .build();
     }
 }

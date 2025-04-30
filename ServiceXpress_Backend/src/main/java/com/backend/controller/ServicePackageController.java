@@ -1,4 +1,3 @@
-
 package com.backend.controller;
 
 import com.backend.dto.ServicePackageDTO;
@@ -33,22 +32,43 @@ public class ServicePackageController {
         return packages.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(packages);
     }
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{vehicleTypeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+    public ResponseEntity<List<ServicePackageDTO>> getByVehicleTypeId(@PathVariable Integer vehicleTypeId) {
+        List<ServicePackageDTO> packages = packageService.findByVehicleTypeId(vehicleTypeId);
+        return packages.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(packages);
+    }
+
+    @GetMapping(value = "/package/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<ServicePackageDTO> getById(@PathVariable Integer id) {
-        return ResponseEntity.ok(packageService.findById(id));
+        try {
+            ServicePackageDTO servicePackage = packageService.findById(id);
+            return ResponseEntity.ok(servicePackage);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ServicePackageDTO> update(@PathVariable Integer id, @RequestBody ServicePackageDTO sp) {
-        return ResponseEntity.ok(packageService.update(id, sp));
+        try {
+            ServicePackageDTO updated = packageService.update(id, sp);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        packageService.delete(id);
-        return ResponseEntity.noContent().build();
+        try {
+            packageService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }

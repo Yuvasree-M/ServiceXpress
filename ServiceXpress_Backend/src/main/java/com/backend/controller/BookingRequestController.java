@@ -20,12 +20,20 @@ public class BookingRequestController {
 
     @PostMapping
     public ResponseEntity<BookingRequest> createBooking(@RequestBody BookingRequest booking) {
-        return ResponseEntity.ok(bookingService.createBooking(booking));
+        try {
+            BookingRequest savedBooking = bookingService.createBooking(booking);
+            return ResponseEntity.status(201).body(savedBooking); // 201 Created
+        } catch (Exception e) {
+            // Log the error and return an appropriate response
+            System.err.println("Error creating booking: " + e.getMessage());
+            return ResponseEntity.status(500).body(null); // 500 Internal Server Error
+        }
     }
 
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<BookingRequest>> getBookingsByCustomerId(@PathVariable Long customerId) {
-        return ResponseEntity.ok(bookingService.getBookingsByCustomerId(customerId));
+        List<BookingRequest> bookings = bookingService.getBookingsByCustomerId(customerId);
+        return bookings.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(bookings);
     }
 
     @GetMapping("/{id}")
@@ -37,12 +45,21 @@ public class BookingRequestController {
 
     @PutMapping("/{id}")
     public ResponseEntity<BookingRequest> updateBooking(@PathVariable Long id, @RequestBody BookingRequest booking) {
-        return ResponseEntity.ok(bookingService.updateBooking(id, booking));
+        try {
+            BookingRequest updatedBooking = bookingService.updateBooking(id, booking);
+            return ResponseEntity.ok(updatedBooking);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
-        bookingService.deleteBooking(id);
-        return ResponseEntity.ok().build();
+        try {
+            bookingService.deleteBooking(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

@@ -7,6 +7,7 @@ public class Booking {
     private Long serviceCenterId;
     private Integer vehicleTypeId;
     private Integer vehicleModelId;
+    private String vehicleRegistrationNumber; // New field
     private String customerName;
     private String customerPhone;
     private String customerEmail;
@@ -17,9 +18,9 @@ public class Booking {
     private String dropAddress;
     private String pickupDropoffOption;
     private LocalDateTime requestedDate;
-    private String status; // Added to match backend
-    private LocalDateTime createdAt; // Added to match backend
-    private LocalDateTime updatedAt; // Added to match backend
+    private String status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // Constructors
     public Booking() {}
@@ -33,6 +34,8 @@ public class Booking {
     public void setVehicleTypeId(Integer vehicleTypeId) { this.vehicleTypeId = vehicleTypeId; }
     public Integer getVehicleModelId() { return vehicleModelId; }
     public void setVehicleModelId(Integer vehicleModelId) { this.vehicleModelId = vehicleModelId; }
+    public String getVehicleRegistrationNumber() { return vehicleRegistrationNumber; }
+    public void setVehicleRegistrationNumber(String vehicleRegistrationNumber) { this.vehicleRegistrationNumber = vehicleRegistrationNumber; }
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
     public String getCustomerPhone() { return customerPhone; }

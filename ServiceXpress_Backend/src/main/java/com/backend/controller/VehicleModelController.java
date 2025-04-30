@@ -1,4 +1,3 @@
-
 package com.backend.controller;
 
 import com.backend.dto.VehicleModelDTO;
@@ -33,22 +32,43 @@ public class VehicleModelController {
         return models.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(models);
     }
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{vehicleTypeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+    public ResponseEntity<List<VehicleModelDTO>> getByVehicleTypeId(@PathVariable Integer vehicleTypeId) {
+        List<VehicleModelDTO> models = modelService.findByVehicleTypeId(vehicleTypeId);
+        return models.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(models);
+    }
+
+    @GetMapping(value = "/model/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
     public ResponseEntity<VehicleModelDTO> getById(@PathVariable Integer id) {
-        return ResponseEntity.ok(modelService.findById(id));
+        try {
+            VehicleModelDTO model = modelService.findById(id);
+            return ResponseEntity.ok(model);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VehicleModelDTO> update(@PathVariable Integer id, @RequestBody VehicleModelDTO modelDTO) {
-        return ResponseEntity.ok(modelService.update(id, modelDTO));
+        try {
+            VehicleModelDTO updated = modelService.update(id, modelDTO);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        modelService.delete(id);
-        return ResponseEntity.noContent().build();
+        try {
+            modelService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }

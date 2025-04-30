@@ -31,6 +31,9 @@ public class BookingRequest {
     private Integer vehicleModelId;
 
     @Column(nullable = false)
+    private String vehicleRegistrationNumber; // New field
+
+    @Column(nullable = false)
     private String customerName;
 
     @Column(nullable = false)
