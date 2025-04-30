@@ -56,10 +56,10 @@ public class SecurityConfig {
             .and()
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/service-packages/**").permitAll()
-                .requestMatchers("/api/service-centers").permitAll()
-                .requestMatchers("/api/vehicle-types").permitAll()
-                .requestMatchers("/api/vehicle-models/**").permitAll()
+//                .requestMatchers("/api/service-packages/**").permitAll()
+//                .requestMatchers("/api/service-centers").permitAll()
+//                .requestMatchers("/api/vehicle-types").permitAll()
+//                .requestMatchers("/api/vehicle-models/**").permitAll()
                 .requestMatchers("/api/bookings/**").permitAll()
                 
 //                .requestMatchers(HttpMethod.POST, "/api/service-packages/**").hasRole("ADMIN")

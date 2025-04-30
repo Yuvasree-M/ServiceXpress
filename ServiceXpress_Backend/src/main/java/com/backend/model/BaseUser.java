@@ -24,7 +24,7 @@ public abstract class BaseUser {
     private String email;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "\\d{10}", message = "Phone number must be 10 digits")
+    @Pattern(regexp = "^\\+91\\d{10}$", message = "Phone number must be 10 digits")
     @Column(unique = true)
     private String phoneNumber;
 
