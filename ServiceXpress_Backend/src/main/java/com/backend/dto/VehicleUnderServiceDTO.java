@@ -1,13 +1,9 @@
-package com.frontend.model;
+package com.backend.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class VehicleUnderService {
+public class VehicleUnderServiceDTO {
     private Long id;
     private String ownerName;
     private String vehicleType;
@@ -17,3 +13,4 @@ public class VehicleUnderService {
     private String serviceAllocated;
     private String status;
 }
+

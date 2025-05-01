@@ -1,4 +1,4 @@
-package com.frontend.model;
+package com.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,11 +10,11 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VehicleDue {
+public class VehicleDueDTO {
     private Long id;
     private String ownerName;
-    private String vehicleModel; // Formatted as "id (modelname)"
-    private String vehicleType;  // Formatted as "id (name)"
+    private String vehicleModel;
+    private String vehicleType;
     private String serviceNeeded;
     private String location;
     private Long serviceAdvisorId;
