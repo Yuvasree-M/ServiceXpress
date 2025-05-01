@@ -182,16 +182,16 @@ public class BookingRequestService {
     public BookingRequest assignServiceAdvisor(Long bookingId, Long advisorId) {
         // Validate booking
         BookingRequest booking = repository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
 
         // Validate advisor
         Advisor advisor = advisorRepository.findById(advisorId)
-                .orElseThrow(() -> new RuntimeException("Advisor not found with id: " + advisorId));
+                .orElseThrow(() -> new IllegalArgumentException("Advisor not found with id: " + advisorId));
 
         // Check if advisor is already assigned
         Optional<BookingAdvisorMapping> existingMapping = bookingAdvisorMappingRepository.findByBookingId(bookingId);
         if (existingMapping.isPresent()) {
-            throw new RuntimeException("Advisor already assigned to booking id: " + bookingId);
+            throw new IllegalStateException("Advisor already assigned to booking id: " + bookingId);
         }
 
         // Create mapping
@@ -240,4 +240,7 @@ public class BookingRequestService {
     public List<Advisor> getAllAdvisors() {
         return advisorRepository.findAll();
     }
+    
+    
+    
 }

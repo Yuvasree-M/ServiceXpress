@@ -1,6 +1,6 @@
 package com.frontend.controller;
 
-import com.frontend.model.DashboardData;
+import com.frontend.model.DashboardDataDTO;
 import com.frontend.model.ServiceItem;
 import com.frontend.model.Vehicle;
 import jakarta.servlet.http.HttpSession;
@@ -72,7 +72,7 @@ public class ServiceAdvisorController {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
             HttpEntity<String> request = new HttpEntity<>(headers);
-            DashboardData data = restTemplate.exchange(url, HttpMethod.GET, request, DashboardData.class).getBody();
+            DashboardDataDTO data = restTemplate.exchange(url, HttpMethod.GET, request, DashboardDataDTO.class).getBody();
             
             model.addAttribute("dashboardData", data);
         } catch (Exception e) {

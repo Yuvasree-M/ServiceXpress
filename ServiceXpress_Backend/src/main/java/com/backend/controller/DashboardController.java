@@ -114,7 +114,7 @@ public class DashboardController {
     }
 
 //    @GetMapping("/service-advisor")
-//    public ResponseEntity<DashboardData> getServiceAdvisorDashboard() {
+//    public ResponseEntity<DashboardDataDTO> getServiceAdvisorDashboard() {
 //        return ResponseEntity.ok(dashboardService.getServiceAdvisorDashboardData());
 //    }
 }

@@ -3,7 +3,7 @@ package com.frontend.controller;
 import com.frontend.model.Booking;
 import com.frontend.model.Customer;
 import com.frontend.model.CustomerService;
-import com.frontend.model.DashboardData;
+import com.frontend.model.DashboardDataDTO;
 import com.frontend.model.ServiceStatus;
 import com.frontend.model.ServiceHistory;
 import com.frontend.model.Service;
@@ -72,7 +72,7 @@ public class CustomerController {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(token);
             HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<DashboardData> response = restTemplate.exchange(url, HttpMethod.GET, request, DashboardData.class);
+            ResponseEntity<DashboardDataDTO> response = restTemplate.exchange(url, HttpMethod.GET, request, DashboardDataDTO.class);
             model.addAttribute("dashboardData", response.getBody());
         } catch (Exception e) {
             model.addAttribute("error", "Unable to fetch dashboard data: " + e.getMessage());
