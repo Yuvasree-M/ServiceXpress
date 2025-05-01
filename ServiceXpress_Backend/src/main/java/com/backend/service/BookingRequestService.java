@@ -1,20 +1,29 @@
 package com.backend.service;
 
+import com.backend.dto.BookingResponseDTO;
+import com.backend.model.Advisor;
+import com.backend.model.BookingAdvisorMapping;
 import com.backend.model.BookingRequest;
 import com.backend.model.ServiceCenter;
 import com.backend.model.VehicleModel;
 import com.backend.model.VehicleType;
+import com.backend.repository.AdvisorRepository;
+import com.backend.repository.BookingAdvisorMappingRepository;
 import com.backend.repository.BookingRequestRepository;
 import com.backend.repository.ServiceCenterRepository;
 import com.backend.repository.VehicleModelRepository;
 import com.backend.repository.VehicleTypeRepository;
 import com.backend.service.EmailService;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingRequestService {
@@ -32,7 +41,20 @@ public class BookingRequestService {
     private ServiceCenterRepository serviceCenterRepository;
 
     @Autowired
+    private AdvisorRepository advisorRepository;
+
+    @Autowired
+    private BookingAdvisorMappingRepository bookingAdvisorMappingRepository;
+    @Autowired
     private EmailService emailService;
+    
+    public AdvisorRepository getAdvisorRepository() {
+        return advisorRepository;
+    }
+
+    public BookingAdvisorMappingRepository getBookingAdvisorMappingRepository() {
+        return bookingAdvisorMappingRepository;
+    }
 
     public BookingRequest createBooking(BookingRequest booking) {
         // Set timestamps
@@ -123,4 +145,102 @@ public class BookingRequestService {
         }
         repository.deleteById(id);
     }
+    
+    
+    public List<BookingResponseDTO> getPendingBookings() {
+        List<BookingRequest> pendingBookings = repository.findByStatus("PENDING");
+        return pendingBookings.stream().map(booking -> {
+            // Fetch and format additional details
+            String vehicleTypeFormatted = booking.getVehicleTypeId() + " (Unknown)";
+            String vehicleModelFormatted = booking.getVehicleModelId() + " (Unknown)";
+            String serviceCenterFormatted = booking.getServiceCenterId() + " (Unknown)";
+
+            try {
+                Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
+                if (vehicleType.isPresent()) {
+                    vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
+                }
+
+                Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
+                if (vehicleModel.isPresent()) {
+                    vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
+                }
+
+                Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
+                if (serviceCenter.isPresent()) {
+                    serviceCenterFormatted = booking.getServiceCenterId() + " (" + serviceCenter.get().getCenterName() + ")";
+                }
+            } catch (Exception e) {
+                System.err.println("Error fetching details for booking ID " + booking.getId() + ": " + e.getMessage());
+            }
+
+            return new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
+        }).collect(Collectors.toList());
+    }
+    
+    @Transactional
+    public BookingRequest assignServiceAdvisor(Long bookingId, Long advisorId) {
+        // Validate booking
+        BookingRequest booking = repository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+
+        // Validate advisor
+        Advisor advisor = advisorRepository.findById(advisorId)
+                .orElseThrow(() -> new IllegalArgumentException("Advisor not found with id: " + advisorId));
+
+        // Check if advisor is already assigned
+        Optional<BookingAdvisorMapping> existingMapping = bookingAdvisorMappingRepository.findByBookingId(bookingId);
+        if (existingMapping.isPresent()) {
+            throw new IllegalStateException("Advisor already assigned to booking id: " + bookingId);
+        }
+
+        // Create mapping
+        BookingAdvisorMapping mapping = BookingAdvisorMapping.builder()
+                .bookingId(bookingId)
+                .advisorId(advisorId)
+                .build();
+        bookingAdvisorMappingRepository.save(mapping);
+
+        // Update booking status
+        booking.setStatus("IN_PROGRESS");
+        booking.setUpdatedAt(LocalDateTime.now());
+        return repository.save(booking);
+    }
+
+    public List<BookingResponseDTO> getInProgressBookings() {
+        List<BookingRequest> inProgressBookings = repository.findByStatus("IN_PROGRESS");
+        return inProgressBookings.stream().map(booking -> {
+            String vehicleTypeFormatted = booking.getVehicleTypeId() + " (Unknown)";
+            String vehicleModelFormatted = booking.getVehicleModelId() + " (Unknown)";
+            String serviceCenterFormatted = booking.getServiceCenterId() + " (Unknown)";
+
+            try {
+                Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
+                if (vehicleType.isPresent()) {
+                    vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
+                }
+
+                Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
+                if (vehicleModel.isPresent()) {
+                    vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
+                }
+
+                Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
+                if (serviceCenter.isPresent()) {
+                    serviceCenterFormatted = booking.getServiceCenterId() + " (" + serviceCenter.get().getCenterName() + ")";
+                }
+            } catch (Exception e) {
+                System.err.println("Error fetching details for booking ID " + booking.getId() + ": " + e.getMessage());
+            }
+
+            return new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
+        }).collect(Collectors.toList());
+    }
+
+    public List<Advisor> getAllAdvisors() {
+        return advisorRepository.findAll();
+    }
+    
+    
+    
 }

@@ -55,12 +55,14 @@ public class SecurityConfig {
             .cors().configurationSource(corsConfigurationSource())
             .and()
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow CORS preflight
                 .requestMatchers("/api/auth/**").permitAll()
-//                .requestMatchers("/api/service-packages/**").permitAll()
-//                .requestMatchers("/api/service-centers").permitAll()
-//                .requestMatchers("/api/vehicle-types").permitAll()
-//                .requestMatchers("/api/vehicle-models/**").permitAll()
+                .requestMatchers("/api/service-packages/**").permitAll()
+                .requestMatchers("/api/service-centers").permitAll()
+                .requestMatchers("/api/vehicle-types/**").permitAll()
+                .requestMatchers("/api/vehicle-models/**").permitAll()
                 .requestMatchers("/api/bookings/**").permitAll()
+                .requestMatchers("/api/admin/bookings/**").hasRole("ADMIN")
                 
 //                .requestMatchers(HttpMethod.POST, "/api/service-packages/**").hasRole("ADMIN")
 //                .requestMatchers(HttpMethod.PUT, "/api/service-packages/**").hasRole("ADMIN")
@@ -77,14 +79,15 @@ public class SecurityConfig {
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/customer").hasRole("CUSTOMER")
                 .requestMatchers("/api/dashboard/service-advisor").hasRole("SERVICE_ADVISOR")
-                .requestMatchers(HttpMethod.GET, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/advisors/**").hasRole("ADMIN")
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/advisor/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/advisor/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/advisor/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/advisor/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/service-advisor/**").hasRole("SERVICE_ADVISOR")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
-                .requestMatchers("/api/vehicle-types/**").hasAnyRole("ADMIN", "CUSTOMER")
+                // ---- CRUD for Vehicle Types, Models, Customers, Advisors, Packages ----
+                .requestMatchers("/api/vehicle-type/**").hasAnyRole("ADMIN", "CUSTOMER")
                 .requestMatchers("/api/vehicle-models/**").hasRole("ADMIN")
                 .requestMatchers("/api/customers/**").hasRole("ADMIN")
                 .requestMatchers("/api/advisors/**").hasRole("ADMIN")
@@ -100,7 +103,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:8082"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

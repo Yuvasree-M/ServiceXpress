@@ -2,6 +2,7 @@ package com.frontend.controller;
 
 import com.frontend.model.*;
 
+
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -33,14 +34,12 @@ public class AdminController {
     public AdminController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-
     @GetMapping("/dashboard/admin")
     public String showDashboard(Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
-        logger.info("Token from session: {}", token);
         if (token == null) {
             model.addAttribute("error", "No authentication token found. Please log in.");
-            return "index";
+            return "redirect:/login";
         }
         try {
             String url = backendApiUrl + "/dashboard/admin";
@@ -48,28 +47,47 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(token);
             HttpEntity<String> request = new HttpEntity<>(headers);
-            logger.info("Fetching dashboard data from: {}", url);
-            DashboardData data = restTemplate.exchange(url, HttpMethod.GET, request, DashboardData.class).getBody();
-            logger.info("Received dashboard data: {}", data);
-            if (data != null) {
-                logger.info("Frontend - Vehicles Due: {}", data.getVehiclesDue());
-                logger.info("Frontend - Vehicles Under Service: {}", data.getVehiclesUnderService());
-                logger.info("Frontend - Vehicles Completed: {}", data.getVehiclesCompleted());
-//                logger.info("Frontend - Available Advisors: {}", data.getAvailableAdvisors());
-            }
+            ResponseEntity<DashboardDataDTO> response = restTemplate.exchange(url, HttpMethod.GET, request, DashboardDataDTO.class);
+            DashboardDataDTO data = response.getBody();
             if (data == null) {
                 model.addAttribute("error", "No dashboard data received from backend.");
             } else {
                 model.addAttribute("dashboardData", data);
                 model.addAttribute("token", token);
-                model.addAttribute("profileName", data.getProfileName() != null ? data.getProfileName() : "Admin User");
             }
         } catch (Exception e) {
-            logger.error("Error fetching dashboard data: ", e);
+            logger.error("Failed to load dashboard: {}", e.getMessage(), e);
             model.addAttribute("error", "Failed to load dashboard: " + e.getMessage());
         }
         return "admin-dashboard";
     }
+
+    @PostMapping("/dashboard/assign-advisor")
+    @ResponseBody
+    public ResponseEntity<String> assignAdvisor(@RequestBody Long advisorId, @RequestParam Long bookingId, HttpSession session) {
+        String token = (String) session.getAttribute("token");
+        if (token == null || token.isEmpty()) {
+            logger.warn("No authentication token found in session for bookingId: {}", bookingId);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No authentication token found. Please log in.");
+        }
+        try {
+            String url = backendApiUrl + "/admin/bookings/" + bookingId + "/assign-advisor";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+            HttpEntity<Long> httpEntity = new HttpEntity<>(advisorId, headers);
+            ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.POST, httpEntity, Void.class);
+            logger.info("Advisor {} assigned to booking {}", advisorId, bookingId);
+            return ResponseEntity.ok("Advisor assigned successfully");
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error assigning advisor: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return ResponseEntity.status(e.getStatusCode()).body("Error assigning advisor: " + e.getResponseBodyAsString());
+        } catch (Exception e) {
+            logger.error("Unexpected error assigning advisor: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + e.getMessage());
+        }
+    }
+    
     
     private List<ServiceItem> fetchInventoryList(String token) {
         String url = backendApiUrl + "/inventory";

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class DashboardData {
+public class DashboardDataDTO {
     private int dueCount;
     private int servicingCount;
     private int completedCount;
@@ -18,7 +18,7 @@ public class DashboardData {
     private List<VehicleCompleted> vehiclesCompleted;
     private List<AdvisorRequest> advisorRequests;
 
-    public DashboardData(int dueCount, int servicingCount, int completedCount, int advisorRequestsCount,
+    public DashboardDataDTO(int dueCount, int servicingCount, int completedCount, int advisorRequestsCount,
                         String profileName, List<VehicleDue> vehiclesDue,
                         List<VehicleUnderService> vehiclesUnderService, List<VehicleCompleted> vehiclesCompleted,
                         List<AdvisorRequest> advisorRequests) {

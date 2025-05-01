@@ -1,7 +1,8 @@
-package com.backend.model;
+package com.backend.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
+import com.backend.model.BookingRequest;
 
 public class BookingResponseDTO {
     private Long id;
