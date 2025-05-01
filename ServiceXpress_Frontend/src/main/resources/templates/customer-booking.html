@@ -798,10 +798,9 @@
             </div>
             <div class="col-md-4" th:each="vehicleType : ${vehicleTypes}">
                 <div class="vehicle-card" th:data-id="${vehicleType.id}">
-                    <img th:src="@{/images/qualitywork.jpg}"alt="Vehicle Type" class="img-fluid">
+                    <img th:src="@{/images/qualitywork.jpg}" alt="Vehicle Type" class="img-fluid">
                     <div class="card-content">
                         <h5 th:text="${vehicleType.name}">Vehicle Type</h5>
-                       
                     </div>
                 </div>
             </div>
@@ -872,85 +871,86 @@
     </div>
 
     <!-- Booking Modal -->
-<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="bookingModalLabel">Complete Your Booking</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="bookingForm" th:action="@{/submit-booking}" th:object="${booking}" method="post">
-                    <input type="hidden" id="customerId" th:value="${customer.id}">
-                    <input type="hidden" id="serviceCenterId" name="serviceCenterId">
-                    <input type="hidden" id="vehicleTypeId" name="vehicleTypeId">
-                    <input type="hidden" id="vehicleModelId" name="vehicleModelId">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="customerName" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="customerName" th:field="*{customerName}" required>
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingModalLabel">Complete Your Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm" th:action="@{/submit-booking}" th:object="${booking}" method="post">
+                        <input type="hidden" id="customerId" th:value="${customer.id}">
+                        <input type="hidden" id="serviceCenterId" name="serviceCenterId">
+                        <input type="hidden" id="vehicleTypeId" name="vehicleTypeId">
+                        <input type="hidden" id="vehicleModelId" name="vehicleModelId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="customerName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="customerName" th:field="*{customerName}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="customerEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="customerEmail" th:field="*{customerEmail}" required>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="customerEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="customerEmail" th:field="*{customerEmail}" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="customerPhone" class="form-label">Mobile Number</label>
+                                <input type="tel" class="form-control" id="customerPhone" th:field="*{customerPhone}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="vehicleRegistrationNumber" class="form-label">Vehicle Registration Number</label>
+                                <input type="text" class="form-control" id="vehicleRegistrationNumber" name="vehicleRegistrationNumber" th:field="*{vehicleRegistrationNumber}" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="customerPhone" class="form-label">Mobile Number</label>
-                            <input type="tel" class="form-control" id="customerPhone" th:field="*{customerPhone}" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="services" class="form-label">Selected Services</label>
+                                <input type="text" class="form-control" id="services" name="services" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="requestedDate" class="form-label">Requested Date</label>
+                                <input type="datetime-local" class="form-control" id="requestedDate" name="requestedDate" th:field="*{requestedDate}" required>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="vehicleRegistrationNumber" class="form-label">Vehicle Registration Number</label>
-                            <input type="text" class="form-control" id="vehicleRegistrationNumber" name="vehicleRegistrationNumber" th:field="*{vehicleRegistrationNumber}" required>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" name="address" th:field="*{address}" rows="3" required></textarea>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="services" class="form-label">Selected Services</label>
-                            <input type="text" class="form-control" id="services" name="services" readonly>
+                        <div class="mb-3">
+                            <label for="pickDropOption" class="form-label">Pick-up/Drop-off Required?</label>
+                            <select class="form-control" id="pickDropOption" name="pickDropOption" th:field="*{pickDropOption}" required>
+                                <option value="NONE">No</option>
+                                <option value="YES">Yes</option>
+                            </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="requestedDate" class="form-label">Requested Date</label>
-                            <input type="datetime-local" class="form-control" id="requestedDate" name="requestedDate" th:field="*{requestedDate}" required>
+                        <div class="mb-3" id="pickupDropoffType">
+                            <label for="pickupDropoffOption" class="form-label">Pick-up/Drop-off Option</label>
+                            <select class="form-control" id="pickupDropoffOption" name="pickupDropoffOption" th:field="*{pickupDropoffOption}">
+                                <option value="">Select Option</option>
+                                <option value="pickup">Pick-up Only</option>
+                                <option value="dropoff">Drop-off Only</option>
+                                <option value="both">Both</option>
+                            </select>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Address</label>
-                        <textarea class="form-control" id="address" name="address" th:field="*{address}" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="pickDropOption" class="form-label">Pick-up/Drop-off Required?</label>
-                        <select class="form-control" id="pickDropOption" name="pickDropOption" th:field="*{pickDropOption}" required>
-                            <option value="NONE">No</option>
-                            <option value="YES">Yes</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" id="pickupDropoffType">
-                        <label for="pickupDropoffOption" class="form-label">Pick-up/Drop-off Option</label>
-                        <select class="form-control" id="pickupDropoffOption" name="pickupDropoffOption" th:field="*{pickupDropoffOption}">
-                            <option value="">Select Option</option>
-                            <option value="pickup">Pick-up Only</option>
-                            <option value="dropoff">Drop-off Only</option>
-                            <option value="both">Both</option>
-                        </select>
-                    </div>
-                    <div class="mb-3" id="pickupAddress">
-                        <label for="pickupAddressInput" class="form-label">Pick-up Address</label>
-                        <textarea class="form-control" id="pickupAddressInput" name="pickupAddress" th:field="*{pickupAddress}" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3" id="dropoffAddress">
-                        <label for="dropoffAddressInput" class="form-label">Drop-off Address</label>
-                        <textarea class="form-control" id="dropoffAddressInput" name="dropAddress" th:field="*{dropAddress}" rows="3"></textarea>
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-book">Confirm Booking</button>
-                    </div>
-                </form>
+                        <div class="mb-3" id="pickupAddress">
+                            <label for="pickupAddressInput" class="form-label">Pick-up Address</label>
+                            <textarea class="form-control" id="pickupAddressInput" name="pickupAddress" th:field="*{pickupAddress}" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3" id="dropoffAddress">
+                            <label for="dropoffAddressInput" class="form-label">Drop-off Address</label>
+                            <textarea class="form-control" id="dropoffAddressInput" name="dropAddress" th:field="*{dropAddress}" rows="3"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-book">Confirm Booking</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
     <!-- Footer -->
     <footer id="contact">
         <div class="container-fluid col-md-11 mx-auto">
@@ -995,427 +995,436 @@
     <!-- Font Awesome for footer icons -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const token = '[[${session.token}]]'; // Get token from session
-    const backendApiUrl = 'http://localhost:8081/api';
-    const customerId = document.getElementById('customerId').value;
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = '[[${session.token}]]'; // Get token from session
+        const backendApiUrl = 'http://localhost:8081/api';
+        const customerId = document.getElementById('customerId').value;
 
-    const centerSelection = document.getElementById('center-selection');
-    const serviceCenterDropdown = document.getElementById('serviceCenter');
-    const vehicleSelection = document.getElementById('vehicle-selection');
-    const modelSelection = document.getElementById('model-selection');
-    const modelContainer = document.getElementById('model-container');
-    const serviceSelection = document.getElementById('service-selection');
-    const serviceContainer = serviceSelection.querySelector('.row'); // Container for service cards
-    const cartSection = document.getElementById('cart-section');
-    const confirmationSection = document.getElementById('confirmation-section');
-    const confirmationDetails = document.getElementById('confirmation-details');
-    const backButton = document.getElementById('back-button');
-    const addToCartButton = document.getElementById('add-to-cart');
-    const cartItems = document.getElementById('cart-items');
+        const centerSelection = document.getElementById('center-selection');
+        const serviceCenterDropdown = document.getElementById('serviceCenter');
+        const vehicleSelection = document.getElementById('vehicle-selection');
+        const modelSelection = document.getElementById('model-selection');
+        const modelContainer = document.getElementById('model-container');
+        const serviceSelection = document.getElementById('service-selection');
+        const serviceContainer = serviceSelection.querySelector('.row'); // Container for service cards
+        const cartSection = document.getElementById('cart-section');
+        const confirmationSection = document.getElementById('confirmation-section');
+        const confirmationDetails = document.getElementById('confirmation-details');
+        const backButton = document.getElementById('back-button');
+        const addToCartButton = document.getElementById('add-to-cart');
+        const cartItems = document.getElementById('cart-items');
 
-    let selectedCenterId = '';
-    let selectedVehicleTypeId = '';
-    let selectedVehicleModelId = '';
-    let cart = [];
+        let selectedCenterId = '';
+        let selectedCenterName = ''; // New: Store center name
+        let selectedVehicleTypeId = '';
+        let selectedVehicleTypeName = ''; // New: Store vehicle type name
+        let selectedVehicleModelId = '';
+        let selectedVehicleModelName = ''; // New: Store vehicle model name
+        let cart = [];
 
-    // Fetch service centers
-    fetch(`${backendApiUrl}/service-centers`, {
-        headers: { 'Accept': 'application/json' }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to fetch service centers: ${response.status}`);
-            }
-            return response.json();
+        // Fetch service centers
+        fetch(`${backendApiUrl}/service-centers`, {
+            headers: { 'Accept': 'application/json' }
         })
-        .then(data => {
-            console.log('Service centers:', data);
-            if (!data || data.length === 0) {
-                alert('No service centers available. Please try again later.');
-                return;
-            }
-            serviceCenterDropdown.innerHTML = '<option value="">Select a Service Center</option>';
-            data.forEach(center => {
-                const option = document.createElement('option');
-                option.value = center.id;
-                option.textContent = `${center.centerName} (${center.cityName})`;
-                serviceCenterDropdown.appendChild(option);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch service centers: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Service centers:', data);
+                if (!data || data.length === 0) {
+                    alert('No service centers available. Please try again later.');
+                    return;
+                }
+                serviceCenterDropdown.innerHTML = '<option value="">Select a Service Center</option>';
+                data.forEach(center => {
+                    const option = document.createElement('option');
+                    option.value = center.id;
+                    option.textContent = `${center.centerName} (${center.cityName})`;
+                    option.setAttribute('data-name', `${center.centerName} (${center.cityName})`); // Store name
+                    serviceCenterDropdown.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching service centers:', error);
+                alert('Unable to load service centers. Please check your connection or try again later.');
             });
-        })
-        .catch(error => {
-            console.error('Error fetching service centers:', error);
-            alert('Unable to load service centers. Please check your connection or try again later.');
+
+        // Service center selection
+        serviceCenterDropdown.addEventListener('change', function() {
+            selectedCenterId = this.value;
+            selectedCenterName = this.options[this.selectedIndex].getAttribute('data-name') || ''; // Capture name
+            console.log('Selected service center:', selectedCenterId, selectedCenterName);
+            if (selectedCenterId) {
+                centerSelection.style.display = 'none';
+                vehicleSelection.style.display = 'flex';
+                const vehicleCards = vehicleSelection.querySelectorAll('.vehicle-card');
+                if (vehicleCards.length === 0) {
+                    console.warn('No vehicle type cards found');
+                    alert('No vehicle types available. Please try again or contact support.');
+                }
+            }
         });
 
-    // Service center selection
-    serviceCenterDropdown.addEventListener('change', function() {
-        selectedCenterId = this.value;
-        console.log('Selected service center ID:', selectedCenterId);
-        if (selectedCenterId) {
-            centerSelection.style.display = 'none';
-            vehicleSelection.style.display = 'flex';
-            const vehicleCards = vehicleSelection.querySelectorAll('.vehicle-card');
-            if (vehicleCards.length === 0) {
-                console.warn('No vehicle type cards found');
-                alert('No vehicle types available. Please try again or contact support.');
+        // Vehicle type selection
+        document.querySelectorAll('.vehicle-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedVehicleTypeId = this.getAttribute('data-id');
+                selectedVehicleTypeName = this.querySelector('h5').textContent; // Capture name
+                console.log('Selected vehicle type:', selectedVehicleTypeId, selectedVehicleTypeName);
+
+                // Fetch vehicle models for the selected vehicle type
+                fetch(`${backendApiUrl}/vehicle-models/${selectedVehicleTypeId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch vehicle models: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Vehicle models for type ID', selectedVehicleTypeId, ':', data);
+                        modelContainer.innerHTML = '';
+                        if (!data || data.length === 0) {
+                            alert('No vehicle models available for this vehicle type.');
+                            return;
+                        }
+                        data.forEach(model => {
+                            const modelCard = `
+                                <div class="col-md-4">
+                                    <div class="model-card" data-id="${model.id}">
+                                        <img src="${model.vehicleType?.imageUrl || 'https://wallpaperaccess.com/full/3417022.jpg'}" alt="${model.modelName}" class="img-fluid">
+                                        <div class="card-content">
+                                            <h5>${model.modelName}</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            modelContainer.innerHTML += modelCard;
+                        });
+
+                        centerSelection.style.display = 'none';
+                        vehicleSelection.style.display = 'none';
+                        modelSelection.style.display = 'block';
+                        serviceSelection.style.display = 'none';
+                        cartSection.style.display = 'none';
+                        confirmationSection.style.display = 'none';
+
+                        // Model selection
+                        document.querySelectorAll('.model-card').forEach(modelCard => {
+                            modelCard.addEventListener('click', function() {
+                                document.querySelectorAll('.model-card').forEach(mc => mc.classList.remove('selected'));
+                                this.classList.add('selected');
+                                selectedVehicleModelId = this.getAttribute('data-id');
+                                selectedVehicleModelName = this.querySelector('h5').textContent; // Capture name
+                                console.log('Selected vehicle model:', selectedVehicleModelId, selectedVehicleModelName);
+
+                                // Fetch service packages for the selected vehicle type
+                                fetch(`${backendApiUrl}/service-packages/${selectedVehicleTypeId}`, {
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                        'Accept': 'application/json'
+                                    }
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error(`Failed to fetch service packages: ${response.status}`);
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(services => {
+                                        console.log('Service packages for vehicle type ID', selectedVehicleTypeId, ':', services);
+                                        serviceContainer.innerHTML = '';
+                                        if (!services || services.length === 0) {
+                                            serviceContainer.innerHTML = '<div class="col-12"><p class="text-muted text-center">No services available for this vehicle type.</p></div>';
+                                        } else {
+                                            services.forEach(service => {
+                                                const serviceCard = `
+                                                    <div class="col-md-4">
+                                                        <div class="service-card">
+                                                            <div class="service-header">
+                                                                <div class="d-flex align-items-center">
+                                                                    <input type="checkbox" id="service_${service.id}" name="service" value="${service.packageName}">
+                                                                    <label for="service_${service.id}">
+                                                                        <h5>${service.packageName}</h5>
+                                                                        <small class="text-muted">$${service.price}</small>
+                                                                    </label>
+                                                                </div>
+                                                                <span class="material-icons toggle-icon" data-target="service_${service.id}_details">expand_less</span>
+                                                            </div>
+                                                            <div class="service-details" id="service_${service.id}_details">
+                                                                <h6>Details for ${service.packageName}</h6>
+                                                                <div class="service-details-item">
+                                                                    <span>Description</span>
+                                                                    <strong>${service.description || 'N/A'}</strong>
+                                                                </div>
+                                                                <div class="service-details-item">
+                                                                    <span>Vehicle Type</span>
+                                                                    <strong>${service.vehicleType?.name || 'N/A'}</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                                serviceContainer.innerHTML += serviceCard;
+                                            });
+
+                                            // Re-attach toggle event listeners for the new service cards
+                                            document.querySelectorAll('.toggle-icon').forEach(icon => {
+                                                icon.addEventListener('click', function() {
+                                                    const targetId = this.getAttribute('data-target');
+                                                    const details = document.getElementById(targetId);
+                                                    const isExpanded = details.style.display === 'block';
+                                                    details.style.display = isExpanded ? 'none' : 'block';
+                                                    this.textContent = isExpanded ? 'expand_more' : 'expand_less';
+                                                });
+                                            });
+                                        }
+
+                                        modelSelection.style.display = 'none';
+                                        serviceSelection.style.display = 'block';
+                                        cartSection.style.display = 'block';
+                                        confirmationSection.style.display = 'none';
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching service packages:', error);
+                                        alert('Unable to load services for this vehicle type. Please try again.');
+                                        serviceContainer.innerHTML = '<div class="col-12"><p class="text-muted text-center">Error loading services. Please try again.</p></div>';
+                                        modelSelection.style.display = 'none';
+                                        serviceSelection.style.display = 'block';
+                                        cartSection.style.display = 'block';
+                                        confirmationSection.style.display = 'none';
+                                    });
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching vehicle models:', error);
+                        alert('Unable to load vehicle models. Please try again.');
+                    });
+            });
+        });
+
+        // Toggle service details (for initial load, replaced by dynamic binding above)
+        document.querySelectorAll('.toggle-icon').forEach(icon => {
+            icon.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const details = document.getElementById(targetId);
+                const isExpanded = details.style.display === 'block';
+                details.style.display = isExpanded ? 'none' : 'block';
+                this.textContent = isExpanded ? 'expand_more' : 'expand_less';
+            });
+        });
+
+        // Add to cart
+        addToCartButton.addEventListener('click', function() {
+            const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked'))
+                .map(checkbox => checkbox.value);
+            if (selectedServices.length === 0) {
+                alert('Please select at least one service to add to cart.');
+                return;
             }
-        }
-    });
-
-    // Vehicle type selection
-    document.querySelectorAll('.vehicle-card').forEach(card => {
-        card.addEventListener('click', function() {
-            document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
-            this.classList.add('selected');
-            selectedVehicleTypeId = this.getAttribute('data-id');
-            console.log('Selected vehicle type ID:', selectedVehicleTypeId);
-
-            // Fetch vehicle models for the selected vehicle type
-            fetch(`${backendApiUrl}/vehicle-models/${selectedVehicleTypeId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
+            selectedServices.forEach(service => {
+                if (!cart.includes(service)) {
+                    cart.push(service);
                 }
+            });
+            updateCart();
+            document.querySelectorAll('input[name="service"]').forEach(checkbox => checkbox.checked = false);
+        });
+
+        // Update cart
+        function updateCart() {
+            cartItems.innerHTML = '';
+            cart.forEach((service, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `${service} <button class="btn btn-sm btn-danger" data-index="${index}">Remove</button>`;
+                cartItems.appendChild(li);
+            });
+
+            document.querySelectorAll('.cart-section .btn-danger').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = this.getAttribute('data-index');
+                    cart.splice(index, 1);
+                    updateCart();
+                });
+            });
+        }
+
+        // Booking modal logic
+        const pickupDropoff = document.getElementById('pickDropOption');
+        const pickupDropoffType = document.getElementById('pickupDropoffType');
+        const pickupAddress = document.getElementById('pickupAddress');
+        const dropoffAddress = document.getElementById('dropoffAddress');
+        const pickupDropoffOption = document.getElementById('pickupDropoffOption');
+
+        pickupDropoff.addEventListener('change', function() {
+            const isPickupDropoffYes = this.value === 'YES';
+            pickupDropoffType.style.display = isPickupDropoffYes ? 'block' : 'none';
+            pickupAddress.style.display = 'none';
+            dropoffAddress.style.display = 'none';
+            if (!isPickupDropoffYes) {
+                pickupDropoffOption.value = '';
+            }
+        });
+
+        pickupDropoffOption.addEventListener('change', function() {
+            const option = this.value;
+            pickupAddress.style.display = (option === 'pickup' || option === 'both') ? 'block' : 'none';
+            dropoffAddress.style.display = (option === 'dropoff' || option === 'both') ? 'block' : 'none';
+        });
+
+        // Form submission
+        document.getElementById('bookingForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            if (!selectedCenterId) {
+                alert('Please select a service center.');
+                return;
+            }
+            if (!selectedVehicleTypeId) {
+                alert('Please select a vehicle type.');
+                return;
+            }
+            if (!selectedVehicleModelId) {
+                alert('Please select a vehicle model.');
+                return;
+            }
+            if (cart.length === 0) {
+                alert('Your cart is empty. Please add services to book.');
+                return;
+            }
+
+            const bookingData = {
+                customerId: parseInt(customerId),
+                serviceCenterId: parseInt(selectedCenterId),
+                vehicleTypeId: parseInt(selectedVehicleTypeId),
+                vehicleModelId: parseInt(selectedVehicleModelId),
+                vehicleRegistrationNumber: document.getElementById('vehicleRegistrationNumber').value,
+                customerName: document.getElementById('customerName').value,
+                customerPhone: document.getElementById('customerPhone').value,
+                customerEmail: document.getElementById('customerEmail').value,
+                address: document.getElementById('address').value,
+                services: cart.join(', '),
+                pickDropOption: document.getElementById('pickDropOption').value,
+                pickupAddress: document.getElementById('pickupAddressInput').value,
+                dropAddress: document.getElementById('dropoffAddressInput').value,
+                pickupDropoffOption: document.getElementById('pickupDropoffOption').value,
+                requestedDate: document.getElementById('requestedDate').value,
+                status: 'PENDING',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+
+            fetch(`${backendApiUrl}/bookings`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(bookingData)
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`Failed to fetch vehicle models: ${response.status}`);
+                        return response.text().then(text => {
+                            throw new Error(`Failed to submit booking: ${response.status} - ${text}`);
+                        });
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Vehicle models for type ID', selectedVehicleTypeId, ':', data);
-                    modelContainer.innerHTML = '';
-                    if (!data || data.length === 0) {
-                        alert('No vehicle models available for this vehicle type.');
-                        return;
-                    }
-                    data.forEach(model => {
-                        const modelCard = `
-                            <div class="col-md-4">
-                                <div class="model-card" data-id="${model.id}">
-                                    <img src="${model.vehicleType?.imageUrl || 'https://wallpaperaccess.com/full/3417022.jpg'}" alt="${model.modelName}" class="img-fluid">
-                                    <div class="card-content">
-                                        <h5>${model.modelName}</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        modelContainer.innerHTML += modelCard;
-                    });
+                    console.log('Booking response:', data);
+                    confirmationDetails.innerHTML = `
+                        <h5>Booking Confirmed!</h5>
+                        <p><strong>Name:</strong> ${data.customerName}</p>
+                        <p><strong>Email:</strong> ${data.customerEmail}</p>
+                        <p><strong>Mobile Number:</strong> ${data.customerPhone}</p>
+                        <p><strong>Vehicle Registration Number:</strong> ${data.vehicleRegistrationNumber}</p>
+                        <p><strong>Service Center:</strong> ${selectedCenterName}</p>
+                        <p><strong>Vehicle Type:</strong> ${selectedVehicleTypeName}</p>
+                        <p><strong>Vehicle Model:</strong> ${selectedVehicleModelName}</p>
+                        <p><strong>Services:</strong> ${data.services}</p>
+                        <p><strong>Address:</strong> ${data.address}</p>
+                        <p><strong>Pick-up/Drop-off:</strong> ${data.pickDropOption}</p>
+                        ${data.pickDropOption === 'YES' ? `
+                            <p><strong>Pick-up/Drop-off Option:</strong> ${data.pickupDropoffOption}</p>
+                            ${data.pickupDropoffOption === 'pickup' || data.pickupDropoffOption === 'both' ? `<p><strong>Pick-up Address:</strong> ${data.pickupAddress}</p>` : ''}
+                            ${data.pickupDropoffOption === 'dropoff' || data.pickupDropoffOption === 'both' ? `<p><strong>Drop-off Address:</strong> ${data.dropAddress}</p>` : ''}
+                        ` : ''}
+                    `;
 
                     centerSelection.style.display = 'none';
                     vehicleSelection.style.display = 'none';
-                    modelSelection.style.display = 'block';
+                    modelSelection.style.display = 'none';
                     serviceSelection.style.display = 'none';
                     cartSection.style.display = 'none';
-                    confirmationSection.style.display = 'none';
+                    confirmationSection.style.display = 'flex';
 
-                    // Model selection
-                    document.querySelectorAll('.model-card').forEach(modelCard => {
-                        modelCard.addEventListener('click', function() {
-                            document.querySelectorAll('.model-card').forEach(mc => mc.classList.remove('selected'));
-                            this.classList.add('selected');
-                            selectedVehicleModelId = this.getAttribute('data-id');
-                            console.log('Selected vehicle model ID:', selectedVehicleModelId);
-
-                            // Fetch service packages for the selected vehicle type
-                            fetch(`${backendApiUrl}/service-packages/${selectedVehicleTypeId}`, {
-                                headers: {
-                                    'Authorization': `Bearer ${token}`,
-                                    'Accept': 'application/json'
-                                }
-                            })
-                                .then(response => {
-                                    if (!response.ok) {
-                                        throw new Error(`Failed to fetch service packages: ${response.status}`);
-                                    }
-                                    return response.json();
-                                })
-                                .then(services => {
-                                    console.log('Service packages for vehicle type ID', selectedVehicleTypeId, ':', services);
-                                    serviceContainer.innerHTML = '';
-                                    if (!services || services.length === 0) {
-                                        serviceContainer.innerHTML = '<div class="col-12"><p class="text-muted text-center">No services available for this vehicle type.</p></div>';
-                                    } else {
-                                        services.forEach(service => {
-                                            const serviceCard = `
-                                                <div class="col-md-4">
-                                                    <div class="service-card">
-                                                        <div class="service-header">
-                                                            <div class="d-flex align-items-center">
-                                                                <input type="checkbox" id="service_${service.id}" name="service" value="${service.packageName}">
-                                                                <label for="service_${service.id}">
-                                                                    <h5>${service.packageName}</h5>
-                                                                    <small class="text-muted">$${service.price}</small>
-                                                                </label>
-                                                            </div>
-                                                            <span class="material-icons toggle-icon" data-target="service_${service.id}_details">expand_less</span>
-                                                        </div>
-                                                        <div class="service-details" id="service_${service.id}_details">
-                                                            <h6>Details for ${service.packageName}</h6>
-                                                            <div class="service-details-item">
-                                                                <span>Description</span>
-                                                                <strong>${service.description || 'N/A'}</strong>
-                                                            </div>
-                                                            <div class="service-details-item">
-                                                                <span>Vehicle Type</span>
-                                                                <strong>${service.vehicleType?.name || 'N/A'}</strong>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            `;
-                                            serviceContainer.innerHTML += serviceCard;
-                                        });
-
-                                        // Re-attach toggle event listeners for the new service cards
-                                        document.querySelectorAll('.toggle-icon').forEach(icon => {
-                                            icon.addEventListener('click', function() {
-                                                const targetId = this.getAttribute('data-target');
-                                                const details = document.getElementById(targetId);
-                                                const isExpanded = details.style.display === 'block';
-                                                details.style.display = isExpanded ? 'none' : 'block';
-                                                this.textContent = isExpanded ? 'expand_more' : 'expand_less';
-                                            });
-                                        });
-                                    }
-
-                                    modelSelection.style.display = 'none';
-                                    serviceSelection.style.display = 'block';
-                                    cartSection.style.display = 'block';
-                                    confirmationSection.style.display = 'none';
-                                })
-                                .catch(error => {
-                                    console.error('Error fetching service packages:', error);
-                                    alert('Unable to load services for this vehicle type. Please try again.');
-                                    serviceContainer.innerHTML = '<div class="col-12"><p class="text-muted text-center">Error loading services. Please try again.</p></div>';
-                                    modelSelection.style.display = 'none';
-                                    serviceSelection.style.display = 'block';
-                                    cartSection.style.display = 'block';
-                                    confirmationSection.style.display = 'none';
-                                });
-                        });
-                    });
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('bookingModal'));
+                    modal.hide();
                 })
                 .catch(error => {
-                    console.error('Error fetching vehicle models:', error);
-                    alert('Unable to load vehicle models. Please try again.');
+                    console.error('Error submitting booking:', error);
+                    alert('Error submitting booking: ' + error.message);
                 });
         });
-    });
 
-    // Toggle service details (for initial load, replaced by dynamic binding above)
-    document.querySelectorAll('.toggle-icon').forEach(icon => {
-        icon.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            const details = document.getElementById(targetId);
-            const isExpanded = details.style.display === 'block';
-            details.style.display = isExpanded ? 'none' : 'block';
-            this.textContent = isExpanded ? 'expand_more' : 'expand_less';
-        });
-    });
+        // Reset page
+        function resetToServicePage() {
+            selectedCenterId = '';
+            selectedCenterName = ''; // Reset
+            selectedVehicleTypeId = '';
+            selectedVehicleTypeName = ''; // Reset
+            selectedVehicleModelId = '';
+            selectedVehicleModelName = ''; // Reset
+            cart = [];
 
-    // Add to cart
-    addToCartButton.addEventListener('click', function() {
-        const selectedServices = Array.from(document.querySelectorAll('input[name="service"]:checked'))
-            .map(checkbox => checkbox.value);
-        if (selectedServices.length === 0) {
-            alert('Please select at least one service to add to cart.');
-            return;
-        }
-        selectedServices.forEach(service => {
-            if (!cart.includes(service)) {
-                cart.push(service);
-            }
-        });
-        updateCart();
-        document.querySelectorAll('input[name="service"]').forEach(checkbox => checkbox.checked = false);
-    });
+            serviceCenterDropdown.value = '';
+            modelContainer.innerHTML = '';
+            serviceContainer.innerHTML = ''; // Clear service packages
+            document.querySelectorAll('.vehicle-card').forEach(card => card.classList.remove('selected'));
+            document.querySelectorAll('.model-card').forEach(card => card.classList.remove('selected'));
+            document.querySelectorAll('input[name="service"]').forEach(checkbox => checkbox.checked = false);
+            document.querySelectorAll('.service-details').forEach(details => details.style.display = 'block');
+            document.querySelectorAll('.toggle-icon').forEach(icon => icon.textContent = 'expand_less');
+            cartItems.innerHTML = '';
 
-    // Update cart
-    function updateCart() {
-        cartItems.innerHTML = '';
-        cart.forEach((service, index) => {
-            const li = document.createElement('li');
-            li.innerHTML = `${service} <button class="btn btn-sm btn-danger" data-index="${index}">Remove</button>`;
-            cartItems.appendChild(li);
-        });
-
-        document.querySelectorAll('.cart-section .btn-danger').forEach(button => {
-            button.addEventListener('click', function() {
-                const index = this.getAttribute('data-index');
-                cart.splice(index, 1);
-                updateCart();
-            });
-        });
-    }
-
-    // Booking modal logic
-    const pickupDropoff = document.getElementById('pickDropOption');
-    const pickupDropoffType = document.getElementById('pickupDropoffType');
-    const pickupAddress = document.getElementById('pickupAddress');
-    const dropoffAddress = document.getElementById('dropoffAddress');
-    const pickupDropoffOption = document.getElementById('pickupDropoffOption');
-
-    pickupDropoff.addEventListener('change', function() {
-        const isPickupDropoffYes = this.value === 'YES';
-        pickupDropoffType.style.display = isPickupDropoffYes ? 'block' : 'none';
-        pickupAddress.style.display = 'none';
-        dropoffAddress.style.display = 'none';
-        if (!isPickupDropoffYes) {
-            pickupDropoffOption.value = '';
-        }
-    });
-
-    pickupDropoffOption.addEventListener('change', function() {
-        const option = this.value;
-        pickupAddress.style.display = (option === 'pickup' || option === 'both') ? 'block' : 'none';
-        dropoffAddress.style.display = (option === 'dropoff' || option === 'both') ? 'block' : 'none';
-    });
-
-    // Form submission
-    // Form submission
-document.getElementById('bookingForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    if (!selectedCenterId) {
-        alert('Please select a service center.');
-        return;
-    }
-    if (!selectedVehicleTypeId) {
-        alert('Please select a vehicle type.');
-        return;
-    }
-    if (!selectedVehicleModelId) {
-        alert('Please select a vehicle model.');
-        return;
-    }
-    if (cart.length === 0) {
-        alert('Your cart is empty. Please add services to book.');
-        return;
-    }
-
-    const bookingData = {
-        customerId: parseInt(customerId),
-        serviceCenterId: parseInt(selectedCenterId),
-        vehicleTypeId: parseInt(selectedVehicleTypeId),
-        vehicleModelId: parseInt(selectedVehicleModelId),
-        vehicleRegistrationNumber: document.getElementById('vehicleRegistrationNumber').value, // Include new field
-        customerName: document.getElementById('customerName').value,
-        customerPhone: document.getElementById('customerPhone').value,
-        customerEmail: document.getElementById('customerEmail').value,
-        address: document.getElementById('address').value,
-        services: cart.join(', '),
-        pickDropOption: document.getElementById('pickDropOption').value,
-        pickupAddress: document.getElementById('pickupAddressInput').value,
-        dropAddress: document.getElementById('dropoffAddressInput').value,
-        pickupDropoffOption: document.getElementById('pickupDropoffOption').value,
-        requestedDate: document.getElementById('requestedDate').value, // ISO format handled by datetime-local
-        status: 'PENDING',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-    };
-
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    };
-
-    fetch(`${backendApiUrl}/bookings`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(bookingData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Failed to submit booking: ${response.status} - ${text}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Booking response:', data);
-            confirmationDetails.innerHTML = `
-                <h5>Booking Confirmed!</h5>
-                <p><strong>Name:</strong> ${bookingData.customerName}</p>
-                <p><strong>Email:</strong> ${bookingData.customerEmail}</p>
-                <p><strong>Mobile Number:</strong> ${bookingData.customerPhone}</p>
-                <p><strong>Vehicle Registration Number:</strong> ${bookingData.vehicleRegistrationNumber}</p>
-                <p><strong>Service Center ID:</strong> ${bookingData.serviceCenterId}</p>
-                <p><strong>Vehicle Type ID:</strong> ${bookingData.vehicleTypeId}</p>
-                <p><strong>Vehicle Model ID:</strong> ${bookingData.vehicleModelId}</p>
-                <p><strong>Services:</strong> ${bookingData.services}</p>
-                <p><strong>Address:</strong> ${bookingData.address}</p>
-                <p><strong>Pick-up/Drop-off:</strong> ${bookingData.pickDropOption}</p>
-                ${bookingData.pickDropOption === 'YES' ? `
-                    <p><strong>Pick-up/Drop-off Option:</strong> ${bookingData.pickupDropoffOption}</p>
-                    ${bookingData.pickupDropoffOption === 'pickup' || bookingData.pickupDropoffOption === 'both' ? `<p><strong>Pick-up Address:</strong> ${bookingData.pickupAddress}</p>` : ''}
-                    ${bookingData.pickupDropoffOption === 'dropoff' || bookingData.pickupDropoffOption === 'both' ? `<p><strong>Drop-off Address:</strong> ${bookingData.dropAddress}</p>` : ''}
-                ` : ''}
-            `;
-
-            centerSelection.style.display = 'none';
-            vehicleSelection.style.display = 'none';
+            confirmationSection.style.display = 'none';
             modelSelection.style.display = 'none';
             serviceSelection.style.display = 'none';
             cartSection.style.display = 'none';
-            confirmationSection.style.display = 'flex';
+            vehicleSelection.style.display = 'none';
+            centerSelection.style.display = 'block';
 
-            const modal = bootstrap.Modal.getInstance(document.getElementById('bookingModal'));
-            modal.hide();
-        })
-        .catch(error => {
-            console.error('Error submitting booking:', error);
-            alert('Error submitting booking: ' + error.message);
-        });
-});
-
-    // Reset page
-    function resetToServicePage() {
-        selectedCenterId = '';
-        selectedVehicleTypeId = '';
-        selectedVehicleModelId = '';
-        cart = [];
-
-        serviceCenterDropdown.value = '';
-        modelContainer.innerHTML = '';
-        serviceContainer.innerHTML = ''; // Clear service packages
-        document.querySelectorAll('.vehicle-card').forEach(card => card.classList.remove('selected'));
-        document.querySelectorAll('.model-card').forEach(card => card.classList.remove('selected'));
-        document.querySelectorAll('input[name="service"]').forEach(checkbox => checkbox.checked = false);
-        document.querySelectorAll('.service-details').forEach(details => details.style.display = 'block');
-        document.querySelectorAll('.toggle-icon').forEach(icon => icon.textContent = 'expand_less');
-        cartItems.innerHTML = '';
-
-        confirmationSection.style.display = 'none';
-        modelSelection.style.display = 'none';
-        serviceSelection.style.display = 'none';
-        cartSection.style.display = 'none';
-        vehicleSelection.style.display = 'none';
-        centerSelection.style.display = 'block';
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        history.replaceState(null, '', window.location.pathname);
-    }
-
-    backButton.addEventListener('click', resetToServicePage);
-
-    document.getElementById('submit-booking').addEventListener('click', function() {
-        document.getElementById('serviceCenterId').value = selectedCenterId;
-        document.getElementById('vehicleTypeId').value = selectedVehicleTypeId;
-        document.getElementById('vehicleModelId').value = selectedVehicleModelId;
-        document.getElementById('services').value = cart.join(', ');
-    });
-
-    function logout() {
-        if (confirm("Are you sure you want to logout?")) {
-            window.location.href = "/customer/logout";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            history.replaceState(null, '', window.location.pathname);
         }
-    }
-});
-</script>
+
+        backButton.addEventListener('click', resetToServicePage);
+
+        document.getElementById('submit-booking').addEventListener('click', function() {
+            document.getElementById('serviceCenterId').value = selectedCenterId;
+            document.getElementById('vehicleTypeId').value = selectedVehicleTypeId;
+            document.getElementById('vehicleModelId').value = selectedVehicleModelId;
+            document.getElementById('services').value = cart.join(', ');
+        });
+
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                window.location.href = "/customer/logout";
+            }
+        }
+    });
+    </script>
 </body>
-</html> 
+</html>

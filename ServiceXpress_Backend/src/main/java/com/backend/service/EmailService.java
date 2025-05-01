@@ -1,13 +1,16 @@
 package com.backend.service;
 
+import com.backend.model.BookingRequest;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import com.backend.model.BookingRequest;
 
-import jakarta.mail.MessagingException;
 
 @Service
 public class EmailService {
@@ -15,15 +18,19 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendBookingConfirmationEmail(String to, String customerName, BookingRequest booking) throws MessagingException {
-        jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+    public void sendBookingConfirmationEmail(String to, String customerName, BookingRequest booking,
+                                            String vehicleTypeId, String vehicleTypeName,
+                                            String vehicleModelId, String vehicleModelName,
+                                            String serviceCenterId, String serviceCenterName) 
+                                            throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
         helper.setTo(to);
         helper.setSubject("Booking Confirmation - ServiceXpress");
-        helper.setFrom("yuvasreemohan4sep2003@gmail.com"); // Must match spring.mail.username
+        helper.setFrom("yuvasreemohan4sep2003@gmail.com");
 
-        // Construct the HTML email body
+        // Construct the HTML email body with both IDs and names
         String htmlContent = "<html>" +
                 "<body style='font-family: Poppins, sans-serif; color: #4B5563;'>" +
                 "<div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #E5E7EB; border-radius: 10px;'>" +
@@ -36,9 +43,9 @@ public class EmailService {
                 "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Email:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getCustomerEmail() + "</td></tr>" +
                 "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Mobile Number:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getCustomerPhone() + "</td></tr>" +
                 "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Vehicle Registration Number:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getVehicleRegistrationNumber() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Service Center ID:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getServiceCenterId() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Vehicle Type ID:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getVehicleTypeId() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Vehicle Model ID:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getVehicleModelId() + "</td></tr>" +
+                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Service Center (ID: " + serviceCenterId + "):</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + serviceCenterName + "</td></tr>" +
+                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Vehicle Type (ID: " + vehicleTypeId + "):</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + vehicleTypeName + "</td></tr>" +
+                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Vehicle Model (ID: " + vehicleModelId + "):</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + vehicleModelName + "</td></tr>" +
                 "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Services:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getServices() + "</td></tr>" +
                 "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Requested Date:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getRequestedDate() + "</td></tr>" +
                 "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Address:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getAddress() + "</td></tr>" +
@@ -60,7 +67,7 @@ public class EmailService {
                 "</body>" +
                 "</html>";
 
-        helper.setText(htmlContent, true); // true indicates HTML content
+        helper.setText(htmlContent, true);
         mailSender.send(mimeMessage);
     }
 }
