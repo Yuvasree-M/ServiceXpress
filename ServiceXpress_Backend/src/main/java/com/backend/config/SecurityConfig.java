@@ -84,6 +84,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/advisor/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/advisor/**").hasRole("ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/service-advisor/**").hasRole("SERVICE_ADVISOR")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
                 // ---- CRUD for Vehicle Types, Models, Customers, Advisors, Packages ----

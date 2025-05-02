@@ -88,7 +88,6 @@ body {
 
 .sidebar .nav-link:hover,
 .sidebar .nav-link.active {
-    background: rgba(255, 107, 0, 0.1);
     color: var(--primary-color) !important;
 }
 
