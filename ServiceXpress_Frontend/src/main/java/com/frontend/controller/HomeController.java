@@ -98,6 +98,11 @@ public class HomeController {
         return "index";
     }
 
+    @GetMapping("/login")
+    public String loginRedirect() {
+        return "redirect:/?login=true";
+    }
+
     @PostMapping("/login")
     public String login(@RequestParam String identifier, @RequestParam String password, Model model, HttpSession session) {
         try {
@@ -111,6 +116,7 @@ public class HomeController {
             if (response != null && response.getToken() != null && response.getRole() != null) {
                 String token = response.getToken();
                 session.setAttribute("token", token);
+                session.setAttribute("username", identifier); // Store username
                 String role = response.getRole();
                 String redirectUrl = switch (role) {
                     case "ADMIN" -> "/dashboard/admin";
@@ -155,6 +161,7 @@ public class HomeController {
                 AuthResponse authResponse = response.getBody();
                 if (authResponse.getToken() != null && "CUSTOMER".equals(authResponse.getRole())) {
                     session.setAttribute("token", authResponse.getToken());
+                    session.setAttribute("username", request.getPhoneNumber()); // Store phone number as username
                     return "redirect:/dashboard/customer";
                 }
             }
@@ -165,7 +172,6 @@ public class HomeController {
             return "index";
         }
     }
-
 
     public static class OtpRequest {
         private String phoneNumber;

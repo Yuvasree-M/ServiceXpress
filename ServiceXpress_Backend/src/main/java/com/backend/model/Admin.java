@@ -1,7 +1,6 @@
 package com.backend.model;
 
 import com.backend.enums.Role;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,7 +11,7 @@ public class Admin extends BaseUser {
     private Role role = Role.ADMIN;
 
     public Admin() {}
-    
+
     public Admin(String username, String email, String phoneNumber, String password) {
         setUsername(username);
         setEmail(email);

@@ -61,7 +61,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body bg-white">
-                    <div id="errorMessage" class="error-message"></div>
+                    <div id="errorMessage" class="error-message" th:text="${error}"></div>
                     <form id="loginForm">
                         <div class="mb-3">
                             <label class="form-label">Username / Mobile Number</label>
@@ -289,6 +289,15 @@
         const otpInputs = document.querySelectorAll('.otp-input');
         let phoneNumber = '';
         let timerInterval;
+
+        // Check for login query parameter to open modal
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'true') {
+                const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                loginModal.show();
+            }
+        });
 
         function toggleForm(isOtp) {
             passwordDiv.classList.toggle('active', !isOtp);
