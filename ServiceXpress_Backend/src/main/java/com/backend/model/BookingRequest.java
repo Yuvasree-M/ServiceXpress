@@ -31,7 +31,7 @@ public class BookingRequest {
     private Integer vehicleModelId;
 
     @Column(nullable = false)
-    private String vehicleRegistrationNumber; // New field
+    private String vehicleRegistrationNumber;
 
     @Column(nullable = false)
     private String customerName;
@@ -69,4 +69,7 @@ public class BookingRequest {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column
+    private String transactionId; // Added for completed bookings
 }
