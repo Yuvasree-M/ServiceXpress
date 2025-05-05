@@ -20,7 +20,6 @@ import com.backend.repository.CustomerRepository;
 import com.backend.service.TokenBlacklistService;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -55,7 +54,7 @@ public class SecurityConfig {
             .cors().configurationSource(corsConfigurationSource())
             .and()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow CORS preflight
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/service-packages/**").permitAll()
                 .requestMatchers("/api/service-centers").permitAll()
@@ -63,10 +62,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/vehicle-models/**").permitAll()
                 .requestMatchers("/api/bookings/**").permitAll()
                 .requestMatchers("/api/admin/bookings/**").hasRole("ADMIN")
-                
-//                .requestMatchers(HttpMethod.POST, "/api/service-packages/**").hasRole("ADMIN")
-//                .requestMatchers(HttpMethod.PUT, "/api/service-packages/**").hasRole("ADMIN")
-//                .requestMatchers(HttpMethod.DELETE, "/api/service-packages/**").hasRole("ADMIN")
                 .requestMatchers("/api/service-centers/**").hasRole("ADMIN")
                 .requestMatchers("/api/requests/**").hasAnyRole("CUSTOMER", "SERVICE_ADVISOR", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/inventory/**").hasAnyRole("ADMIN", "SERVICE_ADVISOR")
@@ -78,7 +73,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/locations/**").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN")
                 .requestMatchers("/api/dashboard/customer").hasRole("CUSTOMER")
-                .requestMatchers("/api/dashboard/service-advisor").hasRole("SERVICE_ADVISOR")
+                .requestMatchers("/api/dashboard/advisor").hasRole("SERVICE_ADVISOR")
                 .requestMatchers(HttpMethod.GET, "/api/advisor/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/advisor/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/advisor/**").hasRole("ADMIN")
@@ -87,7 +82,6 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/service-advisor/**").hasRole("SERVICE_ADVISOR")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
-                // ---- CRUD for Vehicle Types, Models, Customers, Advisors, Packages ----
                 .requestMatchers("/api/vehicle-type/**").hasAnyRole("ADMIN", "CUSTOMER")
                 .requestMatchers("/api/vehicle-models/**").hasRole("ADMIN")
                 .requestMatchers("/api/customers/**").hasRole("ADMIN")

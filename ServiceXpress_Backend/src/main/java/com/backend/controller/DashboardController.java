@@ -5,13 +5,14 @@ import com.backend.dto.BookingResponseDTO;
 import com.backend.dto.DashboardDataDTO;
 import com.backend.dto.VehicleDueDTO;
 import com.backend.dto.VehicleUnderServiceDTO;
+import com.backend.dto.VehicleAssignedDTO;
 import com.backend.model.Advisor;
 import com.backend.model.BookingAdvisorMapping;
-import com.backend.model.DashboardData;
+import com.backend.model.BookingRequest;
 import com.backend.service.BookingRequestService;
-import com.backend.service.DashboardService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,28 +20,32 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/dashboard")
 public class DashboardController {
     
-    private final DashboardService dashboardService;
-    @Autowired
-    private BookingRequestService bookingRequestService;
+    private final BookingRequestService bookingRequestService;
+    private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 
-    public DashboardController(DashboardService dashboardService) {
-        this.dashboardService = dashboardService;
+    @Autowired
+    public DashboardController(BookingRequestService bookingRequestService) {
+        this.bookingRequestService = bookingRequestService;
     }
 
     @GetMapping("/admin")
     public ResponseEntity<DashboardDataDTO> getAdminDashboardData() {
+        logger.info("Fetching admin dashboard data");
         try {
-            // Fetch pending bookings
             List<BookingResponseDTO> pendingBookings = bookingRequestService.getPendingBookings();
+            logger.debug("Fetched {} pending bookings", pendingBookings.size());
 
-            // Fetch all advisors
             List<Advisor> advisors = bookingRequestService.getAllAdvisors();
             List<AdvisorDTO> advisorDTOs = advisors.stream().map(advisor -> {
                 AdvisorDTO dto = new AdvisorDTO();
@@ -49,7 +54,6 @@ public class DashboardController {
                 return dto;
             }).collect(Collectors.toList());
 
-            // Map pending bookings to VehicleDueDTO
             List<VehicleDueDTO> vehiclesDue = pendingBookings.stream().map(booking -> {
                 VehicleDueDTO vehicleDue = new VehicleDueDTO();
                 vehicleDue.setId(booking.getId());
@@ -61,15 +65,14 @@ public class DashboardController {
                 vehicleDue.setServiceAdvisorId(null);
                 vehicleDue.setAvailableAdvisors(advisorDTOs);
                 vehicleDue.setRequestedDate(booking.getRequestedDate());
-                vehicleDue.setDueDate(booking.getRequestedDate().plusDays(2));
+                vehicleDue.setDueDate(booking.getRequestedDate() != null ? booking.getRequestedDate().plusDays(2) : null);
                 vehicleDue.setStatus(booking.getStatus());
                 return vehicleDue;
             }).collect(Collectors.toList());
 
-            // Fetch in-progress bookings
             List<BookingResponseDTO> inProgressBookings = bookingRequestService.getInProgressBookings();
+            logger.debug("Fetched {} in-progress bookings", inProgressBookings.size());
 
-            // Map in-progress bookings to VehicleUnderServiceDTO
             List<VehicleUnderServiceDTO> vehiclesUnderService = inProgressBookings.stream().map(booking -> {
                 VehicleUnderServiceDTO dto = new VehicleUnderServiceDTO();
                 dto.setId(booking.getId());
@@ -89,32 +92,82 @@ public class DashboardController {
                 return dto;
             }).collect(Collectors.toList());
 
-            // Create DashboardDataDTO
+            List<BookingResponseDTO> assignedBookings = bookingRequestService.getAssignedBookings();
+            logger.debug("Fetched {} assigned bookings", assignedBookings.size());
+
+            List<VehicleAssignedDTO> vehiclesAssigned = assignedBookings.stream().map(booking -> {
+                VehicleAssignedDTO dto = new VehicleAssignedDTO();
+                dto.setId(booking.getId());
+                dto.setCustomerName(booking.getCustomerName());
+                dto.setVehicleModel(booking.getVehicleModelId());
+                dto.setVehicleType(booking.getVehicleTypeId());
+                String advisorName = "Unknown";
+                Optional<BookingAdvisorMapping> mapping = bookingRequestService.getBookingAdvisorMappingRepository().findByBookingId(booking.getId());
+                if (mapping.isPresent()) {
+                    Optional<Advisor> advisor = bookingRequestService.getAdvisorRepository().findById(mapping.get().getAdvisorId());
+                    advisorName = advisor.map(Advisor::getUsername).orElse("Unknown");
+                }
+                dto.setAdvisorName(advisorName);
+                dto.setAssignedDate(booking.getUpdatedAt());
+                dto.setStatus(booking.getStatus());
+                dto.setServicesNeeded(booking.getServices());
+                return dto;
+            }).collect(Collectors.toList());
+
             DashboardDataDTO dashboardData = new DashboardDataDTO();
             dashboardData.setDueCount(vehiclesDue.size());
             dashboardData.setServicingCount(vehiclesUnderService.size());
             dashboardData.setCompletedCount(0);
             dashboardData.setAdvisorRequestsCount(0);
+            dashboardData.setAssignedCount(vehiclesAssigned.size());
             dashboardData.setProfileName("Admin User");
             dashboardData.setVehiclesDue(vehiclesDue);
             dashboardData.setVehiclesUnderService(vehiclesUnderService);
             dashboardData.setVehiclesCompleted(new ArrayList<>());
             dashboardData.setAdvisorRequests(new ArrayList<>());
+            dashboardData.setVehiclesAssigned(vehiclesAssigned);
 
+            logger.info("Admin dashboard data prepared successfully");
             return ResponseEntity.ok(dashboardData);
         } catch (Exception e) {
-            System.err.println("Error fetching dashboard data: " + e.getMessage());
+            logger.error("Error fetching admin dashboard data: {}", e.getMessage(), e);
             return ResponseEntity.status(500).build();
         }
     }
 
-    @GetMapping("/customer")
-    public ResponseEntity<DashboardData> getCustomerDashboard() {
-        return ResponseEntity.ok(dashboardService.getCustomerDashboardData());
+    @GetMapping("/advisor")
+    public ResponseEntity<List<BookingResponseDTO>> getAdvisorBookings(@RequestParam Long advisorId) {
+        logger.info("Fetching bookings for advisorId: {}", advisorId);
+        try {
+            if (advisorId == null) {
+                logger.warn("Advisor ID is null");
+                return ResponseEntity.badRequest().body(Collections.emptyList());
+            }
+
+            List<BookingResponseDTO> advisorBookings = bookingRequestService.getAssignedBookingsForAdvisor(advisorId);
+            logger.info("Fetched {} bookings for advisorId: {}", advisorBookings.size(), advisorId);
+            return ResponseEntity.ok(advisorBookings != null ? advisorBookings : Collections.emptyList());
+        } catch (Exception e) {
+            logger.error("Error fetching advisor bookings for advisorId {}: {}", advisorId, e.getMessage(), e);
+            return ResponseEntity.status(500).body(Collections.emptyList());
+        }
     }
 
-//    @GetMapping("/service-advisor")
-//    public ResponseEntity<DashboardDataDTO> getServiceAdvisorDashboard() {
-//        return ResponseEntity.ok(dashboardService.getServiceAdvisorDashboardData());
-//    }
+    @PostMapping("/start-service")
+    public ResponseEntity<BookingRequest> startService(@RequestParam Long bookingId) {
+        logger.info("Starting service for bookingId: {}", bookingId);
+        try {
+            if (bookingId == null) {
+                logger.warn("Booking ID is null");
+                return ResponseEntity.badRequest().build();
+            }
+
+            BookingRequest updatedBooking = bookingRequestService.startService(bookingId);
+            logger.info("Service started successfully for bookingId: {}", bookingId);
+            return ResponseEntity.ok(updatedBooking);
+        } catch (Exception e) {
+            logger.error("Error starting service for bookingId {}: {}", bookingId, e.getMessage(), e);
+            return ResponseEntity.status(500).build();
+        }
+    }
 }
