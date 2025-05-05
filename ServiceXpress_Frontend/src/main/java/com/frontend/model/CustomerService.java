@@ -54,7 +54,7 @@ public class CustomerService {
 
         ServiceHistory history1 = new ServiceHistory();
         history1.setDate("2025-03-15");
-        history1.setVehicle("Honda City");
+//        history1.setVehicle("Honda City");
         history1.setWorkDone("Oil Change, Filter Replacement");
         history1.setCost(950.00);
         history1.setStatus("Completed");
@@ -62,7 +62,7 @@ public class CustomerService {
 
         ServiceHistory history2 = new ServiceHistory();
         history2.setDate("2025-02-20");
-        history2.setVehicle("Yamaha FZ");
+//        history2.setVehicle("Yamaha FZ");
         history2.setWorkDone("Chain Tightening");
         history2.setCost(300.00);
         history2.setStatus("Completed");
