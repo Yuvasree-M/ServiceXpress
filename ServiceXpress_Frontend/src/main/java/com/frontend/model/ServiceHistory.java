@@ -1,20 +1,16 @@
 package com.frontend.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor 
+@Data
 public class ServiceHistory {
+    private Long id;
     private String date;
-    private String vehicle;
+    private String serviceCenterName;
+    private String vehicleTypeName; // For template concatenation
+    private String vehicleModelName; // For template concatenation
     private String workDone;
-    private double cost;
+    private Double cost;
     private String status;
     private String transactionId;
-    // Getters and setters
 }

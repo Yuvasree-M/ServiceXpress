@@ -1,19 +1,18 @@
 package com.frontend.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class ServiceStatus {
-    private String vehicleType;
-    private String model;
+    private Long id;
+    private String serviceCenterName;
+    @JsonProperty("vehicleTypeName")
+    private String vehicleType; // Maps to vehicleTypeName in JSON
+    @JsonProperty("vehicleModelName")
+    private String model; // Maps to vehicleModelName in JSON
     private String registration;
     private String service;
-    private double cost;
+    private Double cost;
     private String status;
 }

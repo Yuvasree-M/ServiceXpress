@@ -3,12 +3,10 @@ package com.frontend.controller;
 import com.frontend.model.Booking;
 import com.frontend.model.Customer;
 import com.frontend.model.CustomerService;
-import com.frontend.model.DashboardDataDTO;
-import com.frontend.model.ServiceStatus;
-import com.frontend.model.ServiceHistory;
 import com.frontend.model.Service;
 import com.frontend.model.ServicePackage;
 import com.frontend.model.VehicleTypeDTO;
+import com.frontend.model.CustomerDashboardDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -51,32 +49,39 @@ public class CustomerController {
             return "redirect:/login";
         }
 
-        List<ServiceStatus> ongoingServices = customerService.getOngoingServices(customer.getId());
-        List<ServiceHistory> serviceHistory = customerService.getServiceHistory(customer.getId());
+        // Initialize with local data from CustomerService as fallback
+        List<com.frontend.model.ServiceStatus> ongoingServices = customerService.getOngoingServices(customer.getId());
+        List<com.frontend.model.ServiceHistory> serviceHistory = customerService.getServiceHistory(customer.getId());
+
+        // Fetch dashboard data from backend
+        try {
+            String url = backendApiUrl + "/customer/dashboard?customerId=" + customer.getId();
+            HttpEntity<String> request = new HttpEntity<>(new HttpHeaders()); // No token needed
+            ResponseEntity<CustomerDashboardDTO> response = restTemplate.exchange(
+                url, HttpMethod.GET, request, CustomerDashboardDTO.class
+            );
+            CustomerDashboardDTO dashboardData = response.getBody();
+            if (dashboardData != null) {
+                ongoingServices = dashboardData.getOngoingServices();
+                serviceHistory = dashboardData.getServiceHistory();
+                System.out.println("Backend Ongoing Services: " + ongoingServices);
+                System.out.println("Backend Service History: " + serviceHistory);
+            } else {
+                System.err.println("No dashboard data returned from " + url);
+                model.addAttribute("error", "No dashboard data available.");
+            }
+        } catch (HttpClientErrorException e) {
+            System.err.println("HTTP error fetching dashboard data: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            model.addAttribute("error", "Unable to fetch dashboard data: " + e.getStatusCode() + " : " + e.getResponseBodyAsString());
+        } catch (Exception e) {
+            System.err.println("Error fetching dashboard data: " + e.getMessage());
+            model.addAttribute("error", "Unable to fetch dashboard data: " + e.getMessage());
+        }
 
         model.addAttribute("customer", customer);
         model.addAttribute("cartCount", customerService.getCartCount(customer.getId()));
         model.addAttribute("ongoingServices", ongoingServices);
         model.addAttribute("serviceHistory", serviceHistory);
-
-        try {
-            String token = (String) session.getAttribute("token");
-            if (token == null) {
-                model.addAttribute("error", "No authentication token found. Please log in.");
-                return "redirect:/login";
-            }
-
-            model.addAttribute("token", token);
-
-            String url = backendApiUrl + "/dashboard/customer";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-            HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<DashboardDataDTO> response = restTemplate.exchange(url, HttpMethod.GET, request, DashboardDataDTO.class);
-            model.addAttribute("dashboardData", response.getBody());
-        } catch (Exception e) {
-            model.addAttribute("error", "Unable to fetch dashboard data: " + e.getMessage());
-        }
 
         return "customer-dashboard";
     }
