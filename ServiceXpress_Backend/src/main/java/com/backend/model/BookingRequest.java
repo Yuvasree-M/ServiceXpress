@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+
 public class BookingRequest {
 
     @Id
@@ -31,7 +31,7 @@ public class BookingRequest {
     private Integer vehicleModelId;
 
     @Column(nullable = false)
-    private String vehicleRegistrationNumber;
+    private String vehicleRegistrationNumber; // New field
 
     @Column(nullable = false)
     private String customerName;
