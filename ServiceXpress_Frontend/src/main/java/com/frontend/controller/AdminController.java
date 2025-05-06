@@ -468,8 +468,8 @@ public class AdminController {
 
         try {
             logger.info("Fetching vehicle types with token: {}", token);
-            ResponseEntity<VehicleTypeDTO[]> response = restTemplate.exchange(
-                    vehicleTypeUrl(), HttpMethod.GET, request, VehicleTypeDTO[].class);
+            ResponseEntity<VehicleType[]> response = restTemplate.exchange(
+                    vehicleTypeUrl(), HttpMethod.GET, request, VehicleType[].class);
             logger.info("Successfully fetched vehicle types: {}", response.getBody());
             if (response.getBody() == null) {
                 return List.of();
@@ -730,8 +730,8 @@ public class AdminController {
                     vehicleModelUrl(), HttpMethod.GET, request, String.class);
             logger.info("Raw JSON response from /api/vehicle-models: {}", rawResponse.getBody());
 
-            ResponseEntity<VehicleModelDTO[]> response = restTemplate.exchange(
-                    vehicleModelUrl(), HttpMethod.GET, request, VehicleModelDTO[].class);
+            ResponseEntity<VehicleModel[]> response = restTemplate.exchange(
+                    vehicleModelUrl(), HttpMethod.GET, request, VehicleModel[].class);
             if (response.getBody() == null) {
                 return List.of();
             }
@@ -832,16 +832,16 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
             // Convert VehicleModel to VehicleModelDTO
-            VehicleModelDTO vehicleModelDTO = new VehicleModelDTO();
+            VehicleModel vehicleModelDTO = new VehicleModel();
             vehicleModelDTO.setModelName(vehicleModel.getModelName());
-            VehicleTypeDTO vehicleTypeDTO = new VehicleTypeDTO();
+            VehicleType vehicleTypeDTO = new VehicleType();
             vehicleTypeDTO.setId(vehicleModel.getVehicleType().getId());
             // Fetch vehicle type name if needed (optional, since backend only needs ID)
             vehicleTypeDTO.setName(vehicleModel.getVehicleType().getName());
             vehicleModelDTO.setVehicleType(vehicleTypeDTO);
 
             logger.info("Sending add vehicle model request: {}", vehicleModelDTO);
-            HttpEntity<VehicleModelDTO> request = new HttpEntity<>(vehicleModelDTO, headers);
+            HttpEntity<VehicleModel> request = new HttpEntity<>(vehicleModelDTO, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(vehicleModelUrl(), request, String.class);
             logger.info("Add vehicle model response: {}", response.getBody());
 
@@ -885,9 +885,9 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             HttpEntity<String> request = new HttpEntity<>(headers);
 
-            ResponseEntity<VehicleModelDTO> response = restTemplate.exchange(
-                    vehicleModelUrl() + "/" + id, HttpMethod.GET, request, VehicleModelDTO.class);
-            VehicleModelDTO dto = response.getBody();
+            ResponseEntity<VehicleModel> response = restTemplate.exchange(
+                    vehicleModelUrl() + "/" + id, HttpMethod.GET, request, VehicleModel.class);
+            VehicleModel dto = response.getBody();
             if (dto == null) {
                 throw new RuntimeException("Vehicle model not found");
             }
@@ -958,16 +958,16 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
             // Convert VehicleModel to VehicleModelDTO
-            VehicleModelDTO vehicleModelDTO = new VehicleModelDTO();
+            VehicleModel vehicleModelDTO = new VehicleModel();
             vehicleModelDTO.setId(id); // Use the Integer id directly
             vehicleModelDTO.setModelName(vehicleModel.getModelName());
-            VehicleTypeDTO vehicleTypeDTO = new VehicleTypeDTO();
+            VehicleType vehicleTypeDTO = new VehicleType();
             vehicleTypeDTO.setId(vehicleModel.getVehicleType().getId());
             vehicleTypeDTO.setName(vehicleModel.getVehicleType().getName());
             vehicleModelDTO.setVehicleType(vehicleTypeDTO);
 
             logger.info("Sending edit vehicle model request: {}", vehicleModelDTO);
-            HttpEntity<VehicleModelDTO> request = new HttpEntity<>(vehicleModelDTO, headers);
+            HttpEntity<VehicleModel> request = new HttpEntity<>(vehicleModelDTO, headers);
             ResponseEntity<String> response = restTemplate.exchange(
                     vehicleModelUrl() + "/" + id, HttpMethod.PUT, request, String.class);
             logger.info("Edit vehicle model response: {}", response.getBody());
@@ -1041,7 +1041,8 @@ public class AdminController {
         }
     }
     
- // SERVICE PACKAGE MODULE
+    // SERVICE PACKAGE
+    
     private String servicePackageUrl() {
         return backendApiUrl + "/service-packages";
     }
@@ -1053,32 +1054,12 @@ public class AdminController {
         HttpEntity<String> request = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> rawResponse = restTemplate.exchange(
-                    servicePackageUrl(), HttpMethod.GET, request, String.class);
-            logger.info("Raw JSON response from /api/service-packages: {}", rawResponse.getBody());
-
-            ResponseEntity<ServicePackageDTO[]> response = restTemplate.exchange(
-                    servicePackageUrl(), HttpMethod.GET, request, ServicePackageDTO[].class);
+            ResponseEntity<ServicePackage[]> response = restTemplate.exchange(
+                    servicePackageUrl(), HttpMethod.GET, request, ServicePackage[].class);
             if (response.getBody() == null) {
                 return List.of();
             }
-
-            // Map ServicePackageDTO to ServicePackage
-            return Arrays.stream(response.getBody())
-                    .map(dto -> {
-                        ServicePackage.VehicleType vehicleType = new ServicePackage.VehicleType(
-                                dto.getVehicleType().getId(),
-                                dto.getVehicleType().getName()
-                        );
-                        return new ServicePackage(
-                                dto.getId(),
-                                dto.getPackageName(),
-                                dto.getDescription(),
-                                dto.getPrice(),
-                                vehicleType
-                        );
-                    })
-                    .collect(Collectors.toList());
+            return Arrays.asList(response.getBody());
         } catch (HttpClientErrorException e) {
             logger.error("HTTP error fetching service packages: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("Failed to fetch service packages: " + e.getResponseBodyAsString(), e);
@@ -1087,6 +1068,28 @@ public class AdminController {
             throw new RuntimeException("Failed to fetch service packages: " + e.getMessage(), e);
         }
     }
+
+//    private List<VehicleType> fetchVehicleTypes(String token) {
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setBearerAuth(token);
+//        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+//        HttpEntity<String> request = new HttpEntity<>(headers);
+//
+//        try {
+//            ResponseEntity<VehicleType[]> response = restTemplate.exchange(
+//                    backendApiUrl + "/vehicle-types", HttpMethod.GET, request, VehicleType[].class);
+//            if (response.getBody() == null) {
+//                return List.of();
+//            }
+//            return Arrays.asList(response.getBody());
+//        } catch (HttpClientErrorException e) {
+//            logger.error("HTTP error fetching vehicle types: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+//            throw new RuntimeException("Failed to fetch vehicle types: " + e.getResponseBodyAsString(), e);
+//        } catch (Exception e) {
+//            logger.error("Error fetching vehicle types: {}", e.getMessage(), e);
+//            throw new RuntimeException("Failed to fetch vehicle types: " + e.getMessage(), e);
+//        }
+//    }
 
     @GetMapping("/service-package")
     public String listServicePackages(Model model, HttpSession session) {
@@ -1141,7 +1144,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception e) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + e.getMessage());
             }
             return "service-package";
         }
@@ -1153,7 +1156,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception e) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + e.getMessage());
             }
             return "service-package";
         }
@@ -1165,7 +1168,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception e) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + e.getMessage());
             }
             return "service-package";
         }
@@ -1176,18 +1179,17 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-            // Convert ServicePackage to ServicePackageDTO
-            ServicePackageDTO servicePackageDTO = new ServicePackageDTO();
+            ServicePackage servicePackageDTO = new ServicePackage();
             servicePackageDTO.setPackageName(servicePackage.getPackageName());
             servicePackageDTO.setDescription(servicePackage.getDescription());
             servicePackageDTO.setPrice(servicePackage.getPrice());
-            VehicleTypeDTO vehicleTypeDTO = new VehicleTypeDTO();
+            VehicleType vehicleTypeDTO = new VehicleType();
             vehicleTypeDTO.setId(servicePackage.getVehicleType().getId());
             vehicleTypeDTO.setName(servicePackage.getVehicleType().getName());
             servicePackageDTO.setVehicleType(vehicleTypeDTO);
 
             logger.info("Sending add service package request: {}", servicePackageDTO);
-            HttpEntity<ServicePackageDTO> request = new HttpEntity<>(servicePackageDTO, headers);
+            HttpEntity<ServicePackage> request = new HttpEntity<>(servicePackageDTO, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(servicePackageUrl(), request, String.class);
             logger.info("Add service package response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
 
@@ -1200,7 +1202,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception ex) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
             }
             return "service-package";
         } catch (Exception e) {
@@ -1211,7 +1213,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception ex) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
             }
             return "service-package";
         }
@@ -1231,24 +1233,14 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             HttpEntity<String> request = new HttpEntity<>(headers);
 
-            ResponseEntity<ServicePackageDTO> response = restTemplate.exchange(
-                    servicePackageUrl() + "/" + id, HttpMethod.GET, request, ServicePackageDTO.class);
-            ServicePackageDTO dto = response.getBody();
+            ResponseEntity<ServicePackage> response = restTemplate.exchange(
+                    servicePackageUrl() + "/" + id, HttpMethod.GET, request, ServicePackage.class);
+            ServicePackage dto = response.getBody();
             if (dto == null) {
                 throw new RuntimeException("Service package not found");
             }
 
-            ServicePackage servicePackage = new ServicePackage();
-            servicePackage.setId(dto.getId());
-            servicePackage.setPackageName(dto.getPackageName());
-            servicePackage.setDescription(dto.getDescription());
-            servicePackage.setPrice(dto.getPrice());
-            ServicePackage.VehicleType vehicleType = new ServicePackage.VehicleType();
-            vehicleType.setId(dto.getVehicleType().getId());
-            vehicleType.setName(dto.getVehicleType().getName());
-            servicePackage.setVehicleType(vehicleType);
-
-            model.addAttribute("servicePackage", servicePackage);
+            model.addAttribute("servicePackage", dto);
             model.addAttribute("formMode", "edit");
             model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
             model.addAttribute("servicePackages", fetchServicePackages(token));
@@ -1260,7 +1252,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception ex) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
             }
         } catch (Exception e) {
             logger.error("Error fetching service package for edit: {}", e.getMessage(), e);
@@ -1270,7 +1262,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception ex) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
             }
         }
 
@@ -1292,7 +1284,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception e) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + e.getMessage());
             }
             return "service-package";
         }
@@ -1304,7 +1296,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception e) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + e.getMessage());
             }
             return "service-package";
         }
@@ -1316,7 +1308,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception e) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + e.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + e.getMessage());
             }
             return "service-package";
         }
@@ -1327,19 +1319,18 @@ public class AdminController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-            // Convert ServicePackage to ServicePackageDTO
-            ServicePackageDTO servicePackageDTO = new ServicePackageDTO();
+            ServicePackage servicePackageDTO = new ServicePackage();
             servicePackageDTO.setId(id);
             servicePackageDTO.setPackageName(servicePackage.getPackageName());
             servicePackageDTO.setDescription(servicePackage.getDescription());
             servicePackageDTO.setPrice(servicePackage.getPrice());
-            VehicleTypeDTO vehicleTypeDTO = new VehicleTypeDTO();
+            VehicleType vehicleTypeDTO = new VehicleType();
             vehicleTypeDTO.setId(servicePackage.getVehicleType().getId());
             vehicleTypeDTO.setName(servicePackage.getVehicleType().getName());
             servicePackageDTO.setVehicleType(vehicleTypeDTO);
 
             logger.info("Sending edit service package request: {}", servicePackageDTO);
-            HttpEntity<ServicePackageDTO> request = new HttpEntity<>(servicePackageDTO, headers);
+            HttpEntity<ServicePackage> request = new HttpEntity<>(servicePackageDTO, headers);
             ResponseEntity<String> response = restTemplate.exchange(
                     servicePackageUrl() + "/" + id, HttpMethod.PUT, request, String.class);
             logger.info("Edit service package response: Status {}, Body: {}", response.getStatusCode(), response.getBody());
@@ -1353,7 +1344,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception ex) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
             }
             return "service-package";
         } catch (Exception e) {
@@ -1364,7 +1355,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception ex) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
             }
             return "service-package";
         }
@@ -1397,7 +1388,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception ex) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
             }
             return "service-package";
         } catch (Exception e) {
@@ -1407,7 +1398,7 @@ public class AdminController {
                 model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
                 model.addAttribute("servicePackages", fetchServicePackages(token));
             } catch (Exception ex) {
-                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+                model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
             }
             return "service-package";
         }

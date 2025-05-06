@@ -40,9 +40,6 @@ public class AdminService {
     private AdvisorRepository advisorRepository;
     
     @Autowired
-    private CustomerServiceRequestsRepository customerServiceRequestsRepository;
-    
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -107,62 +104,12 @@ public class AdminService {
         logger.debug("Saving service package: {}", servicePackage.getId());
         return servicePackageRepository.save(servicePackage);
     }
-
-    public CustomerServiceRequests assignServiceRequestToAdvisor(Integer requestId, Long advisorId) {
-        logger.debug("Assigning service request {} to advisor {}", requestId, advisorId);
-        CustomerServiceRequests request = customerServiceRequestsRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Service request not found"));
-        Advisor advisor = advisorRepository.findById(advisorId)
-                .orElseThrow(() -> new RuntimeException("Advisor not found"));
-        request.setAdvisor(advisor);
-        request.setServiceStatus(ServiceStatus.PENDING);
-        return customerServiceRequestsRepository.save(request);
-    }
-
-    public CustomerServiceRequests completeServiceRequest(Integer requestId) {
-        logger.debug("Marking service request {} as completed", requestId);
-        CustomerServiceRequests request = customerServiceRequestsRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Service request not found"));
-        request.setServiceStatus(ServiceStatus.COMPLETED);
-        return customerServiceRequestsRepository.save(request);
-    }
-
-    public void sendBillToAdmin(CustomerServiceRequests request) {
-        logger.debug("Sending bill for service request: {}", request.getRequestId());
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo("admin@vehicle.com");
-        message.setSubject("Bill of Materials for Service Request");
-        message.setText("Bill of materials for service request " + request.getRequestId() + " is ready.");
-        mailSender.send(message);
-        logger.info("Bill sent for service request: {}", request.getRequestId());
-    }
-
-    public void sendPaymentUrlToCustomer(CustomerServiceRequests request) {
-        logger.debug("Sending payment URL for service request: {}", request.getRequestId());
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(request.getCustomer().getEmail());
-        message.setSubject("Payment Link for Your Service Request");
-        message.setText("Click the following link to complete your payment: http://payment.url/" + request.getRequestId());
-        mailSender.send(message);
-        logger.info("Payment URL sent for service request: {}", request.getRequestId());
-    }
+  
     
     public void deleteServicePackage(Integer id) {
         logger.debug("Deleting service package: {}", id);
         servicePackageRepository.deleteById(id);
     }
 
-    public void sendBillToAdminById(Integer requestId) {
-        logger.debug("Fetching service request {} to send bill", requestId);
-        CustomerServiceRequests request = customerServiceRequestsRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Service request not found"));
-        sendBillToAdmin(request);
-    }
-
-    public void sendPaymentUrlToCustomerById(Integer requestId) {
-        logger.debug("Fetching service request {} to send payment URL", requestId);
-        CustomerServiceRequests request = customerServiceRequestsRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Service request not found"));
-        sendPaymentUrlToCustomer(request);
-    }
+   
 }

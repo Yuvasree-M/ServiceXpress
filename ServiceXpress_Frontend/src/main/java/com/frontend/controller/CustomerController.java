@@ -5,7 +5,7 @@ import com.frontend.model.Customer;
 import com.frontend.model.CustomerService;
 import com.frontend.model.Service;
 import com.frontend.model.ServicePackage;
-import com.frontend.model.VehicleTypeDTO;
+import com.frontend.model.VehicleType;
 import com.frontend.model.CustomerDashboardDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -179,10 +179,10 @@ public class CustomerController {
             // Fetch vehicle types
             String vehicleTypeUrl = backendApiUrl + "/vehicle-types";
             HttpEntity<String> request = new HttpEntity<>(new HttpHeaders()); // No token needed
-            ResponseEntity<List<VehicleTypeDTO>> vehicleTypeResponse = restTemplate.exchange(
-                vehicleTypeUrl, HttpMethod.GET, request, new ParameterizedTypeReference<List<VehicleTypeDTO>>(){}
+            ResponseEntity<List<VehicleType>> vehicleTypeResponse = restTemplate.exchange(
+                vehicleTypeUrl, HttpMethod.GET, request, new ParameterizedTypeReference<List<VehicleType>>(){}
             );
-            List<VehicleTypeDTO> vehicleTypeDTOs = vehicleTypeResponse.getBody();
+            List<VehicleType> vehicleTypeDTOs = vehicleTypeResponse.getBody();
             if (vehicleTypeDTOs == null || vehicleTypeDTOs.isEmpty()) {
                 System.err.println("No vehicle types returned from " + vehicleTypeUrl);
                 model.addAttribute("error", "No vehicle types available. Please try again later.");

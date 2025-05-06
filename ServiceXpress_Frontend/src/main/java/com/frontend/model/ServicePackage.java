@@ -7,11 +7,9 @@ public class ServicePackage {
     private Double price;
     private VehicleType vehicleType;
 
-    // Default constructor
     public ServicePackage() {
     }
 
-    // Constructor with fields
     public ServicePackage(Integer id, String packageName, String description, Double price, VehicleType vehicleType) {
         this.id = id;
         this.packageName = packageName;
@@ -30,28 +28,4 @@ public class ServicePackage {
     public void setPrice(Double price) { this.price = price; }
     public VehicleType getVehicleType() { return vehicleType; }
     public void setVehicleType(VehicleType vehicleType) { this.vehicleType = vehicleType; }
-
-    // Nested VehicleType class
-    public static class VehicleType {
-        private Integer id;
-        private String name; // Changed from typeName to match VehicleTypeDTO
-
-        public VehicleType() {
-        }
-
-        public VehicleType(Integer id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public Integer getId() { return id; }
-        public void setId(Integer id) { this.id = id; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-    }
-
-    @Override
-    public String toString() {
-        return "ServicePackage{id=" + id + ", packageName='" + packageName + "', price=" + price + "}";
-    }
 }

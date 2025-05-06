@@ -9,21 +9,10 @@ import com.backend.dto.VehicleAssignedDTO;
 import com.backend.model.Advisor;
 import com.backend.model.BookingAdvisorMapping;
 import com.backend.model.BookingRequest;
-import com.backend.service.BookingRequestService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.backend.model.DashboardData;
 import com.backend.repository.AdvisorRepository;
 import com.backend.repository.BookingAdvisorMappingRepository;
 import com.backend.service.BookingRequestService;
-import com.backend.service.DashboardService;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,29 +32,19 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/dashboard")
 public class DashboardController {
 
-    
     private final BookingRequestService bookingRequestService;
+    private final BookingAdvisorMappingRepository bookingAdvisorMappingRepository;
+    private final AdvisorRepository advisorRepository;
     private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 
-    @Autowired
-    public DashboardController(BookingRequestService bookingRequestService) {
+    public DashboardController(
+        BookingRequestService bookingRequestService,
+        BookingAdvisorMappingRepository bookingAdvisorMappingRepository,
+        AdvisorRepository advisorRepository
+    ) {
         this.bookingRequestService = bookingRequestService;
-
-
-    private final DashboardService dashboardService;
-
-    @Autowired
-    private BookingRequestService bookingRequestService;
-
-    @Autowired
-    private BookingAdvisorMappingRepository bookingAdvisorMappingRepository;
-
-    @Autowired
-    private AdvisorRepository advisorRepository;
-
-    public DashboardController(DashboardService dashboardService) {
-        this.dashboardService = dashboardService;
-
+        this.bookingAdvisorMappingRepository = bookingAdvisorMappingRepository;
+        this.advisorRepository = advisorRepository;
     }
 
     @GetMapping("/admin")
@@ -86,8 +66,8 @@ public class DashboardController {
                 VehicleDueDTO vehicleDue = new VehicleDueDTO();
                 vehicleDue.setId(booking.getId());
                 vehicleDue.setOwnerName(booking.getCustomerName());
-                vehicleDue.setVehicleModel(booking.getVehicleModelId()); // Formatted as "1 (Pulsar 150)"
-                vehicleDue.setVehicleType(booking.getVehicleTypeId()); // Formatted as "1 (Bike)"
+                vehicleDue.setVehicleModel(booking.getVehicleModelId());
+                vehicleDue.setVehicleType(booking.getVehicleTypeId());
                 vehicleDue.setServiceNeeded(booking.getServices());
                 vehicleDue.setLocation(booking.getAddress());
                 vehicleDue.setServiceAdvisorId(null);
@@ -105,9 +85,9 @@ public class DashboardController {
                 VehicleUnderServiceDTO dto = new VehicleUnderServiceDTO();
                 dto.setId(booking.getId());
                 dto.setOwnerName(booking.getCustomerName());
-                dto.setVehicleType(booking.getVehicleTypeId()); // Formatted as "1 (Bike)"
-                dto.setVehicleModel(booking.getVehicleModelId()); // Formatted as "1 (Pulsar 150)"
-                dto.setServiceCenter(booking.getServiceCenterId()); // Formatted as "1 (Mumbai Center 1)"
+                dto.setVehicleType(booking.getVehicleTypeId());
+                dto.setVehicleModel(booking.getVehicleModelId());
+                dto.setServiceCenter(booking.getServiceCenterId());
                 String advisorName = "Unknown";
                 Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(booking.getId());
                 if (mapping.isPresent()) {
@@ -119,7 +99,6 @@ public class DashboardController {
                 dto.setStatus(booking.getStatus());
                 return dto;
             }).collect(Collectors.toList());
-
 
             List<BookingResponseDTO> assignedBookings = bookingRequestService.getAssignedBookings();
             logger.debug("Fetched {} assigned bookings", assignedBookings.size());
@@ -143,13 +122,6 @@ public class DashboardController {
                 return dto;
             }).collect(Collectors.toList());
 
-            DashboardDataDTO dashboardData = new DashboardDataDTO();
-            dashboardData.setDueCount(vehiclesDue.size());
-            dashboardData.setServicingCount(vehiclesUnderService.size());
-            dashboardData.setCompletedCount(0);
-            dashboardData.setAdvisorRequestsCount(0);
-            dashboardData.setAssignedCount(vehiclesAssigned.size());
-
             // Fetch completed bookings for completedCount
             List<BookingRequest> completedBookings = bookingRequestService.getBookingsByCustomerId(null)
                 .stream()
@@ -157,13 +129,12 @@ public class DashboardController {
                 .collect(Collectors.toList());
             int completedCount = completedBookings.size();
 
-            // Create DashboardDataDTO
             DashboardDataDTO dashboardData = new DashboardDataDTO();
             dashboardData.setDueCount(vehiclesDue.size());
             dashboardData.setServicingCount(vehiclesUnderService.size());
             dashboardData.setCompletedCount(completedCount);
-            dashboardData.setAdvisorRequestsCount(0); // Placeholder, as no advisor request logic provided
-
+            dashboardData.setAdvisorRequestsCount(0);
+            dashboardData.setAssignedCount(vehiclesAssigned.size());
             dashboardData.setProfileName("Admin User");
             dashboardData.setVehiclesDue(vehiclesDue);
             dashboardData.setVehiclesUnderService(vehiclesUnderService);
@@ -179,7 +150,6 @@ public class DashboardController {
         }
     }
 
-
     @GetMapping("/advisor")
     public ResponseEntity<List<BookingResponseDTO>> getAdvisorBookings(@RequestParam Long advisorId) {
         logger.info("Fetching bookings for advisorId: {}", advisorId);
@@ -191,7 +161,7 @@ public class DashboardController {
 
             List<BookingResponseDTO> advisorBookings = bookingRequestService.getAssignedBookingsForAdvisor(advisorId);
             logger.info("Fetched {} bookings for advisorId: {}", advisorBookings.size(), advisorId);
-            return ResponseEntity.ok(advisorBookings != null ? advisorBookings : Collections.emptyList());
+            return ResponseEntity.ok(advisorBookings);
         } catch (Exception e) {
             logger.error("Error fetching advisor bookings for advisorId {}: {}", advisorId, e.getMessage(), e);
             return ResponseEntity.status(500).body(Collections.emptyList());
@@ -212,16 +182,6 @@ public class DashboardController {
             return ResponseEntity.ok(updatedBooking);
         } catch (Exception e) {
             logger.error("Error starting service for bookingId {}: {}", bookingId, e.getMessage(), e);
-            return ResponseEntity.status(500).build();
-        }
-    }
-
-    @GetMapping("/customer")
-    public ResponseEntity<DashboardData> getCustomerDashboard() {
-        try {
-            return ResponseEntity.ok(dashboardService.getCustomerDashboardData());
-        } catch (Exception e) {
-            System.err.println("Error fetching customer dashboard data: " + e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }

@@ -12,12 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import java.util.*;
-
 import java.util.stream.Collectors;
 
 @Service
@@ -44,7 +39,6 @@ public class BookingRequestService {
     @Autowired
     private EmailService emailService;
 
-    
     private static final Logger logger = LoggerFactory.getLogger(BookingRequestService.class);
 
     public AdvisorRepository getAdvisorRepository() {
@@ -58,9 +52,6 @@ public class BookingRequestService {
     public BookingRequest createBooking(BookingRequest booking) {
         logger.info("Creating new booking for customer: {}", booking.getCustomerName());
 
-
-    public BookingRequest createBooking(BookingRequest booking) {
-
         LocalDateTime now = LocalDateTime.now();
         booking.setCreatedAt(now);
         booking.setUpdatedAt(now);
@@ -68,10 +59,7 @@ public class BookingRequestService {
         booking.setStatus("PENDING");
         BookingRequest savedBooking = repository.save(booking);
 
-        String vehicleTypeId = String.valueOf(savedBooking.getVehicleTypeId());
-
         String vehicleTypeId = savedBooking.getVehicleTypeId() != null ? String.valueOf(savedBooking.getVehicleTypeId()) : "Unknown";
-
         String vehicleTypeName = "Unknown";
         String vehicleModelId = savedBooking.getVehicleModelId() != null ? String.valueOf(savedBooking.getVehicleModelId()) : "Unknown";
         String vehicleModelName = "Unknown";
@@ -100,11 +88,7 @@ public class BookingRequestService {
                 }
             }
         } catch (Exception e) {
-
-            logger.error("Error fetching details for email: {}", e.getMessage(), e);
-
-            System.err.println("Error fetching details for email, booking ID " + savedBooking.getId() + ": " + e.getMessage());
-
+            logger.error("Error fetching details for email for booking ID {}: {}", savedBooking.getId(), e.getMessage(), e);
         }
 
         try {
@@ -121,11 +105,8 @@ public class BookingRequestService {
             );
             logger.info("Booking confirmation email sent to: {}", savedBooking.getCustomerEmail());
         } catch (Exception e) {
-
-            logger.error("Failed to send booking confirmation email: {}", e.getMessage(), e);
-
-            System.err.println("Failed to send booking confirmation email for booking ID " + savedBooking.getId() + ": " + e.getMessage());
-     }
+            logger.error("Failed to send booking confirmation email for booking ID {}: {}", savedBooking.getId(), e.getMessage(), e);
+        }
 
         return savedBooking;
     }
@@ -171,58 +152,21 @@ public class BookingRequestService {
     public List<BookingResponseDTO> getPendingBookings() {
         logger.info("Fetching pending bookings");
         List<BookingRequest> pendingBookings = repository.findByStatus("PENDING");
-
-        return pendingBookings.stream().map(booking -> {
-            String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
-            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
-            String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
-
-            try {
-                if (booking.getVehicleTypeId() != null) {
-                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
-                    if (vehicleType.isPresent()) {
-                        vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
-                    }
-                }
-
-                if (booking.getVehicleModelId() != null) {
-                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
-                    if (vehicleModel.isPresent()) {
-                        vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
-                    }
-                }
-
-                if (booking.getServiceCenterId() != null) {
-                    Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
-                    if (serviceCenter.isPresent()) {
-                        serviceCenterFormatted = booking.getServiceCenterId() + " (" + serviceCenter.get().getCenterName() + ")";
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
-            }
-
         return mapToBookingResponseDTOs(pendingBookings);
     }
 
-
     public List<BookingResponseDTO> getInProgressBookings() {
+        logger.info("Fetching in-progress bookings");
         List<BookingRequest> inProgressBookings = repository.findByStatus("IN_PROGRESS");
         return mapToBookingResponseDTOs(inProgressBookings);
     }
 
     @Transactional
     public BookingRequest assignServiceAdvisor(Long bookingId, Long advisorId) {
-
         logger.info("Assigning advisor {} to booking {}", advisorId, bookingId);
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
 
-        Advisor advisor = advisorRepository.findById(advisorId)
-                .orElseThrow(() -> new IllegalArgumentException("Advisor not found with id: " + advisorId));
-
-        BookingRequest booking = repository.findById(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
         Advisor advisor = advisorRepository.findById(advisorId)
                 .orElseThrow(() -> new IllegalArgumentException("Advisor not found with id: " + advisorId));
 
@@ -254,52 +198,15 @@ public class BookingRequestService {
             throw new IllegalStateException("No advisor assigned to booking id: " + bookingId);
         }
 
-        BookingAdvisorMapping mapping = BookingAdvisorMapping.builder()
-                .bookingId(bookingId)
-                .advisorId(advisorId)
-                .build();
-        bookingAdvisorMappingRepository.save(mapping);
-
         booking.setStatus("IN_PROGRESS");
         booking.setUpdatedAt(LocalDateTime.now());
         return repository.save(booking);
     }
 
     public List<BookingResponseDTO> getAssignedBookings() {
-        logger.info("Fetching assigned bookings");
+        logger.info("Fetching assigned_TERM bookings");
         List<BookingRequest> assignedBookings = repository.findByStatus("ASSIGNED");
-        return assignedBookings.stream().map(booking -> {
-            String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
-            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
-            String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
-
-            try {
-                if (booking.getVehicleTypeId() != null) {
-                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
-                    if (vehicleType.isPresent()) {
-                        vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
-                    }
-                }
-
-                if (booking.getVehicleModelId() != null) {
-                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
-                    if (vehicleModel.isPresent()) {
-                        vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
-                    }
-                }
-
-                if (booking.getServiceCenterId() != null) {
-                    Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
-                    if (serviceCenter.isPresent()) {
-                        serviceCenterFormatted = booking.getServiceCenterId() + " (" + serviceCenter.get().getCenterName() + ")";
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
-            }
-
-            return new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
-        }).collect(Collectors.toList());
+        return mapToBookingResponseDTOs(assignedBookings);
     }
 
     public List<BookingResponseDTO> getAssignedBookingsForAdvisor(Long advisorId) {
@@ -325,56 +232,11 @@ public class BookingRequestService {
             return new ArrayList<>();
         }
 
-        return assignedBookings.stream().map(booking -> {
-            String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
-            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
-            String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
-
-            try {
-                if (booking.getVehicleTypeId() != null) {
-                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
-                    if (vehicleType.isPresent()) {
-                        vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
-                    }
-                }
-
-                if (booking.getVehicleModelId() != null) {
-                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
-                    if (vehicleModel.isPresent()) {
-                        vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
-                    }
-                }
-
-                if (booking.getServiceCenterId() != null) {
-                    Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
-                    if (serviceCenter.isPresent()) {
-                        serviceCenterFormatted = booking.getServiceCenterId() + " (" + serviceCenter.get().getCenterName() + ")";
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
-            }
-
-            return new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
-        }).collect(Collectors.toList());
+        return mapToBookingResponseDTOs(assignedBookings);
     }
 
-    public List<BookingResponseDTO> getInProgressBookings() {
-        logger.info("Fetching in-progress bookings");
-        List<BookingRequest> inProgressBookings = repository.findByStatus("IN_PROGRESS");
-        return inProgressBookings.stream().map(booking -> {
-            String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
-            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
-            String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
-
-            try {
-                if (booking.getVehicleTypeId() != null) {
-                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
-                    if (vehicleType.isPresent()) {
-                        vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
-                    }
-
     public List<Advisor> getAllAdvisors() {
+        logger.info("Fetching all advisors");
         return advisorRepository.findAll();
     }
 
@@ -411,13 +273,13 @@ public class BookingRequestService {
                     }
                 }
             } catch (Exception e) {
-                System.err.println("Error fetching details for booking ID " + booking.getId() + ": " + e.getMessage());
-                continue; // Skip this booking and continue processing others
+                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
+                continue;
             }
 
             Double cost = calculateCost(booking.getServices());
 
-            if (List.of("PENDING", "IN_PROGRESS", "Ready for Pickup").contains(booking.getStatus())) {
+            if (List.of("PENDING", "IN_PROGRESS", "Ready for Pickup","ASSIGNED","COMPLETED").contains(booking.getStatus())) {
                 ServiceStatus status = new ServiceStatus();
                 status.setId(booking.getId());
                 status.setServiceCenterName(serviceCenterName);
@@ -494,28 +356,18 @@ public class BookingRequestService {
                 Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
                 if (vehicleType.isPresent()) {
                     vehicleTypeName = vehicleType.get().getName();
-
                 }
             }
-
-
-                if (booking.getVehicleModelId() != null) {
-                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
-                    if (vehicleModel.isPresent()) {
-                        vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
-                    }
 
             if (booking.getVehicleModelId() != null) {
                 Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
                 if (vehicleModel.isPresent()) {
                     vehicleModelName = vehicleModel.get().getModelName();
-
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error fetching details for receipt ID " + booking.getId() + ": " + e.getMessage());
+            logger.error("Error fetching details for receipt ID {}: {}", booking.getId(), e.getMessage(), e);
         }
-
 
         receiptData.put("serviceCenterName", serviceCenterName);
         receiptData.put("vehicleTypeName", vehicleTypeName);
@@ -558,7 +410,6 @@ public class BookingRequestService {
                     }
                 }
 
-
                 if (booking.getServiceCenterId() != null) {
                     Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
                     if (serviceCenter.isPresent()) {
@@ -572,11 +423,4 @@ public class BookingRequestService {
             return new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
         }).collect(Collectors.toList());
     }
-
-
-    public List<Advisor> getAllAdvisors() {
-        logger.info("Fetching all advisors");
-        return advisorRepository.findAll();
-    }
-
 }
