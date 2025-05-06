@@ -1,11 +1,12 @@
 package com.backend.controller;
 
 import com.backend.dto.BookingResponseDTO;
-import com.backend.model.Advisor;
+import com.backend.model.BookingAdvisorMapping;
 import com.backend.model.BookingRequest;
 import com.backend.model.ServiceCenter;
 import com.backend.model.VehicleModel;
 import com.backend.model.VehicleType;
+import com.backend.repository.BookingAdvisorMappingRepository;
 import com.backend.repository.ServiceCenterRepository;
 import com.backend.repository.VehicleModelRepository;
 import com.backend.repository.VehicleTypeRepository;
@@ -14,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:8082")
@@ -33,6 +36,9 @@ public class BookingRequestController {
     @Autowired
     private ServiceCenterRepository serviceCenterRepository;
 
+    @Autowired
+    private BookingAdvisorMappingRepository bookingAdvisorMappingRepository;
+
     public BookingRequestController(BookingRequestService bookingService) {
         this.bookingService = bookingService;
     }
@@ -40,10 +46,9 @@ public class BookingRequestController {
     @PostMapping
     public ResponseEntity<BookingRequest> createBooking(@RequestBody BookingRequest booking) {
         try {
-            // Validate IDs
             if (!vehicleTypeRepository.existsById(booking.getVehicleTypeId())) {
                 System.err.println("Invalid vehicle type ID: " + booking.getVehicleTypeId());
-                return ResponseEntity.badRequest().body(null); // 400 Bad Request
+                return ResponseEntity.badRequest().body(null);
             }
             if (!vehicleModelRepository.existsById(booking.getVehicleModelId())) {
                 System.err.println("Invalid vehicle model ID: " + booking.getVehicleModelId());
@@ -55,10 +60,10 @@ public class BookingRequestController {
             }
 
             BookingRequest savedBooking = bookingService.createBooking(booking);
-            return ResponseEntity.status(201).body(savedBooking); // 201 Created
+            return ResponseEntity.status(201).body(savedBooking);
         } catch (Exception e) {
             System.err.println("Error creating booking: " + e.getMessage());
-            return ResponseEntity.status(500).body(null); // 500 Internal Server Error
+            return ResponseEntity.status(500).body(null);
         }
     }
 
@@ -77,7 +82,6 @@ public class BookingRequestController {
 
         BookingRequest booking = bookingOptional.get();
 
-        // Fetch and format additional details
         String vehicleTypeFormatted = booking.getVehicleTypeId() + " (Unknown)";
         String vehicleModelFormatted = booking.getVehicleModelId() + " (Unknown)";
         String serviceCenterFormatted = booking.getServiceCenterId() + " (Unknown)";
@@ -101,7 +105,6 @@ public class BookingRequestController {
             System.err.println("Error fetching details for booking ID " + id + ": " + e.getMessage());
         }
 
-        // Create response DTO
         BookingResponseDTO response = new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
         return ResponseEntity.ok(response);
     }
@@ -116,6 +119,22 @@ public class BookingRequestController {
         }
     }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateBookingStatus(@PathVariable Long id, @RequestBody BookingResponseDTO updateRequest) {
+        try {
+            BookingRequest booking = bookingService.getBookingById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + id));
+            booking.setStatus(updateRequest.getStatus());
+            booking.setUpdatedAt(LocalDateTime.now());
+            bookingService.updateBooking(id, booking);
+            return ResponseEntity.ok("Booking updated successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to update booking: " + e.getMessage());
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
         try {
@@ -126,4 +145,37 @@ public class BookingRequestController {
         }
     }
 
+    @GetMapping("/assigned")
+    public ResponseEntity<List<BookingResponseDTO>> getAssignedBookingsForAdvisor(@RequestParam Long advisorId) {
+        List<BookingAdvisorMapping> mappings = bookingAdvisorMappingRepository.findByAdvisorId(advisorId);
+        List<Long> bookingIds = mappings.stream().map(BookingAdvisorMapping::getBookingId).collect(Collectors.toList());
+        List<BookingResponseDTO> assignedBookings = bookingService.getAssignedBookings().stream()
+                .filter(dto -> bookingIds.contains(dto.getId()))
+                .collect(Collectors.toList());
+        return assignedBookings.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(assignedBookings);
+    }
+
+    @GetMapping("/in-progress")
+    public ResponseEntity<List<BookingResponseDTO>> getInProgressBookingsForAdvisor(@RequestParam Long advisorId) {
+        List<BookingAdvisorMapping> mappings = bookingAdvisorMappingRepository.findByAdvisorId(advisorId);
+        List<Long> bookingIds = mappings.stream().map(BookingAdvisorMapping::getBookingId).collect(Collectors.toList());
+        List<BookingResponseDTO> inProgressBookings = bookingService.getInProgressBookings().stream()
+                .filter(dto -> bookingIds.contains(dto.getId()))
+                .collect(Collectors.toList());
+        return inProgressBookings.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(inProgressBookings);
+    }
+
+    @PostMapping("/start/{id}")
+    public ResponseEntity<String> startService(@PathVariable Long id) {
+        try {
+            bookingService.startService(id);
+            return ResponseEntity.ok("Service started successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to start service: " + e.getMessage());
+        }
+    }
 }
