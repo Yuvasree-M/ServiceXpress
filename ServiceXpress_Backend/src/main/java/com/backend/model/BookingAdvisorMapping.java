@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class BookingAdvisorMapping {
 
     @Id
@@ -21,4 +20,12 @@ public class BookingAdvisorMapping {
 
     @Column(nullable = false)
     private Long advisorId;
+
+    // Constructor for creating instances without builder
+    public BookingAdvisorMapping(Long bookingId, Long advisorId) {
+        this.bookingId = bookingId;
+        this.advisorId = advisorId;
+    }
+
+
 }

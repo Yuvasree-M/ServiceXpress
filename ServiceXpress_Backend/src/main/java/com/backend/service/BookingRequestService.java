@@ -8,9 +8,16 @@ import com.backend.service.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import java.util.*;
+
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +44,23 @@ public class BookingRequestService {
     @Autowired
     private EmailService emailService;
 
+    
+    private static final Logger logger = LoggerFactory.getLogger(BookingRequestService.class);
+
+    public AdvisorRepository getAdvisorRepository() {
+        return advisorRepository;
+    }
+
+    public BookingAdvisorMappingRepository getBookingAdvisorMappingRepository() {
+        return bookingAdvisorMappingRepository;
+    }
+
     public BookingRequest createBooking(BookingRequest booking) {
+        logger.info("Creating new booking for customer: {}", booking.getCustomerName());
+
+
+    public BookingRequest createBooking(BookingRequest booking) {
+
         LocalDateTime now = LocalDateTime.now();
         booking.setCreatedAt(now);
         booking.setUpdatedAt(now);
@@ -45,7 +68,10 @@ public class BookingRequestService {
         booking.setStatus("PENDING");
         BookingRequest savedBooking = repository.save(booking);
 
+        String vehicleTypeId = String.valueOf(savedBooking.getVehicleTypeId());
+
         String vehicleTypeId = savedBooking.getVehicleTypeId() != null ? String.valueOf(savedBooking.getVehicleTypeId()) : "Unknown";
+
         String vehicleTypeName = "Unknown";
         String vehicleModelId = savedBooking.getVehicleModelId() != null ? String.valueOf(savedBooking.getVehicleModelId()) : "Unknown";
         String vehicleModelName = "Unknown";
@@ -74,7 +100,11 @@ public class BookingRequestService {
                 }
             }
         } catch (Exception e) {
+
+            logger.error("Error fetching details for email: {}", e.getMessage(), e);
+
             System.err.println("Error fetching details for email, booking ID " + savedBooking.getId() + ": " + e.getMessage());
+
         }
 
         try {
@@ -89,22 +119,29 @@ public class BookingRequestService {
                 serviceCenterId,
                 serviceCenterName
             );
+            logger.info("Booking confirmation email sent to: {}", savedBooking.getCustomerEmail());
         } catch (Exception e) {
+
+            logger.error("Failed to send booking confirmation email: {}", e.getMessage(), e);
+
             System.err.println("Failed to send booking confirmation email for booking ID " + savedBooking.getId() + ": " + e.getMessage());
-        }
+     }
 
         return savedBooking;
     }
 
     public List<BookingRequest> getBookingsByCustomerId(Long customerId) {
+        logger.info("Fetching bookings for customerId: {}", customerId);
         return repository.findByCustomerId(customerId);
     }
 
     public Optional<BookingRequest> getBookingById(Long id) {
+        logger.info("Fetching booking by id: {}", id);
         return repository.findById(id);
     }
 
     public BookingRequest updateBooking(Long id, BookingRequest booking) {
+        logger.info("Updating booking with id: {}", id);
         BookingRequest existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
         existing.setCustomerName(booking.getCustomerName());
@@ -124,6 +161,7 @@ public class BookingRequestService {
     }
 
     public void deleteBooking(Long id) {
+        logger.info("Deleting booking with id: {}", id);
         if (!repository.existsById(id)) {
             throw new RuntimeException("Booking not found with id: " + id);
         }
@@ -131,9 +169,42 @@ public class BookingRequestService {
     }
 
     public List<BookingResponseDTO> getPendingBookings() {
+        logger.info("Fetching pending bookings");
         List<BookingRequest> pendingBookings = repository.findByStatus("PENDING");
+
+        return pendingBookings.stream().map(booking -> {
+            String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
+            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
+            String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
+
+            try {
+                if (booking.getVehicleTypeId() != null) {
+                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
+                    if (vehicleType.isPresent()) {
+                        vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
+                    }
+                }
+
+                if (booking.getVehicleModelId() != null) {
+                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
+                    if (vehicleModel.isPresent()) {
+                        vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
+                    }
+                }
+
+                if (booking.getServiceCenterId() != null) {
+                    Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
+                    if (serviceCenter.isPresent()) {
+                        serviceCenterFormatted = booking.getServiceCenterId() + " (" + serviceCenter.get().getCenterName() + ")";
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
+            }
+
         return mapToBookingResponseDTOs(pendingBookings);
     }
+
 
     public List<BookingResponseDTO> getInProgressBookings() {
         List<BookingRequest> inProgressBookings = repository.findByStatus("IN_PROGRESS");
@@ -142,23 +213,166 @@ public class BookingRequestService {
 
     @Transactional
     public BookingRequest assignServiceAdvisor(Long bookingId, Long advisorId) {
+
+        logger.info("Assigning advisor {} to booking {}", advisorId, bookingId);
+        BookingRequest booking = repository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+
+        Advisor advisor = advisorRepository.findById(advisorId)
+                .orElseThrow(() -> new IllegalArgumentException("Advisor not found with id: " + advisorId));
+
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
         Advisor advisor = advisorRepository.findById(advisorId)
                 .orElseThrow(() -> new IllegalArgumentException("Advisor not found with id: " + advisorId));
+
         Optional<BookingAdvisorMapping> existingMapping = bookingAdvisorMappingRepository.findByBookingId(bookingId);
         if (existingMapping.isPresent()) {
             throw new IllegalStateException("Advisor already assigned to booking id: " + bookingId);
         }
+
+        BookingAdvisorMapping mapping = new BookingAdvisorMapping(bookingId, advisorId);
+        bookingAdvisorMappingRepository.save(mapping);
+
+        booking.setStatus("ASSIGNED");
+        booking.setUpdatedAt(LocalDateTime.now());
+        return repository.save(booking);
+    }
+
+    @Transactional
+    public BookingRequest startService(Long bookingId) {
+        logger.info("Starting service for bookingId: {}", bookingId);
+        BookingRequest booking = repository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+
+        if (!"ASSIGNED".equals(booking.getStatus())) {
+            throw new IllegalStateException("Booking must be in ASSIGNED status to start service. Current status: " + booking.getStatus());
+        }
+
+        Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(bookingId);
+        if (!mapping.isPresent()) {
+            throw new IllegalStateException("No advisor assigned to booking id: " + bookingId);
+        }
+
         BookingAdvisorMapping mapping = BookingAdvisorMapping.builder()
                 .bookingId(bookingId)
                 .advisorId(advisorId)
                 .build();
         bookingAdvisorMappingRepository.save(mapping);
+
         booking.setStatus("IN_PROGRESS");
         booking.setUpdatedAt(LocalDateTime.now());
         return repository.save(booking);
     }
+
+    public List<BookingResponseDTO> getAssignedBookings() {
+        logger.info("Fetching assigned bookings");
+        List<BookingRequest> assignedBookings = repository.findByStatus("ASSIGNED");
+        return assignedBookings.stream().map(booking -> {
+            String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
+            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
+            String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
+
+            try {
+                if (booking.getVehicleTypeId() != null) {
+                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
+                    if (vehicleType.isPresent()) {
+                        vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
+                    }
+                }
+
+                if (booking.getVehicleModelId() != null) {
+                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
+                    if (vehicleModel.isPresent()) {
+                        vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
+                    }
+                }
+
+                if (booking.getServiceCenterId() != null) {
+                    Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
+                    if (serviceCenter.isPresent()) {
+                        serviceCenterFormatted = booking.getServiceCenterId() + " (" + serviceCenter.get().getCenterName() + ")";
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
+            }
+
+            return new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
+        }).collect(Collectors.toList());
+    }
+
+    public List<BookingResponseDTO> getAssignedBookingsForAdvisor(Long advisorId) {
+        logger.info("Fetching assigned bookings for advisorId: {}", advisorId);
+        List<BookingAdvisorMapping> mappings = bookingAdvisorMappingRepository.findByAdvisorId(advisorId);
+        if (mappings == null || mappings.isEmpty()) {
+            logger.debug("No bookings assigned to advisorId: {}", advisorId);
+            return new ArrayList<>();
+        }
+
+        List<Long> bookingIds = mappings.stream()
+                .map(BookingAdvisorMapping::getBookingId)
+                .collect(Collectors.toList());
+
+        if (bookingIds.isEmpty()) {
+            logger.debug("No booking IDs found for advisorId: {}", advisorId);
+            return new ArrayList<>();
+        }
+
+        List<BookingRequest> assignedBookings = repository.findByIdInAndStatus(bookingIds, "ASSIGNED");
+        if (assignedBookings == null || assignedBookings.isEmpty()) {
+            logger.debug("No assigned bookings found for advisorId: {}", advisorId);
+            return new ArrayList<>();
+        }
+
+        return assignedBookings.stream().map(booking -> {
+            String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
+            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
+            String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
+
+            try {
+                if (booking.getVehicleTypeId() != null) {
+                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
+                    if (vehicleType.isPresent()) {
+                        vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
+                    }
+                }
+
+                if (booking.getVehicleModelId() != null) {
+                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
+                    if (vehicleModel.isPresent()) {
+                        vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
+                    }
+                }
+
+                if (booking.getServiceCenterId() != null) {
+                    Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
+                    if (serviceCenter.isPresent()) {
+                        serviceCenterFormatted = booking.getServiceCenterId() + " (" + serviceCenter.get().getCenterName() + ")";
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
+            }
+
+            return new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
+        }).collect(Collectors.toList());
+    }
+
+    public List<BookingResponseDTO> getInProgressBookings() {
+        logger.info("Fetching in-progress bookings");
+        List<BookingRequest> inProgressBookings = repository.findByStatus("IN_PROGRESS");
+        return inProgressBookings.stream().map(booking -> {
+            String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
+            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
+            String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
+
+            try {
+                if (booking.getVehicleTypeId() != null) {
+                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
+                    if (vehicleType.isPresent()) {
+                        vehicleTypeFormatted = booking.getVehicleTypeId() + " (" + vehicleType.get().getName() + ")";
+                    }
 
     public List<Advisor> getAllAdvisors() {
         return advisorRepository.findAll();
@@ -280,18 +494,28 @@ public class BookingRequestService {
                 Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
                 if (vehicleType.isPresent()) {
                     vehicleTypeName = vehicleType.get().getName();
+
                 }
             }
+
+
+                if (booking.getVehicleModelId() != null) {
+                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
+                    if (vehicleModel.isPresent()) {
+                        vehicleModelFormatted = booking.getVehicleModelId() + " (" + vehicleModel.get().getModelName() + ")";
+                    }
 
             if (booking.getVehicleModelId() != null) {
                 Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
                 if (vehicleModel.isPresent()) {
                     vehicleModelName = vehicleModel.get().getModelName();
+
                 }
             }
         } catch (Exception e) {
             System.err.println("Error fetching details for receipt ID " + booking.getId() + ": " + e.getMessage());
         }
+
 
         receiptData.put("serviceCenterName", serviceCenterName);
         receiptData.put("vehicleTypeName", vehicleTypeName);
@@ -334,6 +558,7 @@ public class BookingRequestService {
                     }
                 }
 
+
                 if (booking.getServiceCenterId() != null) {
                     Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
                     if (serviceCenter.isPresent()) {
@@ -341,10 +566,17 @@ public class BookingRequestService {
                     }
                 }
             } catch (Exception e) {
-                System.err.println("Error fetching details for booking ID " + booking.getId() + ": " + e.getMessage());
+                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
             }
 
             return new BookingResponseDTO(booking, serviceCenterFormatted, vehicleTypeFormatted, vehicleModelFormatted);
         }).collect(Collectors.toList());
     }
+
+
+    public List<Advisor> getAllAdvisors() {
+        logger.info("Fetching all advisors");
+        return advisorRepository.findAll();
+    }
+
 }

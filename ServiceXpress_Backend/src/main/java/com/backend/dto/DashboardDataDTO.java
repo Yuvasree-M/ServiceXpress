@@ -14,9 +14,11 @@ public class DashboardDataDTO {
     private int servicingCount;
     private int completedCount;
     private int advisorRequestsCount;
+    private int assignedCount;
     private String profileName;
     private List<VehicleDueDTO> vehiclesDue;
     private List<VehicleUnderServiceDTO> vehiclesUnderService;
     private List<VehicleCompletedDTO> vehiclesCompleted;
     private List<AdvisorRequestDTO> advisorRequests;
+    private List<VehicleAssignedDTO> vehiclesAssigned;
 }

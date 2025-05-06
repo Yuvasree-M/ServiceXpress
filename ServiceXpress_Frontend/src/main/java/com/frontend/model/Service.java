@@ -78,8 +78,5 @@ public class Service {
 		this.vehicleType = vehicleType;
 	}
 
-	@Override
-	public String toString() {
-		return "Service{name='" + name + "', price=" + price + ", vehicleType='" + vehicleType + "'}";
-	}
+
 }

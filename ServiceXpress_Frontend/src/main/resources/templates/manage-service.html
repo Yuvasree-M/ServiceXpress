@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .header {
+            background-color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .header img {
+            height: 40px;
+        }
+        .header nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .details-table th, .details-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .details-table th {
+            background-color: #f5f5f5;
+            width: 30%;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #fff;
+        }
+        .btn-back {
+            background-color: #007bff;
+        }
+        .btn-save {
+            background-color: #f90;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="ServiceExpress Logo" th:src="@{/images/logo.png}">
+        <nav>
+            <a th:href="@{/home}">Home</a>
+            <a th:href="@{/dashboard/service-advisor}" class="active">Dashboard</a>
+            <a th:href="@{/completed}">Completed</a>
+        </nav>
+        <div class="user">
+            <span th:text="${session.userName}">Boomika Mohan</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Manage Service</h2>
+
+        <div th:if="${error}" class="error">
+            <span th:text="${error}"></span>
+        </div>
+
+        <div th:if="${service}">
+            <table class="details-table">
+                <tr>
+                    <th>Vehicle ID</th>
+                    <td th:text="${service.vehicleId}">V00123</td>
+                </tr>
+                <tr>
+                    <th>Customer Name</th>
+                    <td th:text="${service.customerName}">Jane Smith</td>
+                </tr>
+                <tr>
+                    <th>Assigned Date</th>
+                    <td th:text="${service.assignedDate}">March 26, 2025</td>
+                </tr>
+                <tr>
+                    <th>Required Services</th>
+                    <td th:text="${service.requiredServices}">Engine Oil, Wheel Alignment</td>
+                </tr>
+                <tr>
+                    <th>Current Status</th>
+                    <td th:text="${service.status}">IN_PROGRESS</td>
+                </tr>
+            </table>
+
+            <form th:action="@{/service/update/{id}(id=${service.id})}" method="post">
+                <div class="form-group">
+                    <label for="status">Update Status</label>
+                    <select id="status" name="status">
+                        <option value="IN_PROGRESS" th:selected="${service.status == 'IN_PROGRESS'}">In Progress</option>
+                        <option value="COMPLETED" th:selected="${service.status == 'COMPLETED'}">Completed</option>
+                    </select>
+                </div>
+                <div class="actions">
+                    <a th:href="@{/dashboard/service-advisor}" class="btn btn-back">Back to Dashboard</a>
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+        <div th:unless="${service}" class="error">
+            Service details not available.
+        </div>
+    </div>
+</body>
+</html>

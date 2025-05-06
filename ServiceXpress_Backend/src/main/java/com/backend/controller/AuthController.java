@@ -5,10 +5,14 @@ import com.backend.dto.AuthResponse;
 import com.backend.dto.LoginRequest;
 import com.backend.dto.OtpRequest;
 import com.backend.dto.OtpVerificationRequest;
+import com.backend.repository.AdvisorRepository;
 import com.backend.service.OtpService;
 import com.backend.service.TokenBlacklistService;
 import com.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,12 +23,15 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
     private final OtpService otpService;
+    private final AdvisorRepository advisorRepository;
 
-    public AuthController(UserService userService, JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService, OtpService otpService) {
+    @Autowired
+    public AuthController(UserService userService, JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService, OtpService otpService, AdvisorRepository advisorRepository) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistService = tokenBlacklistService;
         this.otpService = otpService;
+        this.advisorRepository = advisorRepository;
     }
 
     @PostMapping("/login")
@@ -85,5 +92,38 @@ public class AuthController {
             }
         }
         return ResponseEntity.status(400).body("Invalid token.");
+    }
+
+    @PostMapping("/me")
+    public ResponseEntity<UserDetailsResponse> getUserDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            return ResponseEntity.status(401).body(null);
+        }
+
+        String username = authentication.getName();
+        String role = authentication.getAuthorities().stream()
+            .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+            .findFirst()
+            .orElse(null);
+
+        if ("SERVICE_ADVISOR".equals(role)) {
+            return advisorRepository.findByUsername(username)
+                .map(advisor -> {
+                    UserDetailsResponse response = new UserDetailsResponse();
+                    response.setAdvisorId(advisor.getId());
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> ResponseEntity.status(404).body(null));
+        }
+
+        return ResponseEntity.status(400).body(null);
+    }
+
+    public static class UserDetailsResponse {
+        private Long advisorId;
+
+        public Long getAdvisorId() { return advisorId; }
+        public void setAdvisorId(Long advisorId) { this.advisorId = advisorId; }
     }
 }
