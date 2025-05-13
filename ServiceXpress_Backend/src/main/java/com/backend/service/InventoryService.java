@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class InventoryService {
@@ -18,15 +19,30 @@ public class InventoryService {
     }
 
     public List<Inventory> getAllInventory() {
-        return inventoryRepository.findAll();
+        return inventoryRepository.findAll().stream()
+            .map(inventory -> {
+                if (Double.isNaN(inventory.getPrices()) || inventory.getPrices() == 0.0) {
+                    inventory.setPrices(0.0);
+                }
+                return inventory;
+            })
+            .collect(Collectors.toList());
     }
 
     public Optional<Inventory> getInventoryById(Long id) {
-        return inventoryRepository.findById(id);
+        return inventoryRepository.findById(id).map(inventory -> {
+            if (Double.isNaN(inventory.getPrices()) || inventory.getPrices() == 0.0) {
+                inventory.setPrices(0.0);
+            }
+            return inventory;
+        });
     }
 
     public Inventory saveInventory(Inventory inventory) {
-        inventory.setLastUpdated(LocalDate.now()); // Ensure lastUpdated is set
+        if (Double.isNaN(inventory.getPrices()) || inventory.getPrices() == 0.0) {
+            inventory.setPrices(0.0);
+        }
+        inventory.setLastUpdated(LocalDate.now());
         return inventoryRepository.save(inventory);
     }
 
@@ -36,7 +52,10 @@ public class InventoryService {
 
     public Inventory updateInventory(Long id, Inventory inventory) {
         inventory.setId(id);
-        inventory.setLastUpdated(LocalDate.now()); // Set lastUpdated on update
+        if (Double.isNaN(inventory.getPrices()) || inventory.getPrices() == 0.0) {
+            inventory.setPrices(0.0);
+        }
+        inventory.setLastUpdated(LocalDate.now());
         return inventoryRepository.save(inventory);
     }
 
@@ -51,6 +70,6 @@ public class InventoryService {
                 return true;
             }
         }
-        return false; // Not enough inventory
+        return false;
     }
 }

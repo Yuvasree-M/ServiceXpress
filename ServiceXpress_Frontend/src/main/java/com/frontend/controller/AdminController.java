@@ -2,7 +2,6 @@ package com.frontend.controller;
 
 import com.frontend.model.*;
 
-
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +33,7 @@ public class AdminController {
     public AdminController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
+
     @GetMapping("/dashboard/admin")
     public String showDashboard(Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
@@ -87,7 +87,6 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + e.getMessage());
         }
     }
-    
     
     private List<ServiceItem> fetchInventoryList(String token) {
         String url = backendApiUrl + "/inventory";
