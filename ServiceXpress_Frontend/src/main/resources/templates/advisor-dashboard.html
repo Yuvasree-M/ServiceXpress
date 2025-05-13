@@ -6,95 +6,288 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
     <style>
+        :root {
+            --primary-color: #FF6200;
+            --secondary-color: #00274D;
+            --light-bg: #D9D9D9;
+            --white: #FFFFFF;
+            --text-muted: #4B4B4B;
+            --success-color: #28A745;
+            --warning-color: #FFC107;
+            --danger-color: #DC3545;
+            --shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --dark-gray: #343a40;
+            --light-gray: #e9ecef;
+            --light-background: #F4F4F4;
+            --medium-gray: #6c757d;
+        }
+
+        body {
+            background: linear-gradient(135deg, #D9D9D9, #e9ecef);
+            font-family: Arial, sans-serif;
+            padding-top: 90px;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navbar Styles */
+        .navbar-custom {
+            background-color: rgba(255, 255, 255, 0.95);
+            height: 70px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 0 15px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand:hover img,
+        .navbar-brand:focus img {
+            transform: scale(1.05);
+        }
+
+        /* Center the nav links */
+        .navbar-nav.center-nav {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--secondary-color) !important;
+        }
+
+        .nav-link:hover::after,
+        .nav-link:focus::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+        }
+
+        /* Profile Circle */
+        .profile-circle {
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .profile-circle:hover,
+        .profile-circle:focus {
+            transform: scale(1.1);
+        }
+
+        /* Table Container */
         .table-container {
-            background: #fff;
+            background: var(--white);
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            padding: 40px;
+            margin-bottom: 2rem;
         }
+
+        .table thead {
+            background-color: #001f3a;
+            color: var(--white);
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--light-gray);
+        }
+
+        /* Sortable Column Headers */
+        .sortable {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+       
+
+        /* Button Styles */
         .btn-orange {
-            background-color: #ff6200;
-            color: #fff;
+            background-color: var(--primary-color);
+            color: var(--white);
             border: none;
+            transition: var(--transition);
         }
+
         .btn-orange:hover {
             background-color: #e55a00;
-            color: #fff;
+            color: var(--white);
         }
+
+        /* Pagination Styles */
         .pagination .page-item.active .page-link {
-            background-color: #007bff;
-            border-color: #007bff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .pagination .page-link {
+            color: var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--light-gray);
+            color: var(--primary-color);
+        }
+
+        /* Search Input */
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.25);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--shadow);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-gray);
         }
     </style>
 </head>
 <body>
     <!-- Hidden inputs for token and advisorId -->
-    <input type="hidden" id="token" th:value="${token}">
-    <input type="hidden" id="advisorId" th:value="${advisorId}">
+    <input type="hidden" id="token" th:value="${token != null ? token : ''}">
+    <input type="hidden" id="advisorId" th:value="${advisorId != null ? advisorId : ''}">
 
-    <div th:replace="~{fragments/advisorNavbar :: navbar}"></div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom" aria-label="Main navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/dashboard/admin}" aria-label="ServiceXpress Home">
+                <img src="/images/logo.jpg" alt="ServiceXpress Logo" onerror="this.src='https://via.placeholder.com/40';">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav center-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/service-advisor/dashboard" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''})}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/service-advisor/completed">Completed</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="text-dark dropdown-toggle d-flex align-items-center"
+                           data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Profile">
+                            <div class="profile-circle me-2" 
+                                 th:text="${#strings.substring(session.username, 0, 1) != null ? #strings.toUpperCase(#strings.substring(session.username, 0, 1)) : 'A'}" 
+                                 aria-hidden="true">A</div>
+                            <span class="fw-medium me-2" 
+                                  th:text="${session.username != null ? session.username : 'Admin'}">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item text-danger" th:href="@{/advisor/logout}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
     <main class="container mt-5 pt-4">
-        <h2>Service Advisor Dashboard</h2>
-
-        <!-- Error Message -->
-        <div th:if="${error}" class="alert alert-danger" role="alert">
-            <span th:text="${error}">Error message</span>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="mb-4">
-            <input type="text" class="form-control" id="searchInput" placeholder="Search by Vehicle ID, Details, or Customer Name...">
-        </div>
-
         <!-- Assigned Vehicles Table -->
         <div class="table-container">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
+            <h2 class="mb-4">Service Advisor Dashboard</h2>
+
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <span th:text="${error}">Error message</span>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search by Vehicle ID, Details, or Customer Name...">
+            </div>
+
+            <table class="table table-striped table-hover" id="vehiclesTable">
+                <thead>
                     <tr>
-                        <th>Vehicle ID</th>
-                        <th>Vehicle Details</th>
-                        <th>Customer Name</th>
-                        <th>Assigned Date</th>
-                        <th>Required Services</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th scope="col" class="sortable" data-column="0">Vehicle ID <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="1">Vehicle Details <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="2">Customer Name <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="3">Assigned Date <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="4">Required Services <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="5">Status <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="vehicle : ${assignedVehicles}">
+                    <tr th:each="vehicle : ${assignedVehicles}" th:if="${assignedVehicles != null}">
                         <td th:text="'V00' + ${vehicle.id}">V00123</td>
-                        <td th:text="${vehicle.vehicleModel}">Toyota Camry - ABC-1234</td>
-                        <td th:text="${vehicle.customerName}">Jane Smith</td>
-                        <td th:text="${#temporals.format(vehicle.assignedDate, 'MMM dd, yyyy')}">March 26, 2025</td>
-                        <td th:text="${vehicle.servicesNeeded}">Engine Oil, Wheel Alignment</td>
-                        <td th:text="${vehicle.status}">Assigned</td>
+                        <td th:text="${vehicle.vehicleModel != null ? vehicle.vehicleModel : 'N/A'}">Toyota Camry - ABC-1234</td>
+                        <td th:text="${vehicle.customerName != null ? vehicle.customerName : 'N/A'}">Jane Smith</td>
+                        <td th:text="${vehicle.assignedDate != null ? #temporals.format(vehicle.assignedDate, 'MMM dd, yyyy') : 'N/A'}">March 26, 2025</td>
+                        <td th:text="${vehicle.servicesNeeded != null ? vehicle.servicesNeeded : 'N/A'}">Engine Oil, Wheel Alignment</td>
+                        <td th:text="${vehicle.status != null ? vehicle.status : 'N/A'}">Assigned</td>
                         <td>
                             <form th:if="${vehicle.status == 'ASSIGNED'}" th:action="@{'/service-advisor/start-service'}" method="post" style="display:inline;">
                                 <input type="hidden" name="bookingId" th:value="${vehicle.id}"/>
-                                <input type="hidden" name="advisorId" th:value="${advisorId}"/>
+                                <input type="hidden" name="advisorId" th:value="${advisorId != null ? advisorId : ''}"/>
                                 <button type="submit" class="btn btn-sm btn-orange">Start Service</button>
                             </form>
-                            <a th:if="${vehicle.status == 'IN_PROGRESS'}" href="#" class="btn btn-sm btn-orange">Manage Service</a>
+                            <a th:if="${vehicle.status == 'IN_PROGRESS'}" th:href="@{'/service-advisor/manage-service?bookingId=' + ${vehicle.id} + '&advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''})}" class="btn btn-sm btn-orange">Manage Service</a>
                         </td>
                     </tr>
-                   <tr th:if="${assignedVehicles == null or assignedVehicles.isEmpty()}">
-    <td colspan="7" class="text-center">No assigned vehicles found.</td>
-</tr>
+                    <tr th:if="${assignedVehicles == null or assignedVehicles.isEmpty()}">
+                        <td colspan="7" class="text-center">No assigned vehicles found.</td>
+                    </tr>
                 </tbody>
             </table>
 
             <!-- Pagination -->
-            <nav aria-label="Page navigation">
+            <nav aria-label="Page navigation" th:if="${totalPages != null and totalPages > 0}">
                 <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">Prev</a>
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${currentPage - 1}}" tabindex="-1">Prev</a>
                     </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${i}}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${currentPage + 1}}">Next</a>
                     </li>
                 </ul>
             </nav>
@@ -106,11 +299,64 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Search functionality
             $('#searchInput').on('keyup', function() {
                 var value = $(this).val().toLowerCase();
-                $('table tbody tr').filter(function() {
+                $('#vehiclesTable tbody tr').filter(function() {
                     $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
                 });
+            });
+
+            // Sorting functionality
+            $('.sortable').on('click', function() {
+                var table = $('#vehiclesTable');
+                var tbody = table.find('tbody');
+                var rows = tbody.find('tr').toArray();
+                var columnIndex = $(this).data('column');
+                var isAscending = $(this).hasClass('asc');
+
+                // Toggle sort direction
+                $('.sortable').removeClass('asc desc');
+                $(this).addClass(isAscending ? 'desc' : 'asc');
+
+                // Update sort icon
+                $('.sort-icon').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
+                $(this).find('.sort-icon').removeClass('fa-sort').addClass(isAscending ? 'fa-sort-down' : 'fa-sort-up');
+
+                // Sort rows
+                rows.sort(function(a, b) {
+                    var aValue = $(a).children('td').eq(columnIndex).text().toLowerCase();
+                    var bValue = $(b).children('td').eq(columnIndex).text().toLowerCase();
+
+                    // Special handling for date column (index 3)
+                    if (columnIndex === 3) {
+                        aValue = aValue === 'n/a' ? '' : new Date(aValue).getTime();
+                        bValue = bValue === 'n/a' ? '' : new Date(bValue).getTime();
+                    }
+
+                    if (aValue < bValue) return isAscending ? 1 : -1;
+                    if (aValue > bValue) return isAscending ? -1 : 1;
+                    return 0;
+                });
+
+                // Re-append sorted rows
+                tbody.empty();
+                $.each(rows, function(index, row) {
+                    tbody.append(row);
+                });
+            });
+        });
+
+        // Script to handle active link
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const linkPath = link.getAttribute('href');
+                link.classList.remove('active');
+                if (currentPath === linkPath || (currentPath.includes('/service-advisor/dashboard') && linkPath.includes('/service-advisor/dashboard'))) {
+                    link.classList.add('active');
+                }
             });
         });
     </script>
