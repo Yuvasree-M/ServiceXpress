@@ -44,7 +44,7 @@ public class InventoryController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Inventory> updateInventory(@PathVariable Long id, @RequestBody Inventory inventory) {
         if (inventory.getWorkitems() == null || inventory.getWorkitems().trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);  // Ensure name is not empty
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         Inventory updatedInventory = inventoryService.updateInventory(id, inventory);
@@ -57,13 +57,12 @@ public class InventoryController {
         Optional<Inventory> inventoryOptional = inventoryService.getInventoryById(id);
 
         if (inventoryOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();  // Return NOT_FOUND if item doesn't exist
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         inventoryService.deleteInventory(id);
-        return ResponseEntity.noContent().build();  // Return no content on successful deletion
+        return ResponseEntity.noContent().build();
     }
-
 
     @PostMapping("/use/{id}/{quantity}")
     @PreAuthorize("hasRole('SERVICE_ADVISOR')")

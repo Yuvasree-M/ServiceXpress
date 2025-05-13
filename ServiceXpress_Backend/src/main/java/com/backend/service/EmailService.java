@@ -1,16 +1,18 @@
 package com.backend.service;
 
+import com.backend.dto.BillOfMaterialDTO;
 import com.backend.model.BookingRequest;
-
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
+import java.util.List;
 
 @Service
 public class EmailService {
@@ -18,56 +20,75 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+
     public void sendBookingConfirmationEmail(String to, String customerName, BookingRequest booking,
-                                            String vehicleTypeId, String vehicleTypeName,
-                                            String vehicleModelId, String vehicleModelName,
-                                            String serviceCenterId, String serviceCenterName) 
-                                            throws MessagingException {
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+                                             String vehicleTypeId, String vehicleTypeName,
+                                             String vehicleModelId, String vehicleModelName,
+                                             String serviceCenterId, String serviceCenterName) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         helper.setTo(to);
-        helper.setSubject("Booking Confirmation - ServiceXpress");
-        helper.setFrom("yuvasreemohan4sep2003@gmail.com");
+        helper.setSubject("Booking Confirmation - " + booking.getId());
+        helper.setFrom("noreply@yourdomain.com");
 
-        // Construct the HTML email body with both IDs and names
-        String htmlContent = "<html>" +
-                "<body style='font-family: Poppins, sans-serif; color: #4B5563;'>" +
-                "<div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #E5E7EB; border-radius: 10px;'>" +
-                "<h2 style='color: #F97316; text-align: center;'>Booking Confirmation</h2>" +
-                "<p style='font-size: 16px;'>Dear <strong>" + customerName + "</strong>,</p>" +
-                "<p style='font-size: 16px;'>Thank you for booking with ServiceXpress! Your service request has been successfully submitted. Below are the details of your booking:</p>" +
-                "<table style='width: 100%; border-collapse: collapse; margin: 20px 0;'>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Booking ID:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getId() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Name:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getCustomerName() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Email:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getCustomerEmail() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Mobile Number:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getCustomerPhone() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Vehicle Registration Number:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getVehicleRegistrationNumber() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Service Center (ID: " + serviceCenterId + "):</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + serviceCenterName + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Vehicle Type (ID: " + vehicleTypeId + "):</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + vehicleTypeName + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Vehicle Model (ID: " + vehicleModelId + "):</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + vehicleModelName + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Services:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getServices() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Requested Date:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getRequestedDate() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Address:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getAddress() + "</td></tr>" +
-                "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Pick-up/Drop-off:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getPickDropOption() + "</td></tr>" +
-                (booking.getPickDropOption().equals("YES") ? (
-                    "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Pick-up/Drop-off Option:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + booking.getPickupDropoffOption() + "</td></tr>" +
-                    (booking.getPickupDropoffOption().equals("pickup") || booking.getPickupDropoffOption().equals("both") ? 
-                        "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Pick-up Address:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + (booking.getPickupAddress() != null ? booking.getPickupAddress() : "N/A") + "</td></tr>" : "") +
-                    (booking.getPickupDropoffOption().equals("dropoff") || booking.getPickupDropoffOption().equals("both") ? 
-                        "<tr><td style='padding: 8px; border: 1px solid #E5E7EB;'><strong>Drop-off Address:</strong></td><td style='padding: 8px; border: 1px solid #E5E7EB;'>" + (booking.getDropAddress() != null ? booking.getDropAddress() : "N/A") + "</td></tr>" : "")
-                ) : "") +
-                "</table>" +
-                "<p style='font-size: 16px; text-align: center;'>We will contact you soon to confirm your appointment. If you have any questions, feel free to reach out to us at <a href='mailto:info@servicexpress.com' style='color: #F97316;'>info@servicexpress.com</a>.</p>" +
-                "<p style='font-size: 16px; text-align: center;'>Thank you for choosing ServiceXpress!</p>" +
-                "<div style='text-align: center; margin-top: 20px;'>" +
-                "<a href='http://localhost:8082/customer/bookings' style='background: #F97316; color: #FFFFFF; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>View Your Bookings</a>" +
-                "</div>" +
-                "</div>" +
-                "</body>" +
-                "</html>";
+        String htmlContent = "<h3>Dear " + customerName + ",</h3>" +
+                "<p>Your booking has been successfully created with the following details:</p>" +
+                "<ul>" +
+                "<li><strong>Booking ID:</strong> " + booking.getId() + "</li>" +
+                "<li><strong>Vehicle Type:</strong> " + vehicleTypeName + " (ID: " + vehicleTypeId + ")</li>" +
+                "<li><strong>Vehicle Model:</strong> " + vehicleModelName + " (ID: " + vehicleModelId + ")</li>" +
+                "<li><strong>Service Center:</strong> " + serviceCenterName + " (ID: " + serviceCenterId + ")</li>" +
+                "<li><strong>Services:</strong> " + booking.getServices() + "</li>" +
+                "<li><strong>Requested Date:</strong> " + booking.getRequestedDate() + "</li>" +
+                "</ul>" +
+                "<p>Thank you for choosing our service!</p>";
 
         helper.setText(htmlContent, true);
-        mailSender.send(mimeMessage);
+        mailSender.send(message);
+        logger.info("Booking confirmation email sent to: {}", to);
+    }
+
+    public void sendBillEmail(String to, String customerName, Long bookingId, String customerNameInBom, 
+                             String advisorName, String serviceName, List<BillOfMaterialDTO.Material> materials, 
+                             Double total) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(to);
+        helper.setSubject("Bill for Booking ID: " + bookingId);
+        helper.setFrom("noreply@yourdomain.com");
+
+        StringBuilder materialsHtml = new StringBuilder();
+        materialsHtml.append("<table border='1' style='border-collapse: collapse; width: 100%;'>" +
+                "<tr><th>Material</th><th>Quantity</th><th>Unit Price</th><th>Total Price</th></tr>");
+        for (BillOfMaterialDTO.Material material : materials) {
+            double totalPrice = material.getQuantity() * material.getPrice();
+            materialsHtml.append("<tr>" +
+                    "<td>").append(material.getMaterialName()).append("</td>" +
+                    "<td>").append(material.getQuantity()).append("</td>" +
+                    "<td>$").append(String.format("%.2f", material.getPrice())).append("</td>" +
+                    "<td>$").append(String.format("%.2f", totalPrice)).append("</td>" +
+                    "</tr>");
+        }
+        materialsHtml.append("</table>");
+
+        String htmlContent = "<h3>Dear " + customerName + ",</h3>" +
+                "<p>Below is the bill for your recent service (Booking ID: " + bookingId + "):</p>" +
+                "<ul>" +
+                "<li><strong>Customer Name:</strong> " + customerNameInBom + "</li>" +
+                "<li><strong>Advisor Name:</strong> " + advisorName + "</li>" +
+                "<li><strong>Service Name:</strong> " + serviceName + "</li>" +
+                "</ul>" +
+                "<h4>Materials Used:</h4>" +
+                materialsHtml.toString() +
+                "<p><strong>Total Amount:</strong> $" + String.format("%.2f", total) + "</p>" +
+                "<p>Please make the payment at your earliest convenience.</p>" +
+                "<p>Thank you for choosing our service!</p>";
+
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+        logger.info("Bill email sent to: {}", to);
     }
 }

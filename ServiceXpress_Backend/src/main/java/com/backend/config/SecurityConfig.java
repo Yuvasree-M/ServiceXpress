@@ -70,7 +70,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/locations/**").hasRole("ADMIN") // Location management
                 .requestMatchers("/api/dashboard/admin").hasRole("ADMIN") // Admin dashboard API
                 .requestMatchers("/dashboard/admin").hasRole("ADMIN") // Admin dashboard page
-                .requestMatchers("/admin/**").hasRole("ADMIN") // Admin web pages
                 .requestMatchers("/inventory").hasRole("ADMIN") // Inventory page
                 .requestMatchers("/service-centers").hasRole("ADMIN") // Service centers page
                 .requestMatchers("/customers").hasRole("ADMIN") // Customers page

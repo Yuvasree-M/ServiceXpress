@@ -131,7 +131,6 @@ public class AdvisorController {
         return "redirect:/service-advisor/dashboard?advisorId=" + advisorId;
     }
     
- // LOGOUT
     @GetMapping("/advisor/logout")
     public String logout(HttpSession session) {
         session.invalidate();

@@ -6,10 +6,10 @@ import com.backend.dto.DashboardDataDTO;
 import com.backend.dto.VehicleDueDTO;
 import com.backend.dto.VehicleUnderServiceDTO;
 import com.backend.dto.VehicleAssignedDTO;
+import com.backend.dto.VehicleCompletedDTO;
 import com.backend.model.Advisor;
 import com.backend.model.BookingAdvisorMapping;
 import com.backend.model.BookingRequest;
-import com.backend.model.DashboardData;
 import com.backend.repository.AdvisorRepository;
 import com.backend.repository.BookingAdvisorMappingRepository;
 import com.backend.service.BookingRequestService;
@@ -51,6 +51,7 @@ public class DashboardController {
     public ResponseEntity<DashboardDataDTO> getAdminDashboardData() {
         logger.info("Fetching admin dashboard data");
         try {
+            // Fetch pending bookings (Vehicles Due)
             List<BookingResponseDTO> pendingBookings = bookingRequestService.getPendingBookings();
             logger.debug("Fetched {} pending bookings", pendingBookings.size());
 
@@ -66,8 +67,8 @@ public class DashboardController {
                 VehicleDueDTO vehicleDue = new VehicleDueDTO();
                 vehicleDue.setId(booking.getId());
                 vehicleDue.setOwnerName(booking.getCustomerName());
-                vehicleDue.setVehicleModel(booking.getVehicleModelId());
-                vehicleDue.setVehicleType(booking.getVehicleTypeId());
+                vehicleDue.setVehicleModel(booking.getVehicleModel());
+                vehicleDue.setVehicleType(booking.getVehicleType());
                 vehicleDue.setServiceNeeded(booking.getServices());
                 vehicleDue.setLocation(booking.getAddress());
                 vehicleDue.setServiceAdvisorId(null);
@@ -78,6 +79,7 @@ public class DashboardController {
                 return vehicleDue;
             }).collect(Collectors.toList());
 
+            // Fetch in-progress bookings (Vehicles Under Service)
             List<BookingResponseDTO> inProgressBookings = bookingRequestService.getInProgressBookings();
             logger.debug("Fetched {} in-progress bookings", inProgressBookings.size());
 
@@ -85,9 +87,9 @@ public class DashboardController {
                 VehicleUnderServiceDTO dto = new VehicleUnderServiceDTO();
                 dto.setId(booking.getId());
                 dto.setOwnerName(booking.getCustomerName());
-                dto.setVehicleType(booking.getVehicleTypeId());
-                dto.setVehicleModel(booking.getVehicleModelId());
-                dto.setServiceCenter(booking.getServiceCenterId());
+                dto.setVehicleType(booking.getVehicleType());
+                dto.setVehicleModel(booking.getVehicleModel());
+                dto.setServiceCenter(booking.getServiceCenter());
                 String advisorName = "Unknown";
                 Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(booking.getId());
                 if (mapping.isPresent()) {
@@ -100,6 +102,7 @@ public class DashboardController {
                 return dto;
             }).collect(Collectors.toList());
 
+            // Fetch assigned bookings (Vehicles Assigned)
             List<BookingResponseDTO> assignedBookings = bookingRequestService.getAssignedBookings();
             logger.debug("Fetched {} assigned bookings", assignedBookings.size());
 
@@ -107,8 +110,8 @@ public class DashboardController {
                 VehicleAssignedDTO dto = new VehicleAssignedDTO();
                 dto.setId(booking.getId());
                 dto.setCustomerName(booking.getCustomerName());
-                dto.setVehicleModel(booking.getVehicleModelId());
-                dto.setVehicleType(booking.getVehicleTypeId());
+                dto.setVehicleModel(booking.getVehicleModel());
+                dto.setVehicleType(booking.getVehicleType());
                 String advisorName = "Unknown";
                 Optional<BookingAdvisorMapping> mapping = bookingRequestService.getBookingAdvisorMappingRepository().findByBookingId(booking.getId());
                 if (mapping.isPresent()) {
@@ -122,24 +125,45 @@ public class DashboardController {
                 return dto;
             }).collect(Collectors.toList());
 
-            // Fetch completed bookings for completedCount
-            List<BookingRequest> completedBookings = bookingRequestService.getBookingsByCustomerId(null)
-                .stream()
-                .filter(booking -> "COMPLETED".equals(booking.getStatus()))
-                .collect(Collectors.toList());
-            int completedCount = completedBookings.size();
+            // Fetch completed bookings (Vehicles Completed)
+            List<BookingResponseDTO> completedBookings = bookingRequestService.getCompletedBookings();
+            logger.debug("Fetched {} completed bookings", completedBookings.size());
 
+            List<VehicleCompletedDTO> vehiclesCompleted = completedBookings.stream().map(booking -> {
+                VehicleCompletedDTO dto = new VehicleCompletedDTO();
+                dto.setId(booking.getId());
+                dto.setOwnerName(booking.getCustomerName());
+                dto.setVehicleType(booking.getVehicleType());
+                dto.setVehicleModel(booking.getVehicleModel());
+                dto.setServiceCenter(booking.getServiceCenter());
+                String advisorName = "Unknown";
+                Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(booking.getId());
+                if (mapping.isPresent()) {
+                    Optional<Advisor> advisor = advisorRepository.findById(mapping.get().getAdvisorId());
+                    advisorName = advisor.map(Advisor::getUsername).orElse("Unknown");
+                }
+                dto.setServiceAdvisor(advisorName);
+                dto.setServiceDone(booking.getServices());
+                dto.setCompletedDate(booking.getUpdatedAt());
+                dto.setStatus(booking.getStatus());
+                dto.setCustomerEmail(booking.getCustomerEmail());
+                dto.setPaymentRequested(false);
+                dto.setPaymentReceived(false);
+                return dto;
+            }).collect(Collectors.toList());
+
+            // Populate DashboardDataDTO
             DashboardDataDTO dashboardData = new DashboardDataDTO();
             dashboardData.setDueCount(vehiclesDue.size());
             dashboardData.setServicingCount(vehiclesUnderService.size());
-            dashboardData.setCompletedCount(completedCount);
-            dashboardData.setAdvisorRequestsCount(0);
+            dashboardData.setCompletedCount(vehiclesCompleted.size());
+            dashboardData.setAdvisorRequestsCount(0); // Not implemented in this code
             dashboardData.setAssignedCount(vehiclesAssigned.size());
             dashboardData.setProfileName("Admin User");
             dashboardData.setVehiclesDue(vehiclesDue);
             dashboardData.setVehiclesUnderService(vehiclesUnderService);
-            dashboardData.setVehiclesCompleted(new ArrayList<>());
-            dashboardData.setAdvisorRequests(new ArrayList<>());
+            dashboardData.setVehiclesCompleted(vehiclesCompleted);
+            dashboardData.setAdvisorRequests(new ArrayList<>()); // Not implemented in this code
             dashboardData.setVehiclesAssigned(vehiclesAssigned);
 
             logger.info("Admin dashboard data prepared successfully");
@@ -185,5 +209,4 @@ public class DashboardController {
             return ResponseEntity.status(500).build();
         }
     }
-
 }
