@@ -41,6 +41,11 @@ public class BookingRequestService {
 
     private static final Logger logger = LoggerFactory.getLogger(BookingRequestService.class);
 
+    // Getter for repository
+    public BookingRequestRepository getBookingRequestRepository() {
+        return repository;
+    }
+
     public AdvisorRepository getAdvisorRepository() {
         return advisorRepository;
     }
@@ -204,7 +209,7 @@ public class BookingRequestService {
     }
 
     public List<BookingResponseDTO> getAssignedBookings() {
-        logger.info("Fetching assigned_TERM bookings");
+        logger.info("Fetching assigned bookings");
         List<BookingRequest> assignedBookings = repository.findByStatus("ASSIGNED");
         return mapToBookingResponseDTOs(assignedBookings);
     }
@@ -392,7 +397,7 @@ public class BookingRequestService {
     private List<BookingResponseDTO> mapToBookingResponseDTOs(List<BookingRequest> bookings) {
         return bookings.stream().map(booking -> {
             String vehicleTypeFormatted = booking.getVehicleTypeId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
-            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleModelId() + " (Unknown)" : "Unknown";
+            String vehicleModelFormatted = booking.getVehicleModelId() != null ? booking.getVehicleTypeId() + " (Unknown)" : "Unknown";
             String serviceCenterFormatted = booking.getServiceCenterId() != null ? booking.getServiceCenterId() + " (Unknown)" : "Unknown";
 
             try {
