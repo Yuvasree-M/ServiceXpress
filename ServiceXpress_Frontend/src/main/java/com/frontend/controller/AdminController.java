@@ -54,6 +54,7 @@ public class AdminController {
             } else {
                 model.addAttribute("dashboardData", data);
                 model.addAttribute("token", token);
+                model.addAttribute("backendApiUrl", backendApiUrl);
             }
         } catch (Exception e) {
             logger.error("Failed to load dashboard: {}", e.getMessage(), e);

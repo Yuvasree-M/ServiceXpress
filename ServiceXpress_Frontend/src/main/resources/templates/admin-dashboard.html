@@ -13,6 +13,7 @@
 <body>
     <!-- Hidden input for the token -->
     <input type="hidden" id="token" th:value="${token}">
+    <input type="hidden" id="backendApiUrl" th:value="${backendApiUrl}">
 
     <div th:replace="fragments/adminNavbar :: navbar"></div>
 
@@ -389,88 +390,90 @@
         }
 
         // View Bill Modal Handling
-        $('.view-bill-btn').on('click', function() {
-            const bookingId = $(this).data('booking-id');
-            const customerEmail = $(this).data('customer-email');
-            const token = $('#token').val();
+        // View Bill Modal Handling
+$('.view-bill-btn').on('click', function() {
+    const bookingId = $(this).data('booking-id');
+    const customerEmail = $(this).data('customer-email');
+    const token = $('#token').val();
+    const backendApiUrl = $('#backendApiUrl').val(); // Get the backend API URL
 
-            $('#modalBookingId').val(bookingId);
-            $('#modalCustomerEmail').val(customerEmail);
+    $('#modalBookingId').val(bookingId);
+    $('#modalCustomerEmail').val(customerEmail);
 
-            $.ajax({
-                url: '/api/bookings/bom/' + bookingId,
-                method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(data) {
-                    $('#modalCustomerName').val(data.customerName);
-                    $('#modalAdvisorName').val(data.advisorName);
-                    $('#modalServiceName').val(data.serviceName);
-                    $('#modalTotal').val('$' + data.total.toFixed(2));
+    $.ajax({
+        url: backendApiUrl + '/bookings/bom/' + bookingId, // Use backendApiUrl
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        },
+        success: function(data) {
+            $('#modalCustomerName').val(data.customerName);
+            $('#modalAdvisorName').val(data.advisorName);
+            $('#modalServiceName').val(data.serviceName);
+            $('#modalTotal').val('$' + data.total.toFixed(2));
 
-                    const materialsTableBody = $('#modalMaterialsTable tbody');
-                    materialsTableBody.empty();
-                    data.materials.forEach(material => {
-                        const row = `
-                            <tr>
-                                <td>${material.materialName}</td>
-                                <td>${material.quantity}</td>
-                                <td>$${material.price.toFixed(2)}</td>
-                                <td>$${(material.price * material.quantity).toFixed(2)}</td>
-                            </tr>
-                        `;
-                        materialsTableBody.append(row);
-                    });
-                },
-                error: function(xhr) {
-                    let errorMessage = 'Failed to load bill of materials.';
-                    if (xhr.status === 404) {
-                        errorMessage = 'Bill not found for this booking. Please ensure the booking is completed and has a bill associated with it.';
-                    } else if (xhr.status === 400) {
-                        errorMessage = 'Receipt is only available for completed bookings.';
-                    } else if (xhr.status === 401) {
-                        errorMessage = 'Unauthorized: Please log in again.';
-                    } else if (xhr.responseText) {
-                        errorMessage = 'Failed to load bill: ' + xhr.responseText;
-                    }
-                    alert(errorMessage);
-                }
+            const materialsTableBody = $('#modalMaterialsTable tbody');
+            materialsTableBody.empty();
+            data.materials.forEach(material => {
+                const row = `
+                    <tr>
+                        <td>${material.materialName}</td>
+                        <td>${material.quantity}</td>
+                        <td>$${material.price.toFixed(2)}</td>
+                        <td>$${(material.price * material.quantity).toFixed(2)}</td>
+                    </tr>
+                `;
+                materialsTableBody.append(row);
             });
-        });
+        },
+        error: function(xhr) {
+            let errorMessage = 'Failed to load bill of materials.';
+            if (xhr.status === 404) {
+                errorMessage = 'Bill not found for this booking. Please ensure the booking is completed and has a bill associated with it.';
+            } else if (xhr.status === 400) {
+                errorMessage = 'Receipt is only available for completed bookings.';
+            } else if (xhr.status === 401) {
+                errorMessage = 'Unauthorized: Please log in again.';
+            } else if (xhr.responseText) {
+                errorMessage = 'Failed to load bill: ' + xhr.responseText;
+            }
+            alert(errorMessage);
+        }
+    });
+});
 
-        // Send Bill to Customer
-        $('#sendBillBtn').on('click', function() {
-            const bookingId = $('#modalBookingId').val();
-            const customerEmail = $('#modalCustomerEmail').val();
-            const token = $('#token').val();
+// Send Bill to Customer
+$('#sendBillBtn').on('click', function() {
+    const bookingId = $('#modalBookingId').val();
+    const customerEmail = $('#modalCustomerEmail').val();
+    const token = $('#token').val();
+    const backendApiUrl = $('#backendApiUrl').val(); // Get the backend API URL
 
-            $.ajax({
-                url: '/api/bookings/send-bill/' + bookingId,
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(response) {
-                    alert('Bill sent to customer successfully!');
-                    $('#viewBillModal').modal('hide');
-                },
-                error: function(xhr) {
-                    let errorMessage = 'Failed to send bill.';
-                    if (xhr.status === 404) {
-                        errorMessage = 'Booking or bill not found.';
-                    } else if (xhr.status === 500) {
-                        errorMessage = 'Server error while sending the bill. Please try again later.';
-                    } else if (xhr.status === 401) {
-                        errorMessage = 'Unauthorized: Please log in again.';
-                    } else if (xhr.responseText) {
-                        errorMessage = 'Failed to send bill: ' + xhr.responseText;
-                    }
-                    alert(errorMessage);
-                }
-            });
-        });
-
+    $.ajax({
+        url: backendApiUrl + '/bookings/send-bill/' + bookingId, // Use backendApiUrl
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        },
+        success: function(response) {
+            alert('Bill sent to customer successfully!');
+            $('#viewBillModal').modal('hide');
+        },
+        error: function(xhr) {
+            let errorMessage = 'Failed to send bill.';
+            if (xhr.status === 404) {
+                errorMessage = 'Booking or bill not found.';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Server error while sending the bill. Please try again later.';
+            } else if (xhr.status === 401) {
+                errorMessage = 'Unauthorized: Please log in again.';
+            } else if (xhr.responseText) {
+                errorMessage = 'Failed to send bill: ' + xhr.responseText;
+            }
+            alert(errorMessage);
+        }
+    });
+});
         document.addEventListener("DOMContentLoaded", function() {
             showTable('dueTable');
             $('.datatable').DataTable({

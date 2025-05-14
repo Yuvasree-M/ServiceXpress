@@ -11,9 +11,11 @@ import com.backend.model.Advisor;
 import com.backend.model.BookingAdvisorMapping;
 import com.backend.model.BookingRequest;
 import com.backend.repository.AdvisorRepository;
+import com.backend.repository.BillOfMaterialRepository;
 import com.backend.repository.BookingAdvisorMappingRepository;
 import com.backend.service.BookingRequestService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,23 +31,28 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:8082")
 @RequestMapping("/api/dashboard")
 public class DashboardController {
 
     private final BookingRequestService bookingRequestService;
     private final BookingAdvisorMappingRepository bookingAdvisorMappingRepository;
     private final AdvisorRepository advisorRepository;
+	private final BillOfMaterialRepository billOfMaterialRepository;
     private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 
     public DashboardController(
         BookingRequestService bookingRequestService,
         BookingAdvisorMappingRepository bookingAdvisorMappingRepository,
-        AdvisorRepository advisorRepository
+        AdvisorRepository advisorRepository,
+        BillOfMaterialRepository billOfMaterialRepository
     ) {
         this.bookingRequestService = bookingRequestService;
         this.bookingAdvisorMappingRepository = bookingAdvisorMappingRepository;
         this.advisorRepository = advisorRepository;
+        this.billOfMaterialRepository = billOfMaterialRepository;
     }
+
 
     @GetMapping("/admin")
     public ResponseEntity<DashboardDataDTO> getAdminDashboardData() {
@@ -149,6 +156,10 @@ public class DashboardController {
                 dto.setCustomerEmail(booking.getCustomerEmail());
                 dto.setPaymentRequested(false);
                 dto.setPaymentReceived(false);
+                // Check if BOM exists and set hasBom
+                boolean hasBom = billOfMaterialRepository.findByBookingId(booking.getId()).isPresent();
+                logger.debug("Booking ID: {}, hasBom: {}", booking.getId(), hasBom);
+                dto.setHasBom(hasBom);
                 return dto;
             }).collect(Collectors.toList());
 
