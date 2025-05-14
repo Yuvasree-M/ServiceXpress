@@ -40,6 +40,7 @@ public class AdminBookingController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+    
 
     @GetMapping("/advisors")
     public ResponseEntity<List<Advisor>> getAllAdvisors() {
