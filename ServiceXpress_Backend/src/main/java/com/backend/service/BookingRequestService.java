@@ -189,23 +189,19 @@ public class BookingRequestService {
         logger.info("Assigning advisor {} to booking {}", advisorId, bookingId);
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
-
         Advisor advisor = advisorRepository.findById(advisorId)
                 .orElseThrow(() -> new IllegalArgumentException("Advisor not found with id: " + advisorId));
-
         Optional<BookingAdvisorMapping> existingMapping = bookingAdvisorMappingRepository.findByBookingId(bookingId);
         if (existingMapping.isPresent()) {
             throw new IllegalStateException("Advisor already assigned to booking id: " + bookingId);
         }
-
         BookingAdvisorMapping mapping = new BookingAdvisorMapping(bookingId, advisorId);
         bookingAdvisorMappingRepository.save(mapping);
-
         booking.setStatus("ASSIGNED");
         booking.setUpdatedAt(LocalDateTime.now());
         return repository.save(booking);
     }
-
+    
     @Transactional
     public BookingRequest startService(Long bookingId) {
         logger.info("Starting service for bookingId: {}", bookingId);
