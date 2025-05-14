@@ -26,6 +26,4 @@ public class BookingAdvisorMapping {
         this.bookingId = bookingId;
         this.advisorId = advisorId;
     }
-
-
 }

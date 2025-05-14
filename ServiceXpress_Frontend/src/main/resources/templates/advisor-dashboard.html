@@ -6,127 +6,708 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet"/>
-    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/admincss.css}">
+    <input type="hidden" id="backendApiUrl" th:value="${@environment.getProperty('backend.api.url')}">
+    
+    <style>
+        :root {
+            --primary-color: #FF6200;
+            --secondary-color: #00274D;
+            --light-bg: #D9D9D9;
+            --white: #FFFFFF;
+            --text-muted: #4B4B4B;
+            --success-color: #28A745;
+            --warning-color: #FFC107;
+            --danger-color: #DC3545;
+            --shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --dark-gray: #343a40;
+            --light-gray: #e9ecef;
+            --light-background: #F4F4F4;
+            --medium-gray: #6c757d;
+        }
+
+        body {
+            background: linear-gradient(135deg, #D9D9D9, #e9ecef);
+            font-family: Arial, sans-serif;
+            padding-top: 90px;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Navbar Styles */
+        .navbar-custom {
+            background-color: rgba(255, 255, 255, 0.95);
+            height: 70px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 0 15px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand:hover img,
+        .navbar-brand:focus img {
+            transform: scale(1.05);
+        }
+
+        /* Center the nav links */
+        .navbar-nav.center-nav {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--secondary-color) !important;
+        }
+
+        .nav-link:hover::after,
+        .nav-link:focus::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+        }
+
+        /* Profile Circle */
+        .profile-circle {
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .profile-circle:hover,
+        .profile-circle:focus {
+            transform: scale(1.1);
+        }
+
+        /* Table Container */
+        .table-container {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 2rem;
+        }
+
+        .table thead {
+            background-color: #001f3a;
+            color: var(--white);
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--light-gray);
+        }
+
+        /* Sortable Column Headers */
+        .sortable {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+        /* Button Styles */
+        .btn-orange {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            transition: var(--transition);
+        }
+
+        .btn-orange:hover {
+            background-color: #e55a00;
+            color: var(--white);
+        }
+
+        /* Pagination Styles */
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .pagination .page-link {
+            color: var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--light-gray);
+            color: var(--primary-color);
+        }
+
+        /* Search Input */
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.25);
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--shadow);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-gray);
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 8px;
+        }
+
+        .modal-header {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .modal-footer .btn-orange {
+            background-color: var(--primary-color);
+        }
+
+        .modal-footer .btn-orange:hover {
+            background-color: #e55a00;
+        }
+
+        .material-row {
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <!-- Hidden input for the token and advisorId -->
-    <input type="hidden" id="token" th:value="${token}">
-    <input type="hidden" id="advisorId" th:value="${advisorId}">
+    <!-- Hidden inputs for token and advisorId -->
+    <input type="hidden" id="token" th:value="${token != null ? token : ''}">
+    <input type="hidden" id="advisorId" th:value="${advisorId != null ? advisorId : ''}">
+    <input type="hidden" id="username" th:value="${session.username != null ? session.username : 'Advisor'}">
 
-    <div th:replace="~{fragments/adminNavbar :: navbar}"></div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom" aria-label="Main navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/dashboard/admin}" aria-label="ServiceXpress Home">
+                <img src="/images/logo.jpg" alt="ServiceXpress Logo" onerror="this.src='https://via.placeholder.com/40';">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav center-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/service-advisor/dashboard" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''})}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/service-advisor/completed">Completed</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="text-dark dropdown-toggle d-flex align-items-center"
+                           data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Profile">
+                            <div class="profile-circle me-2" 
+                                 th:text="${#strings.substring(session.username, 0, 1) != null ? #strings.toUpperCase(#strings.substring(session.username, 0, 1)) : 'A'}" 
+                                 aria-hidden="true">A</div>
+                            <span class="fw-medium me-2" 
+                                  th:text="${session.username != null ? session.username : 'Admin'}">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item text-danger" th:href="@{/advisor/logout}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
     <main class="container mt-5 pt-4">
-        <h2>Service Advisor Dashboard</h2>
+        <!-- Assigned Vehicles Table -->
+        <div class="table-container">
+            <h2 class="mb-4">Service Advisor Dashboard</h2>
 
-        <!-- Error Message -->
-        <div th:if="${error}" class="alert alert-danger" role="alert">
-            <span th:text="${error}">Error message</span>
-        </div>
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <span th:text="${error}">Error message</span>
+            </div>
 
-        <!-- Debug Section: Display Raw Bookings Data -->
-        <div class="mt-3">
-            <h5>Debug: Raw Bookings Data</h5>
-            <pre th:if="${advisorBookings != null}" th:text="${#json.stringify(advisorBookings)}">
-                Raw bookings data will appear here...
-            </pre>
-            <div th:if="${advisorBookings == null}" class="alert alert-warning">
-                No raw bookings data available.
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search by Vehicle ID, Details, or Customer Name...">
             </div>
-        </div>
 
-        <!-- Assigned Bookings Table -->
-        <div id="advisorBookingsTable" class="table-container mt-4">
-            <h4>Assigned Bookings</h4>
-            <div th:if="${advisorBookings == null}" class="alert alert-info">
-                No bookings data available. Please try again later or contact support.
-            </div>
-            <div th:if="${advisorBookings != null and advisorBookings.isEmpty()}" class="alert alert-info">
-                No bookings assigned to you yet. This may be due to the booking status (e.g., only 'ASSIGNED' bookings are shown) or incorrect advisor assignment.
-            </div>
-            <table th:if="${advisorBookings != null and !advisorBookings.isEmpty()}" class="table table-striped table-hover display datatable">
+            <table class="table table-striped table-hover" id="vehiclesTable">
                 <thead>
                     <tr>
-                        <th>Customer Name</th>
-                        <th>Vehicle Model</th>
-                        <th>Vehicle Type</th>
-                        <th>Services Needed</th>
-                        <th>Service Center</th>
-                        <th>Requested Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th scope="col" class="sortable" data-column="0">Vehicle ID <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="1">Vehicle Details <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="2">Customer Name <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="3">Assigned Date <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="4">Required Services <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col" class="sortable" data-column="5">Status <span class="sort-icon fas fa-sort"></span></th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="booking : ${advisorBookings}">
-                        <td th:text="${booking.customerName}">John Doe</td>
-                        <td th:text="${booking.vehicleModelId}">1 (Pulsar 150)</td>
-                        <td th:text="${booking.vehicleTypeId}">1 (Bike)</td>
-                        <td th:text="${booking.services}">Oil Change</td>
-                        <td th:text="${booking.serviceCenterId}">1 (Mumbai Center)</td>
-                        <td th:text="${#temporals.format(booking.requestedDate, 'yyyy-MM-dd HH:mm')}">2024-04-10</td>
-                        <td th:text="${booking.status}">Assigned</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary start-service-btn"
-                                    th:onclick="'startService(' + ${booking.id} + ')'">
-                                Start
-                            </button>
-                        </td>
-                    </tr>
+                    <tr th:each="vehicle : ${assignedVehicles}" 
+        th:if="${assignedVehicles != null} and ${vehicle.status == 'ASSIGNED' or vehicle.status == 'IN_PROGRESS'}">
+        <td th:text="'V00' + ${vehicle.id}">V00123</td>
+        <td th:text="${vehicle.vehicleModel != null ? vehicle.vehicleModel : 'N/A'}">Toyota Camry - ABC-1234</td>
+        <td th:text="${vehicle.customerName != null ? vehicle.customerName : 'N/A'}">Jane Smith</td>
+        <td th:text="${vehicle.assignedDate != null ? #temporals.format(vehicle.assignedDate, 'MMM dd, yyyy') : 'N/A'}">March 26, 2025</td>
+        <td th:text="${vehicle.servicesNeeded != null ? vehicle.servicesNeeded : 'N/A'}">Engine Oil, Wheel Alignment</td>
+        <td th:text="${vehicle.status != null ? vehicle.status : 'N/A'}">Assigned</td>
+        <td>
+            <form th:if="${vehicle.status == 'ASSIGNED'}" th:action="@{'/service-advisor/start-service'}" method="post" style="display:inline;">
+                <input type="hidden" name="bookingId" th:value="${vehicle.id}"/>
+                <input type="hidden" name="advisorId" th:value="${advisorId != null ? advisorId : ''}"/>
+                <button type="submit" class="btn btn-sm btn-orange">Start Service</button>
+            </form>
+            <button th:if="${vehicle.status == 'IN_PROGRESS'}" 
+                    class="btn btn-sm btn-orange manage-service-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#bomModal"
+                    th:attr="data-booking-id=${vehicle.id},data-customer-name=${vehicle.customerName},data-services=${vehicle.servicesNeeded}">
+                Manage Service
+            </button>
+        </td>
+    </tr>
+    <tr th:if="${assignedVehicles == null or assignedVehicles.isEmpty()}">
+        <td colspan="7" class="text-center">No assigned vehicles found.</td>
+    </tr>
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" th:if="${totalPages != null and totalPages > 0}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${currentPage - 1}}" tabindex="-1">Prev</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${i}}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${currentPage + 1}}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- BOM Modal -->
+        <div class="modal fade" id="bomModal" tabindex="-1" aria-labelledby="bomModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bomModalLabel">Bill of Materials</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="bomForm">
+                            <input type="hidden" id="bookingId">
+                            <div class="mb-3">
+                                <label for="customerName" class="form-label">Customer Name</label>
+                                <input type="text" class="form-control" id="customerName" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="advisorName" class="form-label">Advisor Name</label>
+                                <input type="text" class="form-control" id="advisorName" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="serviceName" class="form-label">Service Name</label>
+                                <input type="text" class="form-control" id="serviceName" readonly>
+                            </div>
+                            <div id="materialsContainer">
+                                <div class="material-row row">
+                                    <div class="col-md-4">
+                                        <label for="materialSelect0" class="form-label">Material</label>
+                                        <select class="form-select material-select" id="materialSelect0" required>
+                                            <option value="">Select Material</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="quantity0" class="form-label">Quantity</label>
+                                        <input type="number" class="form-control quantity-input" id="quantity0" min="1" value="1" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="unitPrice0" class="form-label">Unit Price</label>
+                                        <input type="text" class="form-control unit-price-input" id="unitPrice0" readonly>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="price0" class="form-label">Total Price</label>
+                                        <input type="text" class="form-control price-input" id="price0" readonly>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm remove-material">-</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-orange btn-sm mt-2" id="addMaterial">Add Material</button>
+                            <div class="mt-3">
+                                <label class="form-label">Total</label>
+                                <input type="text" class="form-control" id="totalPrice" readonly>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-orange" id="submitBom">Submit BOM</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
-
-    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
-        function startService(bookingId) {
-            const tokenInput = document.getElementById('token');
-            if (!tokenInput) {
-                alert('Authentication token not found. Please log in again.');
-                return;
-            }
-            const token = tokenInput.value;
+        $(document).ready(function() {
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                var value = $(this).val().toLowerCase();
+                $('#vehiclesTable tbody tr').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
 
-            $.ajax({
-                url: '/api/dashboard/start-service?bookingId=' + bookingId,
-                type: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(response) {
-                    alert('Service started successfully.');
-                    window.location.reload();
-                },
-                error: function(xhr) {
-                    if (xhr.status === 403) {
-                        alert('Access denied: You do not have permission to perform this action.');
-                    } else if (xhr.status === 401) {
-                        alert('Unauthorized: Please log in again.');
-                    } else {
-                        alert('Error starting service: ' + xhr.responseText);
+            // Sorting functionality
+            $('.sortable').on('click', function() {
+                var table = $('#vehiclesTable');
+                var tbody = table.find('tbody');
+                var rows = tbody.find('tr').toArray();
+                var columnIndex = $(this).data('column');
+                var isAscending = $(this).hasClass('asc');
+
+                $('.sortable').removeClass('asc desc');
+                $(this).addClass(isAscending ? 'desc' : 'asc');
+
+                $('.sort-icon').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
+                $(this).find('.sort-icon').removeClass('fa-sort').addClass(isAscending ? 'fa-sort-down' : 'fa-sort-up');
+
+                rows.sort(function(a, b) {
+                    var aValue = $(a).children('td').eq(columnIndex).text().toLowerCase();
+                    var bValue = $(b).children('td').eq(columnIndex).text().toLowerCase();
+
+                    if (columnIndex === 3) {
+                        aValue = aValue === 'n/a' ? '' : new Date(aValue).getTime();
+                        bValue = bValue === 'n/a' ? '' : new Date(bValue).getTime();
                     }
+
+                    if (aValue < bValue) return isAscending ? 1 : -1;
+                    if (aValue > bValue) return isAscending ? -1 : 1;
+                    return 0;
+                });
+
+                tbody.empty();
+                $.each(rows, function(index, row) {
+                    tbody.append(row);
+                });
+            });
+
+            // Active link handling
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const linkPath = link.getAttribute('href');
+                link.classList.remove('active');
+                if (currentPath === linkPath || (currentPath.includes('/service-advisor/dashboard') && linkPath.includes('/service-advisor/dashboard'))) {
+                    link.classList.add('active');
                 }
             });
-        }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            $('.datatable').DataTable({
-                dom: 'Bfrtip',
-                buttons: ['csv', 'pdf'],
-                pageLength: 5,
-                lengthMenu: [5, 10, 25, 50]
+            // BOM Modal Handling
+            let materialCount = 1;
+            let inventoryData = []; // Store inventory data to avoid multiple AJAX calls
+
+            // Fetch inventory items
+            function loadInventory($targetSelect) {
+                if (inventoryData.length > 0) {
+                    populateDropdown($targetSelect);
+                    return;
+                }
+
+                $.ajax({
+                    url: $('#backendApiUrl').val() + '/inventory',
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + $('#token').val()
+                    },
+                    success: function(data) {
+                        console.log('Inventory fetched:', data);
+                        // Validate inventory data structure
+                        if (!Array.isArray(data) || data.length === 0) {
+                            console.error('Inventory data is empty or not an array');
+                            alert('No inventory items available.');
+                            return;
+                        }
+                        // Filter out items with missing required fields
+                        inventoryData = data.filter(item => 
+                            item.id != null && 
+                            item.workitems != null && 
+                            item.quantity != null && 
+                            item.quantity > 0 &&  // Ensure quantity is positive
+                            item.prices != null
+                        );
+                        if (inventoryData.length === 0) {
+                            console.error('No valid inventory items after filtering:', data);
+                            alert('No valid inventory items available. Please contact support.');
+                            return;
+                        }
+                        if (inventoryData.length < data.length) {
+                            console.warn('Some inventory items were filtered out due to missing fields:', data);
+                        }
+                        populateDropdown($targetSelect);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching inventory:', xhr.status, xhr.responseText, error);
+                        alert('Failed to load inventory: ' + (xhr.responseText || 'Status ' + xhr.status));
+                    }
+                });
+            }
+
+            // Populate a specific dropdown while preserving selection
+            function populateDropdown($select) {
+                const selectedValue = $select.val();
+                $select.empty().append('<option value="">Select Material</option>');
+                if (inventoryData.length === 0) {
+                    $select.append('<option value="" disabled>No materials available</option>');
+                } else {
+                    inventoryData.forEach(item => {
+                        const displayText = item.workitems || 'Unknown Item';
+                        const price = item.prices !== undefined ? item.prices : 0;
+                        $select.append(`<option value="${item.id}" data-price="${price}">${displayText} (Stock: ${item.quantity})</option>`);
+                    });
+                }
+                if (selectedValue) {
+                    $select.val(selectedValue);
+                    console.log('Restored selection for dropdown:', $select.attr('id'), 'Value:', selectedValue);
+                    const $row = $select.closest('.material-row');
+                    updateRowPrice($row);
+                }
+            }
+
+            // Open BOM modal
+            $('.manage-service-btn').on('click', function() {
+                const bookingId = $(this).data('booking-id');
+                const customerName = $(this).data('customer-name');
+                const services = $(this).data('services');
+                const advisorName = $('#username').val();
+
+                $('#bookingId').val(bookingId);
+                $('#customerName').val(customerName);
+                $('#advisorName').val(advisorName);
+                $('#serviceName').val(services);
+                $('#materialsContainer').html(`
+                    <div class="material-row row">
+                        <div class="col-md-4">
+                            <label for="materialSelect0" class="form-label">Material</label>
+                            <select class="form-select material-select" id="materialSelect0" required>
+                                <option value="">Select Material</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="quantity0" class="form-label">Quantity</label>
+                            <input type="number" class="form-control quantity-input" id="quantity0" min="1" value="1" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="unitPrice0" class="form-label">Unit Price</label>
+                            <input type="text" class="form-control unit-price-input" id="unitPrice0" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="price0" class="form-label">Total Price</label>
+                            <input type="text" class="form-control price-input" id="price0" readonly>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger btn-sm remove-material">-</button>
+                        </div>
+                    </div>
+                `);
+                materialCount = 1;
+                inventoryData = [];
+                loadInventory($('#materialSelect0'));
+            });
+
+            // Add material row
+            $('#addMaterial').on('click', function() {
+                const newRow = `
+                    <div class="material-row row">
+                        <div class="col-md-4">
+                            <label for="materialSelect${materialCount}" class="form-label">Material</label>
+                            <select class="form-select material-select" id="materialSelect${materialCount}" required>
+                                <option value="">Select Material</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="quantity${materialCount}" class="form-label">Quantity</label>
+                            <input type="number" class="form-control quantity-input" id="quantity${materialCount}" min="1" value="1" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="unitPrice${materialCount}" class="form-label">Unit Price</label>
+                            <input type="text" class="form-control unit-price-input" id="unitPrice${materialCount}" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="price${materialCount}" class="form-label">Total Price</label>
+                            <input type="text" class="form-control price-input" id="price${materialCount}" readonly>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger btn-sm remove-material">-</button>
+                        </div>
+                    </div>
+                `;
+                $('#materialsContainer').append(newRow);
+                const $newSelect = $('#materialSelect' + materialCount);
+                loadInventory($newSelect);
+                materialCount++;
+            });
+
+            // Remove material row
+            $(document).on('click', '.remove-material', function() {
+                if ($('.material-row').length > 1) {
+                    $(this).closest('.material-row').remove();
+                    calculateTotal();
+                }
+            });
+
+            // Function to update price for a specific row
+            function updateRowPrice($row) {
+                const $materialSelect = $row.find('.material-select');
+                const $quantityInput = $row.find('.quantity-input');
+                const $unitPriceInput = $row.find('.unit-price-input');
+                const $priceInput = $row.find('.price-input');
+
+                const selectedOption = $materialSelect.find('option:selected');
+                const unitPrice = parseFloat(selectedOption.data('price')) || 0;
+                const quantity = parseInt($quantityInput.val()) || 1;
+                const totalPrice = unitPrice * quantity;
+
+                console.log('Updating row - Material:', $materialSelect.val(), 'Unit Price:', unitPrice, 'Quantity:', quantity, 'Total Price:', totalPrice);
+
+                if (isNaN(unitPrice) || unitPrice === 0) {
+                    $unitPriceInput.val('$0.00');
+                    $priceInput.val('$0.00');
+                } else {
+                    $unitPriceInput.val('$' + unitPrice.toFixed(2));
+                    $priceInput.val('$' + totalPrice.toFixed(2));
+                }
+            }
+
+            // Update price when material is selected
+            $(document).on('change', '.material-select', function() {
+                const $row = $(this).closest('.material-row');
+                console.log('Material changed - ID:', $(this).attr('id'), 'Value:', $(this).val());
+                updateRowPrice($row);
+                calculateTotal();
+            });
+
+            // Update price when quantity changes
+            $(document).on('input', '.quantity-input', function() {
+                const $row = $(this).closest('.material-row');
+                console.log('Quantity changed - ID:', $(this).attr('id'), 'Value:', $(this).val());
+                updateRowPrice($row);
+                calculateTotal();
+            });
+
+            // Calculate total price across all materials
+            function calculateTotal() {
+                let total = 0;
+                $('.material-row').each(function() {
+                    const priceText = $(this).find('.price-input').val();
+                    const price = priceText ? parseFloat(priceText.replace('$', '')) : 0;
+                    total += price;
+                    console.log('Row price:', price, 'Running total:', total);
+                });
+                $('#totalPrice').val('$' + total.toFixed(2));
+                console.log('Final Total Price:', total);
+            }
+
+            // Submit BOM
+            $('#submitBom').on('click', function() {
+                const bomData = {
+                    bookingId: $('#bookingId').val(),
+                    customerName: $('#customerName').val(),
+                    advisorName: $('#advisorName').val(),
+                    serviceName: $('#serviceName').val(),
+                    materials: [],
+                    total: parseFloat($('#totalPrice').val().replace('$', ''))
+                };
+
+                let valid = true;
+                $('.material-row').each(function() {
+                    const material = {
+                        inventoryId: $(this).find('.material-select').val(),
+                        materialName: $(this).find('.material-select option:selected').text().split(' (')[0],
+                        quantity: parseInt($(this).find('.quantity-input').val()) || 0,
+                        price: parseFloat($(this).find('.material-select').find(':selected').data('price')) || 0
+                    };
+                    const stockText = $(this).find('.material-select option:selected').text();
+                    const stockMatch = stockText.match(/Stock: (\d+)/);
+                    const availableStock = stockMatch ? parseInt(stockMatch[1]) : 0;
+                    if (material.inventoryId && material.quantity > 0) {
+                        if (material.quantity > availableStock) {
+                            alert('Quantity for ' + material.materialName + ' exceeds available stock (' + availableStock + ')');
+                            valid = false;
+                            return false;
+                        }
+                        bomData.materials.push(material);
+                    }
+                });
+
+                if (!valid) {
+                    return;
+                }
+
+                if (bomData.materials.length === 0) {
+                    alert('Please add at least one material.');
+                    return;
+                }
+
+                $.ajax({
+                    url: $('#backendApiUrl').val() + '/bookings/complete',
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + $('#token').val(),
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify(bomData),
+                    success: function(response) {
+                        alert('BOM submitted successfully!');
+                        $('#bomModal').modal('hide');
+                        window.location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error submitting BOM:', xhr.status, xhr.responseText, error);
+                        alert('Failed to submit BOM: ' + (xhr.responseText || 'Status ' + xhr.status));
+                    }
+                });
             });
         });
     </script>
