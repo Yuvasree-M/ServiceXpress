@@ -19,7 +19,7 @@
 
     <main class="container mt-5 pt-4">
         <div class="row mt-3">
-            <div class="col-md-2">
+              <div class="col-md-2">
                 <div class="card admin-card" onclick="showTable('dueTable')">
                     <div class="card-body text-center">
                         <i class="fas fa-calendar dashboard-icon"></i>
@@ -28,7 +28,6 @@
                     </div>
                 </div>
             </div>
-            
             <div class="col-md-3">
                 <div class="card admin-card" onclick="showTable('assignedTable')">
                     <div class="card-body text-center">
@@ -67,6 +66,7 @@
             </div>
         </div>
 
+       
         <!-- Tables -->
         <div id="dueTable" class="table-container mt-4">
             <h4>Vehicles Due</h4>
@@ -181,88 +181,51 @@
             </table>
         </div>
 
-        <!-- In admin-dashboard.html, update the completedTable section -->
-<div id="completedTable" class="table-container mt-4">
-    <h4>Completed Services</h4>
-    <div th:if="${dashboardData == null}">Dashboard data is null</div>
-    <div th:if="${dashboardData != null and dashboardData.vehiclesCompleted == null}">Vehicles Completed is null</div>
-    <div th:if="${dashboardData != null and dashboardData.vehiclesCompleted.isEmpty()}">No completed vehicles</div>
-    <table th:if="${dashboardData != null and !dashboardData.vehiclesCompleted.isEmpty()}" class="table table-striped table-hover display datatable">
-        <thead>
-            <tr>
-                <th>Customer Name</th>
-                <th>Vehicle Type</th>
-                <th>Vehicle Model</th>
-                <th>Service Center</th>
-                <th>Service Advisor</th>
-                <th>Service Done</th>
-                <th>Service Completed On</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="v : ${dashboardData.vehiclesCompleted}">
-                <td th:text="${v.ownerName}">Sam White</td>
-                <td th:text="${v.vehicleType}">SUV</td>
-                <td th:text="${v.vehicleModel}">Hyundai Creta</td>
-                <td th:text="${v.serviceCenter}">Center A</td>
-                <td th:text="${v.serviceAdvisor}">John Doe</td>
-                <td th:text="${v.serviceDone}">Oil Change, Brake Check</td>
-                <td th:text="${#temporals.format(v.completedDate, 'yyyy-MM-dd')}">2024-04-01</td>
-                <td th:text="${v.status}">Completed</td>
-                <td>
-                    <button th:if="${v.hasBom}" 
-                            class="btn btn-sm btn-info view-bill-btn"
-                            data-bs-toggle="modal"
-                            data-bs-target="#viewBillModal"
-                            th:attr="data-booking-id=${v.id},data-customer-email=${v.customerEmail}">
-                        View Bill
-                    </button>
-                    <span th:unless="${v.hasBom}" class="badge bg-warning">Bill Not Available</span>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-        <div id="advisorTable" class="table-container mt-4">
-            <h4>Advisor Requests</h4>
+        <!-- Completed Services Table -->
+        <div id="completedTable" class="table-container mt-4">
+            <h4>Completed Services</h4>
             <div th:if="${dashboardData == null}">Dashboard data is null</div>
-            <div th:if="${dashboardData != null and dashboardData.advisorRequests == null}">Advisor Requests is null</div>
-            <div th:if="${dashboardData != null and dashboardData.advisorRequests.isEmpty()}">No advisor requests</div>
-            <table th:if="${dashboardData != null and !dashboardData.advisorRequests.isEmpty()}" class="table table-striped table-hover display datatable">
+            <div th:if="${dashboardData != null and dashboardData.vehiclesCompleted == null}">Vehicles Completed is null</div>
+            <div th:if="${dashboardData != null and dashboardData.vehiclesCompleted.isEmpty()}">No completed vehicles</div>
+            <table th:if="${dashboardData != null and !dashboardData.vehiclesCompleted.isEmpty()}" class="table table-striped table-hover display datatable">
                 <thead>
                     <tr>
-                        <th>Service Advisor</th>
-                        <th>Requested Service</th>
                         <th>Customer Name</th>
                         <th>Vehicle Type</th>
                         <th>Vehicle Model</th>
                         <th>Service Center</th>
+                        <th>Service Advisor</th>
+                        <th>Service Done</th>
+                        <th>Service Completed On</th>
                         <th>Status</th>
+                        <th>Payment Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="v : ${dashboardData.advisorRequests}">
-                        <td th:text="${v.advisorName}">Mark Advisor</td>
-                        <td th:text="${v.requestedService}">Wheel Alignment</td>
-                        <td th:text="${v.customerName}">Jane Smith</td>
+                    <tr th:each="v : ${dashboardData.vehiclesCompleted}">
+                        <td th:text="${v.ownerName}">Sam White</td>
                         <td th:text="${v.vehicleType}">SUV</td>
-                        <td th:text="${v.vehicleModel}">Mahindra XUV500</td>
+                        <td th:text="${v.vehicleModel}">Hyundai Creta</td>
                         <td th:text="${v.serviceCenter}">Center A</td>
-                        <td th:text="${v.status}">Pending</td>
+                        <td th:text="${v.serviceAdvisor}">John Doe</td>
+                        <td th:text="${v.serviceDone}">Oil Change, Brake Check</td>
+                        <td th:text="${#temporals.format(v.completedDate, 'yyyy-MM-dd')}">2024-04-01</td>
+                        <td th:text="${v.status}">Completed</td>
                         <td>
-                            <div th:if="${v.status == 'Pending'}">
-                                <button class="btn btn-sm btn-primary"
-                                        th:onclick="'sendAdvisorRequestToCustomer(' + ${v.id} + ')'">
-                                    Send to Customer
-                                </button>
-                            </div>
-                            <div th:if="${v.status != 'Pending'}">
-                                <span class="badge bg-secondary">Sent</span>
-                            </div>
+                            <span th:if="${v.status == 'COMPLETED_PAID'}" class="badge bg-success">Paid</span>
+                            <span th:if="${v.status == 'COMPLETED_PENDING_PAYMENT'}" class="badge bg-warning">Payment Pending</span>
+                            <span th:if="${v.status == 'COMPLETED'}" class="badge bg-secondary">Not Requested</span>
+                        </td>
+                        <td>
+                            <button th:if="${v.hasBom}" 
+                                    class="btn btn-sm btn-info view-bill-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#viewBillModal"
+                                    th:attr="data-booking-id=${v.id},data-customer-email=${v.customerEmail}">
+                                View Bill
+                            </button>
+                            <span th:unless="${v.hasBom}" class="badge bg-warning">Bill Not Available</span>
                         </td>
                     </tr>
                 </tbody>
@@ -318,6 +281,51 @@
                 </div>
             </div>
         </div>
+
+        <div id="advisorTable" class="table-container mt-4">
+            <h4>Advisor Requests</h4>
+            <div th:if="${dashboardData == null}">Dashboard data is null</div>
+            <div th:if="${dashboardData != null and dashboardData.advisorRequests == null}">Advisor Requests is null</div>
+            <div th:if="${dashboardData != null and dashboardData.advisorRequests.isEmpty()}">No advisor requests</div>
+            <table th:if="${dashboardData != null and !dashboardData.advisorRequests.isEmpty()}" class="table table-striped table-hover display datatable">
+                <thead>
+                    <tr>
+                        <th>Service Advisor</th>
+                        <th>Requested Service</th>
+                        <th>Customer Name</th>
+                        <th>Vehicle Type</th>
+                        <th>Vehicle Model</th>
+                        <th>Service Center</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="v : ${dashboardData.advisorRequests}">
+                        <td th:text="${v.advisorName}">Mark Advisor</td>
+                        <td th:text="${v.requestedService}">Wheel Alignment</td>
+                        <td th:text="${v.customerName}">Jane Smith</td>
+                        <td th:text="${v.vehicleType}">SUV</td>
+                        <td th:text="${v.vehicleModel}">Mahindra XUV500</td>
+                        <td th:text="${v.serviceCenter}">Center A</td>
+                        <td th:text="${v.status}">Pending</td>
+                        <td>
+                            <div th:if="${v.status == 'Pending'}">
+                                <button class="btn btn-sm btn-primary"
+                                        th:onclick="'sendAdvisorRequestToCustomer(' + ${v.id} + ')'">
+                                    Send to Customer
+                                </button>
+                            </div>
+                            <div th:if="${v.status != 'Pending'}">
+                                <span class="badge bg-secondary">Sent</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        
     </main>
 
     <th:block th:replace="fragments/footer :: footer"></th:block>
@@ -390,90 +398,67 @@
         }
 
         // View Bill Modal Handling
-        // View Bill Modal Handling
-$('.view-bill-btn').on('click', function() {
-    const bookingId = $(this).data('booking-id');
-    const customerEmail = $(this).data('customer-email');
-    const token = $('#token').val();
-    const backendApiUrl = $('#backendApiUrl').val(); // Get the backend API URL
+       $('.view-bill-btn').on('click', function() {
+            const bookingId = $(this).data('booking-id');
+            const customerEmail = $(this).data('customer-email');
+            const token = $('#token').val();
+            const backendApiUrl = $('#backendApiUrl').val();
 
-    $('#modalBookingId').val(bookingId);
-    $('#modalCustomerEmail').val(customerEmail);
+            $('#modalBookingId').val(bookingId);
+            $('#modalCustomerEmail').val(customerEmail);
 
-    $.ajax({
-        url: backendApiUrl + '/bookings/bom/' + bookingId, // Use backendApiUrl
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer ' + token
-        },
-        success: function(data) {
-            $('#modalCustomerName').val(data.customerName);
-            $('#modalAdvisorName').val(data.advisorName);
-            $('#modalServiceName').val(data.serviceName);
-            $('#modalTotal').val('$' + data.total.toFixed(2));
+            $.ajax({
+                url: backendApiUrl + '/bookings/bom/' + bookingId,
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token },
+                success: function(data) {
+                    $('#modalCustomerName').val(data.customerName);
+                    $('#modalAdvisorName').val(data.advisorName);
+                    $('#modalServiceName').val(data.serviceName);
+                    $('#modalTotal').val('₹' + data.total.toFixed(2));
 
-            const materialsTableBody = $('#modalMaterialsTable tbody');
-            materialsTableBody.empty();
-            data.materials.forEach(material => {
-                const row = `
-                    <tr>
-                        <td>${material.materialName}</td>
-                        <td>${material.quantity}</td>
-                        <td>$${material.price.toFixed(2)}</td>
-                        <td>$${(material.price * material.quantity).toFixed(2)}</td>
-                    </tr>
-                `;
-                materialsTableBody.append(row);
+                    const materialsTableBody = $('#modalMaterialsTable tbody');
+                    materialsTableBody.empty();
+                    data.materials.forEach(material => {
+                        const row = `
+                            <tr>
+                                <td>${material.materialName}</td>
+                                <td>${material.quantity}</td>
+                                <td>₹${material.price.toFixed(2)}</td>
+                                <td>₹${(material.price * material.quantity).toFixed(2)}</td>
+                            </tr>
+                        `;
+                        materialsTableBody.append(row);
+                    });
+                },
+                error: function(xhr) {
+                    alert('Failed to load bill: ' + (xhr.responseText || 'Unknown error'));
+                }
             });
-        },
-        error: function(xhr) {
-            let errorMessage = 'Failed to load bill of materials.';
-            if (xhr.status === 404) {
-                errorMessage = 'Bill not found for this booking. Please ensure the booking is completed and has a bill associated with it.';
-            } else if (xhr.status === 400) {
-                errorMessage = 'Receipt is only available for completed bookings.';
-            } else if (xhr.status === 401) {
-                errorMessage = 'Unauthorized: Please log in again.';
-            } else if (xhr.responseText) {
-                errorMessage = 'Failed to load bill: ' + xhr.responseText;
-            }
-            alert(errorMessage);
-        }
-    });
-});
+        });
 
-// Send Bill to Customer
-$('#sendBillBtn').on('click', function() {
-    const bookingId = $('#modalBookingId').val();
-    const customerEmail = $('#modalCustomerEmail').val();
-    const token = $('#token').val();
-    const backendApiUrl = $('#backendApiUrl').val(); // Get the backend API URL
+        // Send Bill to Customer
+        $('#sendBillBtn').on('click', function() {
+            const bookingId = $('#modalBookingId').val();
+            const customerEmail = $('#modalCustomerEmail').val();
+            const token = $('#token').val();
+            const backendApiUrl = $('#backendApiUrl').val();
 
-    $.ajax({
-        url: backendApiUrl + '/bookings/send-bill/' + bookingId, // Use backendApiUrl
-        method: 'POST',
-        headers: {
-            'Authorization': 'Bearer ' + token
-        },
-        success: function(response) {
-            alert('Bill sent to customer successfully!');
-            $('#viewBillModal').modal('hide');
-        },
-        error: function(xhr) {
-            let errorMessage = 'Failed to send bill.';
-            if (xhr.status === 404) {
-                errorMessage = 'Booking or bill not found.';
-            } else if (xhr.status === 500) {
-                errorMessage = 'Server error while sending the bill. Please try again later.';
-            } else if (xhr.status === 401) {
-                errorMessage = 'Unauthorized: Please log in again.';
-            } else if (xhr.responseText) {
-                errorMessage = 'Failed to send bill: ' + xhr.responseText;
-            }
-            alert(errorMessage);
-        }
-    });
-});
+            $.ajax({
+                url: backendApiUrl + '/bookings/send-bill/' + bookingId,
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                success: function(response) {
+                    alert('Bill sent to customer successfully with payment link!');
+                    $('#viewBillModal').modal('hide');
+                    window.location.reload();
+                },
+                error: function(xhr) {
+                    alert('Failed to send bill: ' + (xhr.responseText || 'Unknown error'));
+                }
+            });
+        });
+
         document.addEventListener("DOMContentLoaded", function() {
             showTable('dueTable');
             $('.datatable').DataTable({

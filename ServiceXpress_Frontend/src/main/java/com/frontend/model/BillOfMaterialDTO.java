@@ -2,6 +2,7 @@ package com.frontend.model;
 
 import java.util.List;
 
+
 public class BillOfMaterialDTO {
     private Long bookingId;
     private String customerName;

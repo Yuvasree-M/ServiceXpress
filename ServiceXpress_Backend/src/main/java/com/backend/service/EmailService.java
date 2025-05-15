@@ -22,34 +22,33 @@ public class EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
-    public void sendBookingConfirmationEmail(String to, String customerName, BookingRequest booking,
-                                             String vehicleTypeId, String vehicleTypeName,
-                                             String vehicleModelId, String vehicleModelName,
-                                             String serviceCenterId, String serviceCenterName) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-        helper.setTo(to);
-        helper.setSubject("Booking Confirmation - " + booking.getId());
-        helper.setFrom("noreply@yourdomain.com");
-
-        String htmlContent = "<h3>Dear " + customerName + ",</h3>" +
-                "<p>Your booking has been successfully created with the following details:</p>" +
-                "<ul>" +
-                "<li><strong>Booking ID:</strong> " + booking.getId() + "</li>" +
-                "<li><strong>Vehicle Type:</strong> " + vehicleTypeName + " (ID: " + vehicleTypeId + ")</li>" +
-                "<li><strong>Vehicle Model:</strong> " + vehicleModelName + " (ID: " + vehicleModelId + ")</li>" +
-                "<li><strong>Service Center:</strong> " + serviceCenterName + " (ID: " + serviceCenterId + ")</li>" +
-                "<li><strong>Services:</strong> " + booking.getServices() + "</li>" +
-                "<li><strong>Requested Date:</strong> " + booking.getRequestedDate() + "</li>" +
-                "</ul>" +
-                "<p>Thank you for choosing our service!</p>";
-
-        helper.setText(htmlContent, true);
-        mailSender.send(message);
-        logger.info("Booking confirmation email sent to: {}", to);
+    public void sendEmail(String to, String subject, String content) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
     }
-
+    public void sendBookingConfirmationEmail(String to, String customerName, BookingRequest booking,
+                                            String vehicleTypeId, String vehicleTypeName,
+                                            String vehicleModelId, String vehicleModelName,
+                                            String serviceCenterId, String serviceCenterName) {
+        String content = "<h2>Booking Confirmation</h2>" +
+                        "<p>Dear " + customerName + ",</p>" +
+                        "<p>Your booking has been successfully created with the following details:</p>" +
+                        "<p><strong>Booking ID:</strong> " + booking.getId() + "</p>" +
+                        "<p><strong>Vehicle:</strong> " + vehicleTypeName + " - " + vehicleModelName + "</p>" +
+                        "<p><strong>Services:</strong> " + booking.getServices() + "</p>" +
+                        "<p><strong>Service Center:</strong> " + serviceCenterName + "</p>" +
+                        "<p><strong>Requested Date:</strong> " + booking.getRequestedDate() + "</p>" +
+                        "<p>Thank you for choosing our service!</p>";
+        sendEmail(to, "Booking Confirmation - ID: " + booking.getId(), content);
+    }
     public void sendBillEmail(String to, String customerName, Long bookingId, String customerNameInBom, 
                              String advisorName, String serviceName, List<BillOfMaterialDTO.Material> materials, 
                              Double total) throws MessagingException {

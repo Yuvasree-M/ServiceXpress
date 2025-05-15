@@ -29,7 +29,6 @@ public class BillOfMaterialService {
             bom.setServiceName(bomDTO.getServiceName());
             bom.setTotal(bomDTO.getTotal());
 
-            // Convert materials list to JSON string
             String materialsJson = objectMapper.writeValueAsString(bomDTO.getMaterials());
             bom.setMaterials(materialsJson);
 

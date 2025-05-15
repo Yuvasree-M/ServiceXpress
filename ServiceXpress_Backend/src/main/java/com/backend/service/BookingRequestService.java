@@ -1,17 +1,23 @@
+
 package com.backend.service;
 
 import com.backend.dto.*;
 import com.backend.model.*;
 import com.backend.repository.*;
-import com.backend.service.EmailService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+import com.razorpay.Utils;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -49,6 +55,12 @@ public class BookingRequestService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Value("${razorpay.key.id}")
+    private String razorpayKeyId;
+
+    @Value("${razorpay.key.secret}")
+    private String razorpayKeySecret;
 
     private static final Logger logger = LoggerFactory.getLogger(BookingRequestService.class);
 
@@ -201,7 +213,7 @@ public class BookingRequestService {
         booking.setUpdatedAt(LocalDateTime.now());
         return repository.save(booking);
     }
-    
+
     @Transactional
     public BookingRequest startService(Long bookingId) {
         logger.info("Starting service for bookingId: {}", bookingId);
@@ -266,61 +278,50 @@ public class BookingRequestService {
         List<ServiceHistory> serviceHistory = new ArrayList<>();
 
         for (BookingRequest booking : bookings) {
-            String serviceCenterName = "Unknown";
-            String vehicleTypeName = "Unknown";
-            String vehicleModelName = "Unknown";
-
             try {
-                if (booking.getServiceCenterId() != null) {
-                    Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(booking.getServiceCenterId());
-                    if (serviceCenter.isPresent()) {
-                        serviceCenterName = serviceCenter.get().getCenterName() + " (" + serviceCenter.get().getCityName() + ")";
-                    }
+                String serviceCenterName = booking.getServiceCenterId() != null ?
+                        serviceCenterRepository.findById(booking.getServiceCenterId())
+                                .map(sc -> sc.getCenterName() + " (" + sc.getCityName() + ")")
+                                .orElse("Unknown") : "Unknown";
+                String vehicleTypeName = booking.getVehicleTypeId() != null ?
+                        vehicleTypeRepository.findById(Integer.valueOf(booking.getVehicleTypeId()))
+                                .map(VehicleType::getName)
+                                .orElse("Unknown") : "Unknown";
+                String vehicleModelName = booking.getVehicleModelId() != null ?
+                        vehicleModelRepository.findById(Integer.valueOf(booking.getVehicleModelId()))
+                                .map(VehicleModel::getModelName)
+                                .orElse("Unknown") : "Unknown";
+
+                Double cost = calculateCost(booking.getServices());
+
+                if (List.of("PENDING", "ASSIGNED", "IN_PROGRESS", "COMPLETED_PENDING_PAYMENT").contains(booking.getStatus())) {
+                    ServiceStatus status = new ServiceStatus();
+                    status.setId(booking.getId());
+                    status.setServiceCenterName(serviceCenterName);
+                    status.setVehicleTypeName(vehicleTypeName);
+                    status.setVehicleModelName(vehicleModelName);
+                    status.setRegistration(booking.getVehicleRegistrationNumber());
+                    status.setService(booking.getServices());
+                    status.setCost(cost);
+                    status.setStatus(booking.getStatus());
+                    ongoingServices.add(status);
                 }
 
-                if (booking.getVehicleTypeId() != null) {
-                    Optional<VehicleType> vehicleType = vehicleTypeRepository.findById(booking.getVehicleTypeId());
-                    if (vehicleType.isPresent()) {
-                        vehicleTypeName = vehicleType.get().getName();
-                    }
-                }
-
-                if (booking.getVehicleModelId() != null) {
-                    Optional<VehicleModel> vehicleModel = vehicleModelRepository.findById(booking.getVehicleModelId());
-                    if (vehicleModel.isPresent()) {
-                        vehicleModelName = vehicleModel.get().getModelName();
-                    }
+                if ("COMPLETED_PAID".equals(booking.getStatus()) && booking.getTransactionId() != null) {
+                    ServiceHistory history = new ServiceHistory();
+                    history.setId(booking.getId());
+                    history.setDate(booking.getUpdatedAt().toLocalDate().toString());
+                    history.setVehicleTypeName(vehicleTypeName);
+                    history.setVehicleModelName(vehicleModelName);
+                    history.setWorkDone(booking.getServices());
+                    history.setCost(cost);
+                    history.setStatus("Completed");
+                    history.setTransactionId(booking.getTransactionId());
+                    serviceHistory.add(history);
                 }
             } catch (Exception e) {
-                logger.error("Error fetching details for booking ID {}: {}", booking.getId(), e.getMessage(), e);
-                continue;
-            }
-
-            Double cost = calculateCost(booking.getServices());
-
-            if (List.of("PENDING", "IN_PROGRESS", "ASSIGNED").contains(booking.getStatus())) {
-                ServiceStatus status = new ServiceStatus();
-                status.setId(booking.getId());
-                status.setServiceCenterName(serviceCenterName);
-                status.setVehicleTypeName(vehicleTypeName);
-                status.setVehicleModelName(vehicleModelName);
-                status.setRegistration(booking.getVehicleRegistrationNumber());
-                status.setService(booking.getServices());
-                status.setCost(cost);
-                status.setStatus(booking.getStatus());
-                ongoingServices.add(status);
-            } else if ("COMPLETED".equalsIgnoreCase(booking.getStatus())) {
-                ServiceHistory history = new ServiceHistory();
-                history.setId(booking.getId());
-                history.setDate(booking.getUpdatedAt().toString());
-                history.setServiceCenterName(serviceCenterName);
-                history.setVehicleTypeName(vehicleTypeName);
-                history.setVehicleModelName(vehicleModelName);
-                history.setWorkDone(booking.getServices());
-                history.setCost(cost);
-                history.setStatus(booking.getStatus());
-                history.setTransactionId("TXN" + booking.getId());
-                serviceHistory.add(history);
+                logger.error("Error processing booking ID {} for customer ID {}: {}", booking.getId(), customerId, e.getMessage(), e);
+                continue; // Skip problematic booking
             }
         }
 
@@ -428,8 +429,6 @@ public class BookingRequestService {
             dto.setCompletedDate(booking.getUpdatedAt());
             dto.setStatus(booking.getStatus());
             dto.setCustomerEmail(booking.getCustomerEmail());
-            dto.setPaymentRequested(false);
-            dto.setPaymentReceived(false);
             // Check if BOM exists with detailed logging
             logger.info("Checking BOM for booking ID: {}", booking.getId());
             Optional<BillOfMaterial> bomOptional = billOfMaterialRepository.findByBookingId(booking.getId());
@@ -620,5 +619,156 @@ public class BookingRequestService {
         }).collect(Collectors.toList());
         logger.info("Mapped to {} DTOs", dtos.size());
         return dtos;
+    }
+
+    @Transactional
+    public void sendBill(Long bookingId) {
+        BookingRequest booking = repository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+        if (!"COMPLETED".equals(booking.getStatus())) {
+            throw new IllegalStateException("Booking must be completed to send bill");
+        }
+
+        BillOfMaterial bom = billOfMaterialRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Bill of Material not found for booking: " + bookingId));
+
+        String paymentLink = "http://localhost:8082/customer/dashboard?bookingId=" + bookingId;
+        String emailContent = generateBillEmailContent(bom, paymentLink);
+
+        emailService.sendEmail(
+            booking.getCustomerEmail(),
+            "Service Bill for Booking ID: " + bookingId,
+            emailContent
+        );
+
+        booking.setStatus("COMPLETED_PENDING_PAYMENT");
+        booking.setUpdatedAt(LocalDateTime.now());
+        repository.save(booking);
+    }
+
+    private String generateBillEmailContent(BillOfMaterial bom, String paymentLink) {
+        StringBuilder content = new StringBuilder();
+        content.append("<h2>Service Bill</h2>");
+        content.append("<p>Customer Name: ").append(bom.getCustomerName()).append("</p>");
+        content.append("<p>Service: ").append(bom.getServiceName()).append("</p>");
+        content.append("<table border='1'><tr><th>Material</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr>");
+
+        List<BillOfMaterialDTO.Material> materials;
+        try {
+            if (bom.getMaterials() != null && !bom.getMaterials().isEmpty()) {
+                materials = objectMapper.readValue(bom.getMaterials(), new TypeReference<List<BillOfMaterialDTO.Material>>() {});
+                for (BillOfMaterialDTO.Material material : materials) {
+                    content.append("<tr>")
+                           .append("<td>").append(material.getMaterialName()).append("</td>")
+                           .append("<td>").append(material.getQuantity()).append("</td>")
+                           .append("<td>₹").append(material.getPrice()).append("</td>")
+                           .append("<td>₹").append(material.getPrice() * material.getQuantity()).append("</td>")
+                           .append("</tr>");
+                }
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("Error parsing materials JSON for BOM ID {}: {}", bom.getId(), e.getMessage(), e);
+            throw new RuntimeException("Failed to parse materials for bill email", e);
+        }
+
+        content.append("</table>");
+        content.append("<p><strong>Total: ₹").append(bom.getTotal()).append("</strong></p>");
+        content.append("<p><a href='").append(paymentLink).append("'><button>Pay Now</button></a></p>");
+        return content.toString();
+    }
+
+    public PaymentResponse createPayment(Long bookingId, PaymentRequest request) throws RazorpayException {
+        BookingRequest booking = repository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+        if (!"COMPLETED_PENDING_PAYMENT".equals(booking.getStatus())) {
+            throw new IllegalStateException("Booking must be in COMPLETED_PENDING_PAYMENT status");
+        }
+
+        RazorpayClient razorpay = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+        JSONObject orderRequest = new JSONObject();
+        orderRequest.put("amount", request.getAmount());
+        orderRequest.put("currency", request.getCurrency());
+        orderRequest.put("receipt", "booking_" + bookingId);
+
+        Order order = razorpay.orders.create(orderRequest);
+        PaymentResponse response = new PaymentResponse();
+        response.setOrderId(order.get("id"));
+        response.setAmount(request.getAmount());
+        response.setCurrency(request.getCurrency());
+        return response;
+    }
+
+    @Transactional
+    public void verifyPayment(PaymentVerificationRequest request) throws RazorpayException {
+        BookingRequest booking = repository.findById(Long.valueOf(request.getBookingId()))
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + request.getBookingId()));
+
+        // Prepare JSONObject for signature verification
+        JSONObject attributes = new JSONObject();
+        attributes.put("razorpay_order_id", request.getRazorpayOrderId());
+        attributes.put("razorpay_payment_id", request.getRazorpayPaymentId());
+        attributes.put("razorpay_signature", request.getRazorpaySignature());
+
+        try {
+            // Verify the payment signature using Razorpay Utils
+            Utils.verifyPaymentSignature(attributes, razorpayKeySecret);
+            logger.info("Payment signature verified successfully for booking ID: {}", request.getBookingId());
+        } catch (RazorpayException e) {
+            logger.error("Payment signature verification failed for booking ID {}: {}", request.getBookingId(), e.getMessage(), e);
+            throw new RazorpayException("Invalid payment signature: " + e.getMessage());
+        }
+
+        // Update booking status and transaction ID
+        booking.setStatus("COMPLETED_PAID");
+        booking.setTransactionId(request.getRazorpayPaymentId());
+        booking.setUpdatedAt(LocalDateTime.now());
+        repository.save(booking);
+    }
+
+    public BillOfMaterialDTO getBillOfMaterials(Long bookingId, Long customerId) {
+        logger.info("Fetching BOM for bookingId: {}, customerId: {}", bookingId, customerId);
+
+        // Validate booking
+        BookingRequest booking = repository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+
+        // Validate customer ownership
+        if (!booking.getCustomerId().equals(customerId)) {
+            logger.warn("Customer ID {} does not match booking ID {} owner", customerId, bookingId);
+            throw new IllegalArgumentException("Booking does not belong to customer: " + customerId);
+        }
+
+        // Validate status
+        if (!"COMPLETED_PENDING_PAYMENT".equals(booking.getStatus())) {
+            logger.warn("Booking ID {} is not in COMPLETED_PENDING_PAYMENT status, current status: {}", bookingId, booking.getStatus());
+            throw new IllegalArgumentException("Booking must be in COMPLETED_PENDING_PAYMENT status");
+        }
+
+        // Fetch BOM
+        BillOfMaterial bom = billOfMaterialRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Bill of Material not found for booking ID: " + bookingId));
+
+        // Construct DTO
+        BillOfMaterialDTO bomDTO = new BillOfMaterialDTO();
+        bomDTO.setBookingId(bookingId);
+        bomDTO.setCustomerName(bom.getCustomerName());
+        bomDTO.setAdvisorName(bom.getAdvisorName());
+        bomDTO.setServiceName(bom.getServiceName());
+        bomDTO.setTotal(bom.getTotal());
+
+        // Parse materials
+        List<BillOfMaterialDTO.Material> materials = new ArrayList<>();
+        try {
+            if (bom.getMaterials() != null && !bom.getMaterials().isEmpty()) {
+                materials = objectMapper.readValue(bom.getMaterials(), new TypeReference<List<BillOfMaterialDTO.Material>>() {});
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("Error parsing materials JSON for booking ID {}: {}", bookingId, e.getMessage(), e);
+            throw new RuntimeException("Error parsing materials data for booking ID: " + bookingId);
+        }
+        bomDTO.setMaterials(materials);
+
+        logger.info("Successfully fetched BOM for bookingId: {}", bookingId);
+        return bomDTO;
     }
 }

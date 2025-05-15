@@ -1,7 +1,8 @@
 package com.frontend.model;
+
 import java.time.LocalDateTime;
 
-public class VehicleCompleted {
+public class VehicleCompleted{
     private Long id;
     private String ownerName;
     private String vehicleType;

@@ -1,562 +1,40 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Customer Dashboard - Vehicle Service Management</title>
+    <title>Customer Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  
-<style>
-        :root {
-            --primary-color:  #343a40;
-            --secondary-color: #F97316;
-            --background-color: #F3F4F6;
-            --text-color: #4B5563;
-            --white: #FFFFFF;
-            --gradient-primary: linear-gradient(135deg, #343a40, #636363);
-            --gradient-secondary: linear-gradient(135deg, #F97316, #FB923C);
-            --card-header-gradient: linear-gradient(135deg,#343a40, #636363);
-            --primary-orange: #ff6200;
-            --dark-gray: #343a40;
-            --light-gray: #e9ecef;
-            --soft-orange: #ff8c40;
-            --gray-hover: #495057;
-            --light-background: #F4F4F4;
-            --medium-gray: #6c757d;
-            --dark-theme-bg: #2a2e33;
-            --dark-theme-text: #d3d7db;
-        }
-
-        * {
-            transition: all 0.3s ease;
-        }
-
-        body {
-            background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-color);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding-top: 90px;
-        }
-
-        .navbar {
-            background: var(--white);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 15px 20px;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-img {
-            height: 60px;
-            width: 250px;
-            object-fit: contain;
-        }
-
-        .navbar-nav {
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-nav .nav-item {
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-nav .nav-link.active {
-            color: var(--secondary-color);
-            font-weight: 600;
-        }
-
-        .navbar-nav .nav-link {
-            color: var(--primary-color);
-            font-weight: 500;
-            position: relative;
-            margin-left: 20px;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-nav .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background: var(--secondary-color);
-            transition: width 0.3s;
-        }
-
-        .navbar-nav .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .navbar-nav .nav-link:hover {
-            color: var(--secondary-color);
-        }
-
-        .profile-dropdown {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin-left: 20px;
-        }
-
-        .profile-dropdown .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0;
-        }
-
-        .profile-badge {
-            width: 32px;
-            height: 32px;
-            background: var(--primary-color);
-            color: var(--white);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            margin-right: 8px;
-            text-transform: uppercase;
-        }
-
-        .username {
-            color: var(--primary-color);
-            font-weight: 500;
-            font-size: 16px;
-            margin-right: 5px;
-        }
-
-        .dropdown-toggle::after {
-            border: none;
-            content: 'expand_more';
-            font-family: 'Material Icons';
-            vertical-align: middle;
-            color: var(--primary-color);
-            font-size: 20px;
-        }
-
-        .dropdown-menu {
-            background: var(--white);
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-top: 10px;
-            min-width: 200px;
-        }
-
-        .dropdown-item {
-            color: var(--primary-color);
-            font-weight: 500;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        .dropdown-item:hover {
-            background: linear-gradient(145deg, #F9FAFB, #F3F4F6);
-            color: var(--secondary-color);
-        }
-
-        .dropdown-item .material-icons {
-            margin-right: 10px;
-            font-size: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            padding: 30px 15px;
-            flex: 1;
-        }
-
-        h1 {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 700;
-            font-size: 42px;
-            margin-bottom: 20px;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-            background: var(--gradient-secondary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-        }
-
-        p.text-muted {
-            font-size: 18px;
-            text-align: center;
-        }
-
-        .status-card,
-        .history-card {
-            background: var(--white);
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-        }
-
-        .status-card:hover,
-        .history-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        .card-header {
-            background: var(--card-header-gradient);
-            color: var(--white);
-            border-radius: 15px 15px 0 0;
-            font-weight: 600;
-            font-size: 20px;
-            padding: 15px 20px;
-            text-transform: uppercase;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .inner-status-card {
-            background: var(--white);
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .inner-status-card p {
-            margin: 5px 0;
-            font-size: 16px;
-            color: var(--text-color);
-        }
-
-        .inner-status-card p strong {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            margin-top: 10px;
-        }
-
-        .status-awaiting {
-            background: #BFDBFE;
-            color: #1E40AF;
-        }
-
-        .status-under {
-            background: #93C5FD;
-            color: #1D4ED8;
-        }
-
-        .status-ready {
-            background: #60A5FA;
-            color: #1E3A8A;
-        }
-
-        .btn-payment {
-            background: var(--gradient-primary);
-            color: var(--white);
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .btn-payment:hover {
-            background: linear-gradient(135deg, #1E40AF, #2563EB);
-            transform: translateY(-2px);
-            color: var(--white);
-        }
-
-        .table {
-            background: var(--white);
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        .table th {
-            color: var(--primary-color);
-            font-weight: 600;
-            font-family: 'Montserrat', sans-serif;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        .table td {
-            vertical-align: middle;
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        .btn-download {
-            background: var(--secondary-color);
-            color: var(--white);
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-        }
-
-        .btn-download:hover {
-            background: #EA580C;
-            transform: translateY(-2px);
-            color: var(--white);
-        }
-
-        .modal-content {
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            background: var(--gradient-primary);
-            color: var(--white);
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-        }
-
-        .modal-title {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: var(--primary-color);
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #E5E7EB;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 5px rgba(249, 115, 22, 0.3);
-        }
-
-        #cardDetails {
-            display: none;
-        }
-
-        .btn-confirm-payment {
-            background: var(--gradient-secondary);
-            color: var(--white);
-            border: none;
-            padding: 12px 40px;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-confirm-payment:hover {
-            background: linear-gradient(135deg, #EA580C, #F97316);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(234, 88, 12, 0.4);
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 32px;
-            }
-
-            .navbar-nav .nav-link {
-                margin-left: 10px;
-            }
-
-            .profile-dropdown {
-                margin-left: 10px;
-            }
-
-            .username {
-                font-size: 14px;
-            }
-
-            .profile-badge {
-                width: 28px;
-                height: 28px;
-                font-size: 12px;
-            }
-
-            .inner-status-card {
-                padding: 10px;
-            }
-
-            .btn-download,
-            .btn-payment {
-                padding: 6px 15px;
-                font-size: 12px;
-            }
-
-            .btn-confirm-payment {
-                padding: 10px 30px;
-                font-size: 16px;
-            }
-
-            body {
-                padding-top: 70px;
-            }
-        }
-        
-        footer {
-            background-color: var(--dark-gray);
-            color: white;
-            padding: 60px 20px 40px;
-            flex-shrink: 0;
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
-
-        footer h5 {
-            font-size: 1.25rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-            color: var(--primary-orange);
-        }
-
-        footer p, footer a {
-            font-size: 0.95rem;
-            color: white;
-            transition: color 0.3s ease;
-            margin-bottom: 10px;
-        }
-
-        footer .contact-link {
-            color: white;
-            text-decoration: none;
-        }
-
-        footer .contact-link:hover {
-            color: var(--primary-orange);
-        }
-
-        footer .quick-links a {
-            display: block;
-            margin-bottom: 10px;
-            color: white;
-            text-decoration: none;
-        }
-
-        footer .quick-links a:hover {
-            color: var(--primary-orange);
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 25px;
-            margin-top: 15px;
-            justify-content: center;
-        }
-
-        .social-icon {
-            color: white;
-            font-size: 26px;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
-
-        .social-icon:hover {
-            color: var(--primary-orange);
-            transform: scale(1.2);
-        }
-
-        footer .footer-bottom {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        footer .footer-column {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        footer .footer-column.follow-us {
-            align-items: center;
-        }
-
-        @media (max-width: 768px) {
-            footer .text-center-mobile {
-                text-align: center;
-                margin-bottom: 50px;
-            }
-
-            footer .footer-column {
-                align-items: center;
-            }
-
-            footer .social-icons {
-                justify-content: center;
-            }
-
-            footer {
-                padding: 40px 15px 30px;
-            }
-        }
-</style>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #F3F4F6; padding-top: 90px; }
+        .navbar { background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); position: fixed; top: 0; width: 100%; }
+        .status-card { background: #FFFFFF; border-radius: 15px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08); }
+        .card-header { background: linear-gradient(135deg, #343a40, #636363); color: #FFFFFF; }
+        .btn-payment { background: linear-gradient(135deg, #F97316, #FB923C); color: #FFFFFF; border-radius: 20px; }
+        .modal-content { border-radius: 15px; }
+        .status-completed { color: #28a745; font-weight: bold; }
+        .status-under { color: #007bff; font-weight: bold; }
+        .status-awaiting { color: #ffc107; font-weight: bold; }
+    </style>
 </head>
-
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top bg-light shadow-sm">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img th:src="@{/images/logo.jpg}" alt="Logo" style="height: 40px;">
-            </a>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <a class="navbar-brand" href="#"><img th:src="@{/images/logo.jpg}" style="height: 40px;"></a>
+            <div class="collapse navbar-collapse justify-content-end">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link active" href="#"><span class="material-icons">home</span> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/services}"><span class="material-icons">build</span> Services</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/bookings}"><span class="material-icons">calendar_month</span> Booking</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><span class="material-icons">contact_support</span> Contact</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/services}">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/bookings}">Booking</a></li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown">
                             <span class="profile-badge">[[${customer.initials}]]</span>
-                            <span class="username">[[${customer.name}]]</span>
+                            <span>[[${customer.name}]]</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" th:href="@{/customer/history}"><span class="material-icons">history</span> Service History</a></li>
-                            <li><a class="dropdown-item" th:href="@{/customer/cart}"><span class="material-icons">shopping_cart</span> My Cart <span class="badge bg-secondary">[[${cartCount}]]</span></a></li>
-                            <li><a class="dropdown-item" th:href="@{/customer/profile}"><span class="material-icons">manage_accounts</span> Profile Management</a></li>
-                            <li><a class="dropdown-item" th:href="@{/customer/logout}"><span class="material-icons">logout</span> Logout</a></li>
+                            <li><a class="dropdown-item" th:href="@{/customer/history}">Service History</a></li>
+                            <li><a class="dropdown-item" th:href="@{/customer/logout}">Logout</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -564,28 +42,24 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container mt-5 pt-5">
         <h1>Customer Dashboard</h1>
-        <p class="text-muted text-center">Track your vehicle's service status and history here.</p>
-        <div th:if="${error}" class="alert alert-danger">[[${error}]]</div>
-
-        <!-- Service Status -->
-        <div class="card mb-4">
+        <div class="card mb-4 status-card">
             <div class="card-header">Service Status</div>
             <div class="card-body row">
                 <div class="col-md-6" th:each="item : ${ongoingServices}">
-                    <div class="border p-3 rounded">
-                        <p><strong>Vehicle Type:</strong> [[${item.vehicleType}]]</p>
-                        <p><strong>Model:</strong> [[${item.model}]]</p>
+                    <div class="inner-status-card">
+                        <p><strong>Vehicle:</strong> [[${item.vehicleType}]] - [[${item.model}]]</p>
                         <p><strong>Registration:</strong> [[${item.registration}]]</p>
                         <p><strong>Service:</strong> [[${item.service}]]</p>
                         <p><strong>Cost:</strong> ₹[[${item.cost}]]</p>
-                        <span th:classappend="${item.status == 'Ready for Pickup'} ? 'badge bg-success' : 'badge bg-warning'">[[${item.status}]]</span>
-                        <div th:if="${item.status == 'Ready for Pickup'}">
-                            <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                th:attr="data-vehicle=${item.vehicleType != null ? item.vehicleType + ' - ' + item.model : 'Unknown'}, data-service=${item.service}, data-cost=${item.cost}, data-id=${item.id}">
-                                Proceed to Payment
+                        <span th:classappend="${item.status == 'COMPLETED_PENDING_PAYMENT' ? 'status-completed' : (item.status == 'IN_PROGRESS' ? 'status-under' : 'status-awaiting')}">[[${item.status}]]</span>
+                        <div th:if="${item.status == 'COMPLETED_PENDING_PAYMENT'}">
+                            <button class="btn btn-payment view-bill-btn" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#billModal"
+                                    th:attr="data-id=${item.id},data-vehicle=${item.vehicleType + ' - ' + item.model},data-service=${item.service},data-cost=${item.cost}">
+                                Pay Now
                             </button>
                         </div>
                     </div>
@@ -593,8 +67,7 @@
             </div>
         </div>
 
-        <!-- Service History -->
-        <div class="card">
+        <div class="card history-card">
             <div class="card-header">Service History</div>
             <div class="card-body">
                 <table class="table table-striped">
@@ -612,14 +85,14 @@
                     <tbody>
                         <tr th:each="history : ${serviceHistory}">
                             <td>[[${history.date}]]</td>
-                            <td>[[${history.vehicleTypeName != null ? history.vehicleTypeName : 'Unknown'} + ' - ' + ${history.vehicleModelName != null ? history.vehicleModelName : 'Unknown'}]]</td>
+                            <td>[[${history.vehicleTypeName + ' - ' + history.vehicleModelName}]]</td>
                             <td>[[${history.workDone}]]</td>
                             <td>₹[[${history.cost}]]</td>
                             <td>[[${history.status}]]</td>
                             <td>[[${history.transactionId}]]</td>
                             <td>
-                                <button class="btn btn-secondary btn-download" 
-                                        th:attr="data-id=${history.id}, data-customer-id=${customer.id}"
+                                <button class="btn btn-download" 
+                                        th:attr="data-id=${history.id},data-customer-id=${customer.id}"
                                         onclick="downloadInvoice(this.getAttribute('data-id'), this.getAttribute('data-customer-id'))">
                                     Download Invoice
                                 </button>
@@ -630,50 +103,50 @@
             </div>
         </div>
     </div>
-    
-    <!-- Payment Modal -->
-    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+
+    <div class="modal fade" id="billModal" tabindex="-1" aria-labelledby="billModalLabel">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel">Payment Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="billModalLabel">Bill Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="paymentForm">
-                        <input type="hidden" id="bookingId">
-                        <div class="mb-3">
-                            <label for="vehicle" class="form-label">Vehicle</label>
-                            <input type="text" class="form-control" id="vehicle" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="service" class="form-label">Service</label>
-                            <input type="text" class="form-control" id="service" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cost" class="form-label">Cost</label>
-                            <input type="text" class="form-control" id="cost" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="paymentMethod" class="form-label">Payment Method</label>
-                            <select class="form-control" id="paymentMethod" required>
-                                <option value="card">Credit/Debit Card</option>
-                                <option value="upi">UPI</option>
-                                <option value="netbanking">Net Banking</option>
-                            </select>
-                        </div>
-                        <div id="cardDetails" class="mb-3">
-                            <label for="cardNumber" class="form-label">Card Number</label>
-                            <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456">
-                            <label for="expiry" class="form-label mt-2">Expiry Date</label>
-                            <input type="text" class="form-control" id="expiry" placeholder="MM/YY">
-                            <label for="cvv" class="form-label mt-2">CVV</label>
-                            <input type="text" class="form-control" id="cvv" placeholder="123">
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-confirm-payment">Confirm Payment</button>
-                        </div>
-                    </form>
+                    <input type="hidden" id="billBookingId">
+                    <div class="mb-3">
+                        <label class="form-label">Customer Name</label>
+                        <input type="text" class="form-control" id="billCustomerName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Advisor Name</label>
+                        <input type="text" class="form-control" id="billAdvisorName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Service Name</label>
+                        <input type="text" class="form-control" id="billServiceName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Materials</label>
+                        <table class="table table-bordered" id="billMaterialsTable">
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Total</label>
+                        <input type="text" class="form-control" id="billTotal" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-confirm-payment" id="proceedPaymentBtn">Proceed to Payment</button>
                 </div>
             </div>
         </div>
@@ -681,73 +154,122 @@
 
     <th:block th:replace="fragments/footer :: footer"></th:block>
 
-    <!-- Modal and JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-    // Pass backend API URL and token from server to client
-    const backendApiUrl = '[[${@environment.getProperty("backend.api.url")}]]';
-    const token = '[[${session.token}]]';
+        const backendApiUrl = 'http://localhost:8081/api';
+        const token = '[[${session.token}]]';
+        const customerId = '[[${customer.id}]]';
 
-    console.log('Backend API URL:', backendApiUrl); // Debug log
+        async function downloadInvoice(bookingId, customerId) {
+            const url = `${backendApiUrl}/bookings/receipt/${bookingId}?customerId=${customerId}`;
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/pdf' }
+                });
+                if (!response.ok) throw new Error(`Failed to download invoice: ${response.status}`);
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `invoice_${bookingId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+            } catch (error) {
+                alert('Failed to download invoice: ' + error.message);
+            }
+        }
 
-    async function downloadInvoice(bookingId, customerId) {
-        const url = `${backendApiUrl}/bookings/receipt/${bookingId}?customerId=${customerId}`;
-        console.log('Fetching invoice from:', url); // Debug log
-        try {
-            const response = await fetch(url, {
+        $('.view-bill-btn').on('click', function() {
+            const bookingId = $(this).data('id');
+            const vehicle = $(this).data('vehicle');
+            const service = $(this).data('service');
+            const cost = $(this).data('cost');
+
+            $('#billBookingId').val(bookingId);
+
+            $.ajax({
+                url: `${backendApiUrl}/bookings/bom/${bookingId}?customerId=${customerId}`,
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/pdf'
+                headers: { 'Authorization': `Bearer ${token}` },
+                success: function(data) {
+                    $('#billCustomerName').val(data.customerName);
+                    $('#billAdvisorName').val(data.advisorName);
+                    $('#billServiceName').val(data.serviceName);
+                    $('#billTotal').val('₹' + data.total.toFixed(2));
+
+                    const materialsTableBody = $('#billMaterialsTable tbody');
+                    materialsTableBody.empty();
+                    data.materials.forEach(material => {
+                        const row = `
+                            <tr>
+                                <td>${material.materialName}</td>
+                                <td>${material.quantity}</td>
+                                <td>₹${material.price.toFixed(2)}</td>
+                                <td>₹${(material.price * material.quantity).toFixed(2)}</td>
+                            </tr>
+                        `;
+                        materialsTableBody.append(row);
+                    });
+                },
+                error: function(xhr) {
+                    alert('Failed to load bill: ' + (xhr.responseText || 'Unknown error'));
                 }
             });
-            if (!response.ok) {
-                throw new Error(`Failed to download invoice: ${response.status} ${response.statusText}`);
-            }
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = `invoice_${bookingId}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            console.error('Error downloading invoice:', error);
-            alert('Failed to download invoice: ' + error.message);
-        }
-    }
+        });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const paymentModal = document.getElementById('paymentModal');
-        paymentModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const vehicle = button.getAttribute('data-vehicle');
-            const service = button.getAttribute('data-service');
-            const cost = button.getAttribute('data-cost');
-            const bookingId = button.getAttribute('data-id');
+        $('#proceedPaymentBtn').on('click', function() {
+            const bookingId = $('#billBookingId').val();
+            const total = parseFloat($('#billTotal').val().replace('₹', '')) * 100; // Convert to paise
 
-            const modal = this;
-            modal.querySelector('#vehicle').value = vehicle;
-            modal.querySelector('#service').value = service;
-            modal.querySelector('#cost').value = cost;
-            modal.querySelector('#bookingId').value = bookingId;
-
-            const paymentMethod = modal.querySelector('#paymentMethod');
-            const cardDetails = modal.querySelector('#cardDetails');
-            paymentMethod.addEventListener('change', function() {
-                cardDetails.style.display = this.value === 'card' ? 'block' : 'none';
+            $.ajax({
+                url: `${backendApiUrl}/bookings/create-payment/${bookingId}`,
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                data: JSON.stringify({ amount: total, currency: 'INR' }),
+                success: function(response) {
+                    const options = {
+                        key: 'rzp_test_GqJn5IN8LD0wep',
+                        amount: response.amount,
+                        currency: response.currency,
+                        name: 'Vehicle Service Management',
+                        description: `Payment for Booking ID: ${bookingId}`,
+                        order_id: response.orderId,
+                        handler: function(paymentResponse) {
+                            $.ajax({
+                                url: `${backendApiUrl}/bookings/verify-payment`,
+                                method: 'POST',
+                                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                data: JSON.stringify({
+                                    bookingId: bookingId,
+                                    razorpayOrderId: paymentResponse.razorpay_order_id,
+                                    razorpayPaymentId: paymentResponse.razorpay_payment_id,
+                                    razorpaySignature: paymentResponse.razorpay_signature
+                                }),
+                                success: function(verifyResponse) {
+                                    alert('Payment successful! Transaction recorded.');
+                                    $('#billModal').modal('hide');
+                                    window.location.reload();
+                                },
+                                error: function(xhr) {
+                                    alert('Payment verification failed: ' + (xhr.responseText || 'Unknown error'));
+                                }
+                            });
+                        },
+                        prefill: { email: '[[${customer.email}]]', contact: '[[${customer.mobile}]]' },
+                        theme: { color: '#F97316' }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                },
+                error: function(xhr) {
+                    alert('Failed to initiate payment: ' + (xhr.responseText || 'Unknown error'));
+                }
             });
         });
-
-        document.getElementById('paymentForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const bookingId = document.getElementById('bookingId').value;
-            alert('Payment processing for booking ID ' + bookingId + ' not implemented yet.');
-            // Implement payment processing logic here
-        });
-    });
     </script>
 </body>
 </html>
