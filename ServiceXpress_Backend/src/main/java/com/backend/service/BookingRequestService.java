@@ -1,4 +1,3 @@
-
 package com.backend.service;
 
 import com.backend.dto.*;
@@ -321,7 +320,7 @@ public class BookingRequestService {
                 }
             } catch (Exception e) {
                 logger.error("Error processing booking ID {} for customer ID {}: {}", booking.getId(), customerId, e.getMessage(), e);
-                continue; // Skip problematic booking
+                continue;
             }
         }
 
@@ -414,6 +413,7 @@ public class BookingRequestService {
         List<VehicleCompletedDTO> vehiclesCompleted = completedBookings.stream().map(booking -> {
             VehicleCompletedDTO dto = new VehicleCompletedDTO();
             dto.setId(booking.getId());
+            dto.setCustomerId(booking.getCustomerId()); // Add customerId
             dto.setOwnerName(booking.getCustomerName());
             dto.setVehicleType(booking.getVehicleType());
             dto.setVehicleModel(booking.getVehicleModel());
@@ -429,8 +429,6 @@ public class BookingRequestService {
             dto.setCompletedDate(booking.getUpdatedAt());
             dto.setStatus(booking.getStatus());
             dto.setCustomerEmail(booking.getCustomerEmail());
-            // Check if BOM exists with detailed logging
-            logger.info("Checking BOM for booking ID: {}", booking.getId());
             Optional<BillOfMaterial> bomOptional = billOfMaterialRepository.findByBookingId(booking.getId());
             boolean hasBom = bomOptional.isPresent();
             if (hasBom) {
@@ -445,7 +443,7 @@ public class BookingRequestService {
         dashboardData.setVehiclesCompleted(vehiclesCompleted);
         dashboardData.setCompletedCount(vehiclesCompleted.size());
 
-        // Fetch advisor requests (simplified example)
+        // Fetch advisor requests
         List<AdvisorRequestDTO> advisorRequests = inProgressBookings.stream()
             .filter(booking -> booking.getStatus().equals("IN_PROGRESS"))
             .map(booking -> {
@@ -482,14 +480,12 @@ public class BookingRequestService {
             booking.setUpdatedAt(LocalDateTime.now());
             booking = repository.save(booking);
 
-            // Use the provided BOM data
             try {
                 bomDTO.setBookingId(bookingId);
                 if (bomDTO.getCustomerName() == null) {
                     bomDTO.setCustomerName(booking.getCustomerName());
                 }
 
-                // Fetch advisor name if not provided
                 if (bomDTO.getAdvisorName() == null) {
                     String advisorName = "Unknown";
                     Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(bookingId);
@@ -504,7 +500,6 @@ public class BookingRequestService {
                     bomDTO.setServiceName(booking.getServices());
                 }
 
-                // Calculate total if not provided
                 if (bomDTO.getTotal() == null && bomDTO.getMaterials() != null) {
                     Double total = bomDTO.getMaterials().stream()
                             .mapToDouble(m -> m.getPrice() * m.getQuantity())
@@ -524,7 +519,6 @@ public class BookingRequestService {
 
     @Transactional
     public BookingRequest markBookingCompleted(Long bookingId) {
-        // Delegate to the new method with a default BOM
         BillOfMaterialDTO bomDTO = new BillOfMaterialDTO();
         return markBookingCompleted(bookingId, bomDTO);
     }
@@ -703,14 +697,12 @@ public class BookingRequestService {
         BookingRequest booking = repository.findById(Long.valueOf(request.getBookingId()))
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + request.getBookingId()));
 
-        // Prepare JSONObject for signature verification
         JSONObject attributes = new JSONObject();
         attributes.put("razorpay_order_id", request.getRazorpayOrderId());
         attributes.put("razorpay_payment_id", request.getRazorpayPaymentId());
         attributes.put("razorpay_signature", request.getRazorpaySignature());
 
         try {
-            // Verify the payment signature using Razorpay Utils
             Utils.verifyPaymentSignature(attributes, razorpayKeySecret);
             logger.info("Payment signature verified successfully for booking ID: {}", request.getBookingId());
         } catch (RazorpayException e) {
@@ -718,7 +710,6 @@ public class BookingRequestService {
             throw new RazorpayException("Invalid payment signature: " + e.getMessage());
         }
 
-        // Update booking status and transaction ID
         booking.setStatus("COMPLETED_PAID");
         booking.setTransactionId(request.getRazorpayPaymentId());
         booking.setUpdatedAt(LocalDateTime.now());
@@ -728,27 +719,22 @@ public class BookingRequestService {
     public BillOfMaterialDTO getBillOfMaterials(Long bookingId, Long customerId) {
         logger.info("Fetching BOM for bookingId: {}, customerId: {}", bookingId, customerId);
 
-        // Validate booking
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
 
-        // Validate customer ownership
         if (!booking.getCustomerId().equals(customerId)) {
             logger.warn("Customer ID {} does not match booking ID {} owner", customerId, bookingId);
             throw new IllegalArgumentException("Booking does not belong to customer: " + customerId);
         }
 
-        // Validate status
-        if (!"COMPLETED_PENDING_PAYMENT".equals(booking.getStatus())) {
-            logger.warn("Booking ID {} is not in COMPLETED_PENDING_PAYMENT status, current status: {}", bookingId, booking.getStatus());
-            throw new IllegalArgumentException("Booking must be in COMPLETED_PENDING_PAYMENT status");
+        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT").contains(booking.getStatus())) {
+            logger.warn("Booking ID {} is not in COMPLETED or COMPLETED_PENDING_PAYMENT status, current status: {}", bookingId, booking.getStatus());
+            throw new IllegalArgumentException("Booking must be in COMPLETED or COMPLETED_PENDING_PAYMENT status");
         }
 
-        // Fetch BOM
         BillOfMaterial bom = billOfMaterialRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Bill of Material not found for booking ID: " + bookingId));
 
-        // Construct DTO
         BillOfMaterialDTO bomDTO = new BillOfMaterialDTO();
         bomDTO.setBookingId(bookingId);
         bomDTO.setCustomerName(bom.getCustomerName());
@@ -756,7 +742,6 @@ public class BookingRequestService {
         bomDTO.setServiceName(bom.getServiceName());
         bomDTO.setTotal(bom.getTotal());
 
-        // Parse materials
         List<BillOfMaterialDTO.Material> materials = new ArrayList<>();
         try {
             if (bom.getMaterials() != null && !bom.getMaterials().isEmpty()) {

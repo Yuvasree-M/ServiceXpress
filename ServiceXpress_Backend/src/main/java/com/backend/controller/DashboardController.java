@@ -154,8 +154,9 @@ public class DashboardController {
                 dto.setCompletedDate(booking.getUpdatedAt());
                 dto.setStatus(booking.getStatus());
                 dto.setCustomerEmail(booking.getCustomerEmail());
-                dto.setPaymentRequested(false);
-                dto.setPaymentReceived(false);
+                dto.setCustomerId(booking.getCustomerId());
+//                dto.setPaymentRequested(false);
+//                dto.setPaymentReceived(false);
                 // Check if BOM exists and set hasBom
                 boolean hasBom = billOfMaterialRepository.findByBookingId(booking.getId()).isPresent();
                 logger.debug("Booking ID: {}, hasBom: {}", booking.getId(), hasBom);

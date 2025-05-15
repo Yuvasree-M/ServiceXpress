@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
@@ -11,7 +12,6 @@
     <link rel="stylesheet" th:href="@{/css/admincss.css}">
 </head>
 <body>
-    <!-- Hidden input for the token -->
     <input type="hidden" id="token" th:value="${token}">
     <input type="hidden" id="backendApiUrl" th:value="${backendApiUrl}">
 
@@ -19,7 +19,7 @@
 
     <main class="container mt-5 pt-4">
         <div class="row mt-3">
-              <div class="col-md-2">
+            <div class="col-md-2">
                 <div class="card admin-card" onclick="showTable('dueTable')">
                     <div class="card-body text-center">
                         <i class="fas fa-calendar dashboard-icon"></i>
@@ -66,8 +66,6 @@
             </div>
         </div>
 
-       
-        <!-- Tables -->
         <div id="dueTable" class="table-container mt-4">
             <h4>Vehicles Due</h4>
             <div th:if="${dashboardData == null}">Dashboard data is null</div>
@@ -118,7 +116,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <div id="assignedTable" class="table-container mt-4">
             <h4>Vehicles Assigned</h4>
             <div th:if="${dashboardData == null}">Dashboard data is null</div>
@@ -181,7 +179,6 @@
             </table>
         </div>
 
-        <!-- Completed Services Table -->
         <div id="completedTable" class="table-container mt-4">
             <h4>Completed Services</h4>
             <div th:if="${dashboardData == null}">Dashboard data is null</div>
@@ -222,7 +219,7 @@
                                     class="btn btn-sm btn-info view-bill-btn"
                                     data-bs-toggle="modal"
                                     data-bs-target="#viewBillModal"
-                                    th:attr="data-booking-id=${v.id},data-customer-email=${v.customerEmail}">
+                                    th:attr="data-booking-id=${v.id},data-customer-email=${v.customerEmail},data-customer-id=${v.customerId}">
                                 View Bill
                             </button>
                             <span th:unless="${v.hasBom}" class="badge bg-warning">Bill Not Available</span>
@@ -232,7 +229,6 @@
             </table>
         </div>
 
-        <!-- View Bill Modal -->
         <div class="modal fade" id="viewBillModal" tabindex="-1" aria-labelledby="viewBillModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -243,6 +239,7 @@
                     <div class="modal-body">
                         <input type="hidden" id="modalBookingId">
                         <input type="hidden" id="modalCustomerEmail">
+                        <input type="hidden" id="modalCustomerId">
                         <div class="mb-3">
                             <label class="form-label">Customer Name</label>
                             <input type="text" class="form-control" id="modalCustomerName" readonly>
@@ -287,7 +284,7 @@
             <div th:if="${dashboardData == null}">Dashboard data is null</div>
             <div th:if="${dashboardData != null and dashboardData.advisorRequests == null}">Advisor Requests is null</div>
             <div th:if="${dashboardData != null and dashboardData.advisorRequests.isEmpty()}">No advisor requests</div>
-            <table th:if="${dashboardData != null and !dashboardData.advisorRequests.isEmpty()}" class="table table-striped table-hover display datatable">
+            <table th:if="${dashboardData != null and !dashboardData.vehiclesCompleted.isEmpty()}" class="table table-striped table-hover display datatable">
                 <thead>
                     <tr>
                         <th>Service Advisor</th>
@@ -324,13 +321,10 @@
                 </tbody>
             </table>
         </div>
-
-        
     </main>
 
     <th:block th:replace="fragments/footer :: footer"></th:block>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -352,12 +346,11 @@
                 return;
             }
 
-            const tokenInput = document.getElementById('token');
-            if (!tokenInput) {
+            const token = $('#token').val();
+            if (!token) {
                 alert('Authentication token not found. Please log in again.');
                 return;
             }
-            const token = tokenInput.value;
 
             $.ajax({
                 url: '/dashboard/assign-advisor?bookingId=' + bookingId,
@@ -372,12 +365,13 @@
                     window.location.reload();
                 },
                 error: function(xhr) {
+                    const errorMsg = xhr.responseJSON ? xhr.responseJSON.error : xhr.responseText || 'Unknown error';
                     if (xhr.status === 403) {
                         alert('Access denied: You do not have permission to perform this action.');
                     } else if (xhr.status === 401) {
                         alert('Unauthorized: Please log in again.');
                     } else {
-                        alert('Error assigning advisor: ' + xhr.responseText);
+                        alert('Error assigning advisor: ' + errorMsg);
                     }
                 }
             });
@@ -397,64 +391,81 @@
             alert("Sending advisor request to customer for ID: " + id);
         }
 
-        // View Bill Modal Handling
-       $('.view-bill-btn').on('click', function() {
+        $('.view-bill-btn').on('click', function() {
             const bookingId = $(this).data('booking-id');
             const customerEmail = $(this).data('customer-email');
+            const customerId = $(this).data('customer-id');
             const token = $('#token').val();
             const backendApiUrl = $('#backendApiUrl').val();
 
+            if (!token) {
+                alert('Authentication token missing. Please log in again.');
+                return;
+            }
+
             $('#modalBookingId').val(bookingId);
             $('#modalCustomerEmail').val(customerEmail);
+            $('#modalCustomerId').val(customerId);
 
             $.ajax({
-                url: backendApiUrl + '/bookings/bom/' + bookingId,
+                url: backendApiUrl + '/bookings/bom/' + bookingId + '?customerId=' + customerId,
                 method: 'GET',
                 headers: { 'Authorization': 'Bearer ' + token },
                 success: function(data) {
-                    $('#modalCustomerName').val(data.customerName);
-                    $('#modalAdvisorName').val(data.advisorName);
-                    $('#modalServiceName').val(data.serviceName);
-                    $('#modalTotal').val('₹' + data.total.toFixed(2));
+                    $('#modalCustomerName').val(data.customerName || 'N/A');
+                    $('#modalAdvisorName').val(data.advisorName || 'N/A');
+                    $('#modalServiceName').val(data.serviceName || 'N/A');
+                    $('#modalTotal').val(data.total ? '₹' + data.total.toFixed(2) : '₹0.00');
 
                     const materialsTableBody = $('#modalMaterialsTable tbody');
                     materialsTableBody.empty();
-                    data.materials.forEach(material => {
-                        const row = `
-                            <tr>
-                                <td>${material.materialName}</td>
-                                <td>${material.quantity}</td>
-                                <td>₹${material.price.toFixed(2)}</td>
-                                <td>₹${(material.price * material.quantity).toFixed(2)}</td>
-                            </tr>
-                        `;
-                        materialsTableBody.append(row);
-                    });
+                    if (data.materials && data.materials.length > 0) {
+                        data.materials.forEach(material => {
+                            const row = `
+                                <tr>
+                                    <td>${material.materialName || 'N/A'}</td>
+                                    <td>${material.quantity || 0}</td>
+                                    <td>₹${material.price ? material.price.toFixed(2) : '0.00'}</td>
+                                    <td>₹${material.price && material.quantity ? (material.price * material.quantity).toFixed(2) : '0.00'}</td>
+                                </tr>
+                            `;
+                            materialsTableBody.append(row);
+                        });
+                    } else {
+                        materialsTableBody.append('<tr><td colspan="4">No materials available</td></tr>');
+                    }
                 },
                 error: function(xhr) {
-                    alert('Failed to load bill: ' + (xhr.responseText || 'Unknown error'));
+                    const errorMsg = xhr.responseJSON ? xhr.responseJSON.error : xhr.responseText || 'Unknown error';
+                    console.log('Error fetching BOM for booking ID ' + bookingId + ': ' + errorMsg);
+                    alert('Failed to load bill: ' + errorMsg);
                 }
             });
         });
 
-        // Send Bill to Customer
         $('#sendBillBtn').on('click', function() {
             const bookingId = $('#modalBookingId').val();
             const customerEmail = $('#modalCustomerEmail').val();
             const token = $('#token').val();
             const backendApiUrl = $('#backendApiUrl').val();
 
+            if (!token) {
+                alert('Authentication token missing. Please log in again.');
+                return;
+            }
+
             $.ajax({
                 url: backendApiUrl + '/bookings/send-bill/' + bookingId,
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + token },
                 success: function(response) {
-                    alert('Bill sent to customer successfully with payment link!');
+                    alert(response || 'Bill sent to customer successfully with payment link!');
                     $('#viewBillModal').modal('hide');
                     window.location.reload();
                 },
                 error: function(xhr) {
-                    alert('Failed to send bill: ' + (xhr.responseText || 'Unknown error'));
+                    const errorMsg = xhr.responseJSON ? xhr.responseJSON.error : xhr.responseText || 'Unknown error';
+                    alert('Failed to send bill: ' + errorMsg);
                 }
             });
         });
