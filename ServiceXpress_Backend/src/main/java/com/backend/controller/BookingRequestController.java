@@ -1,3 +1,4 @@
+
 package com.backend.controller;
 
 import com.backend.model.BookingRequest;
@@ -5,12 +6,16 @@ import com.backend.service.BookingRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.razorpay.RazorpayException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import com.backend.dto.BillOfMaterialDTO;
+import com.backend.dto.PaymentRequest;
+import com.backend.dto.PaymentResponse;
+import com.backend.dto.PaymentVerificationRequest;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:8082")
@@ -54,51 +59,23 @@ public class BookingRequestController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/bom/{id}")
-    public ResponseEntity<Map<String, Object>> getBillOfMaterials(@PathVariable Long id) {
+    @GetMapping("/bom/{bookingId}")
+    public ResponseEntity<?> getBillOfMaterials(@PathVariable Long bookingId,
+                                               @RequestParam(required = true) Long customerId) {
         try {
-            Map<String, Object> receiptData = bookingService.getReceiptData(id);
-            return ResponseEntity.ok(receiptData);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(400).body(null);
-        }catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(null);
-        } 
-    }
-
-    @PostMapping("/send-bill/{id}")
-    public ResponseEntity<Void> sendBill(@PathVariable Long id) {
-        try {
-            Map<String, Object> receiptData = bookingService.getReceiptData(id);
-            BookingRequest booking = bookingService.getBookingById(id)
-                    .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
-
-            String customerEmail = booking.getCustomerEmail();
-            String customerName = (String) receiptData.get("customerName");
-            String customerNameInBom = customerName;
-            String advisorName = (String) receiptData.get("advisorName");
-            String serviceName = (String) receiptData.get("serviceName");
-            Double total = (Double) receiptData.get("total");
-
-            List<Map<String, Object>> materialsData = (List<Map<String, Object>>) receiptData.get("materials");
-            List<BillOfMaterialDTO.Material> materials = new ArrayList<>();
-            if (materialsData != null) {
-                for (Map<String, Object> materialData : materialsData) {
-                    BillOfMaterialDTO.Material material = new BillOfMaterialDTO.Material();
-                    material.setMaterialName((String) materialData.get("materialName"));
-                    material.setQuantity(((Number) materialData.get("quantity")).intValue());
-                    material.setPrice(((Number) materialData.get("price")).doubleValue());
-                    materials.add(material);
-                }
-            }
-
-            bookingService.sendBillEmail(customerEmail, customerName, id, customerNameInBom, advisorName, serviceName, materials, total);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
+            BillOfMaterialDTO bom = bookingService.getBillOfMaterials(bookingId, customerId);
+            return ResponseEntity.ok(bom);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
+    @PostMapping("/send-bill/{id}")
+    public ResponseEntity<String> sendBill(@PathVariable Long id) {
+        bookingService.sendBill(id);
+        return ResponseEntity.ok("Bill sent successfully");
+    }
+    
     @PostMapping("/start/{id}")
     public ResponseEntity<BookingRequest> startService(@PathVariable Long id) {
         try {
@@ -121,5 +98,17 @@ public class BookingRequestController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(null);
         }
+    }
+    
+    @PostMapping("/create-payment/{bookingId}")
+    public ResponseEntity<PaymentResponse> createPayment(@PathVariable Long bookingId, @RequestBody PaymentRequest request) throws RazorpayException {
+        PaymentResponse response = bookingService.createPayment(bookingId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/verify-payment")
+    public ResponseEntity<String> verifyPayment(@RequestBody PaymentVerificationRequest request) throws RazorpayException {
+        bookingService.verifyPayment(request);
+        return ResponseEntity.ok("Payment verified successfully");
     }
 }

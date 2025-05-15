@@ -5,5 +5,7 @@ public enum ServiceStatus {
     PENDING,
     IN_PROGRESS,
     COMPLETED,
-    CANCELLED
+    CANCELLED,
+    COMPLETED_PENDING_PAYMENT,
+    COMPLETED_PAID
 }

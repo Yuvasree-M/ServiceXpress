@@ -116,6 +116,19 @@
     		<artifactId>ServiceXpress_Frontend</artifactId>
     		<version>0.0.1-SNAPSHOT</version>
     	</dependency>
+    	
+    	<!-- Razorpay SDK -->
+    <dependency>
+        <groupId>com.razorpay</groupId>
+        <artifactId>razorpay-java</artifactId>
+        <version>1.4.3</version> <!-- Check for the latest version -->
+    </dependency>
+    <!-- org.json -->
+    <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20231013</version> <!-- Check for the latest version -->
+    </dependency>
     </dependencies>
     
     <repositories>
