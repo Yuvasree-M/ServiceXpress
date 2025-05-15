@@ -62,11 +62,17 @@ public class BookingRequestController {
     @GetMapping("/bom/{bookingId}")
     public ResponseEntity<?> getBillOfMaterials(@PathVariable Long bookingId,
                                                @RequestParam(required = true) Long customerId) {
+        if (customerId == null || customerId <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid customerId: " + customerId));
+        }
         try {
             BillOfMaterialDTO bom = bookingService.getBillOfMaterials(bookingId, customerId);
             return ResponseEntity.ok(bom);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
         }
     }
 
