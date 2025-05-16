@@ -1,76 +1,136 @@
 package com.frontend.model;
 
-import com.frontend.model.Customer;
-import com.frontend.model.ServiceStatus;
-import com.frontend.model.ServiceHistory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CustomerService {
 
+    @Value("${backend.api.url:http://localhost:8081/api}")
+    private String backendApiUrl;
+
+    private final RestTemplate restTemplate;
+    private final HttpSession session;
+
+    public CustomerService(RestTemplate restTemplate, HttpSession session) {
+        this.restTemplate = restTemplate;
+        this.session = session;
+    }
+
     public Customer getLoggedInCustomer() {
-        Customer customer = new Customer();
-        customer.setId(1L);
-        customer.setName("John Doe");
-//        customer.setInitials("JD");
-        return customer;
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            System.err.println("No authentication token found in session");
+            return null;
+        }
+
+        try {
+            String url = backendApiUrl + "/auth/me";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            ResponseEntity<UserDetailsResponse> response = restTemplate.exchange(
+                url, HttpMethod.POST, request, UserDetailsResponse.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                UserDetailsResponse userDetails = response.getBody();
+                Customer customer = new Customer();
+                customer.setId(userDetails.getCustomerId());
+                customer.setName(userDetails.getName());
+                customer.setEmail(userDetails.getEmail());
+                customer.setMobile(userDetails.getPhoneNumber());
+                customer.setInitials(userDetails.getName() != null ?
+                    userDetails.getName().substring(0, Math.min(2, userDetails.getName().length())).toUpperCase() : "");
+                return customer;
+            } else {
+                System.err.println("No customer data returned from " + url);
+                return null;
+            }
+        } catch (HttpClientErrorException e) {
+            System.err.println("HTTP error fetching customer data: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            return null;
+        } catch (Exception e) {
+            System.err.println("Error fetching customer data: " + e.getMessage());
+            return null;
+        }
     }
 
     public int getCartCount(Long customerId) {
-        // Mocking 3 items in cart
+        // Replace with actual API call if needed
         return 3;
     }
 
     public List<ServiceStatus> getOngoingServices(Long customerId) {
-        List<ServiceStatus> list = new ArrayList<>();
+        // Replace with API call to /api/customer/dashboard
+        try {
+            String url = backendApiUrl + "/customer/dashboard?customerId=" + customerId;
+            String token = (String) session.getAttribute("token");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
 
-        ServiceStatus service1 = new ServiceStatus();
-        service1.setVehicleType("Car");
-        service1.setModel("Honda City");
-        service1.setRegistration("KA05AB1234");
-        service1.setService("Engine Checkup");
-        service1.setCost(1200.00);
-        service1.setStatus("In Progress");
+            ResponseEntity<CustomerDashboardDTO> response = restTemplate.exchange(
+                url, HttpMethod.GET, request, CustomerDashboardDTO.class
+            );
 
-        ServiceStatus service2 = new ServiceStatus();
-        service2.setVehicleType("Bike");
-        service2.setModel("Yamaha FZ");
-        service2.setRegistration("KA01XY5678");
-        service2.setService("Brake Replacement");
-        service2.setCost(750.00);
-        service2.setStatus("Pending");
-
-        list.add(service1);
-        list.add(service2);
-
-        return list;
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody().getOngoingServices();
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            System.err.println("Error fetching ongoing services: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public List<ServiceHistory> getServiceHistory(Long customerId) {
-        List<ServiceHistory> list = new ArrayList<>();
+        // Replace with API call to /api/customer/dashboard
+        try {
+            String url = backendApiUrl + "/customer/dashboard?customerId=" + customerId;
+            String token = (String) session.getAttribute("token");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
 
-        ServiceHistory history1 = new ServiceHistory();
-        history1.setDate("2025-03-15");
-//        history1.setVehicle("Honda City");
-        history1.setWorkDone("Oil Change, Filter Replacement");
-        history1.setCost(950.00);
-        history1.setStatus("Completed");
-        history1.setTransactionId("TXN123456");
+            ResponseEntity<CustomerDashboardDTO> response = restTemplate.exchange(
+                url, HttpMethod.GET, request, CustomerDashboardDTO.class
+            );
 
-        ServiceHistory history2 = new ServiceHistory();
-        history2.setDate("2025-02-20");
-//        history2.setVehicle("Yamaha FZ");
-        history2.setWorkDone("Chain Tightening");
-        history2.setCost(300.00);
-        history2.setStatus("Completed");
-        history2.setTransactionId("TXN654321");
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody().getServiceHistory();
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            System.err.println("Error fetching service history: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
 
-        list.add(history1);
-        list.add(history2);
+    private static class UserDetailsResponse {
+        private Long customerId;
+        private String name;
+        private String email;
+        private String phoneNumber;
 
-        return list;
+        public Long getCustomerId() { return customerId; }
+        public void setCustomerId(Long customerId) { this.customerId = customerId; }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getPhoneNumber() { return phoneNumber; }
+        public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     }
 }

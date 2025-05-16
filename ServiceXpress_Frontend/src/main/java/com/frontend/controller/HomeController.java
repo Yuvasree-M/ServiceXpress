@@ -108,10 +108,89 @@ public class HomeController {
         return "redirect:/?login=true";
     }
 
+//    @PostMapping("/login")
+//    public String login(@RequestParam String phoneNumber, @RequestParam String otp, HttpSession session, Model model) {
+//        logger.info("Verifying OTP for phone number: {}", phoneNumber);
+//        try {
+//            String url = backendApiUrl + "/auth/customer/verify-otp";
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.APPLICATION_JSON);
+//            HomeController.VerifyOtpRequest requestBody = new HomeController.VerifyOtpRequest();
+//            HttpEntity<HomeController.VerifyOtpRequest> request = new HttpEntity<>(requestBody, headers);
+//
+//            ResponseEntity<AuthResponse> response = restTemplate.exchange(
+//                url, HttpMethod.POST, request, AuthResponse.class
+//            );
+//
+//            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+//                AuthResponse authResponse = response.getBody();
+//                if (authResponse.getToken() != null && "CUSTOMER".equals(authResponse.getRole())) {
+//                    session.setAttribute("token", authResponse.getToken());
+//                    session.setAttribute("username", phoneNumber); // Store phone number as username
+//                    logger.info("OTP verified successfully, redirecting customer to /dashboard/customer");
+//                    return "redirect:/dashboard/customer";
+//                }
+//                logger.warn("OTP verification failed: Invalid role or token");
+//                model.addAttribute("error", "Invalid OTP or role");
+//                return "index";
+//            } else {
+//                logger.warn("OTP verification failed: Invalid OTP");
+//                model.addAttribute("error", "Invalid OTP or login failed");
+//                return "index";
+//            }
+//        } catch (HttpClientErrorException e) {
+//            logger.error("HTTP error during OTP verification for {}: Status {}, Response: {}", phoneNumber, e.getStatusCode(), e.getResponseBodyAsString());
+//            model.addAttribute("error", "Verification failed: " + e.getResponseBodyAsString());
+//            return "index";
+//        } catch (Exception e) {
+//            logger.error("OTP verification failed for phone number {}: {}", phoneNumber, e.getMessage(), e);
+//            model.addAttribute("error", "Verification failed: " + e.getMessage());
+//            return "index";
+//        }
+//    }
+    
     @PostMapping("/login")
-    public String login(@RequestParam String identifier, @RequestParam String password, Model model, HttpSession session) {
-        logger.info("Attempting login for identifier: {}", identifier);
+    public String login(@RequestParam(required = false) String identifier,
+                       @RequestParam(required = false) String password,
+                       @RequestParam(required = false) String phoneNumber,
+                       @RequestParam(required = false) String otp,
+                       Model model, HttpSession session) {
+        logger.info("Login attempt with identifier: {}, phoneNumber: {}", identifier, phoneNumber);
+
         try {
+            // Handle customer login with phone number and OTP
+            if (phoneNumber != null && !phoneNumber.trim().isEmpty() && otp != null && !otp.trim().isEmpty()) {
+                logger.info("Verifying OTP for phone number: {}", phoneNumber);
+                String url = backendApiUrl + "/auth/customer/verify-otp";
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                VerifyOtpRequest requestBody = new VerifyOtpRequest();
+                HttpEntity<VerifyOtpRequest> request = new HttpEntity<>(requestBody, headers);
+
+                ResponseEntity<AuthResponse> response = restTemplate.exchange(
+                    url, HttpMethod.POST, request, AuthResponse.class
+                );
+
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    AuthResponse authResponse = response.getBody();
+                    if (authResponse.getToken() != null && "CUSTOMER".equals(authResponse.getRole())) {
+                        session.setAttribute("token", authResponse.getToken());
+                        session.setAttribute("username", phoneNumber);
+                        session.setAttribute("role", authResponse.getRole());
+                        logger.info("OTP verified successfully, redirecting customer to /dashboard/customer");
+                        return "redirect:/dashboard/customer";
+                    }
+                    logger.warn("OTP verification failed: Invalid role or token");
+                    model.addAttribute("error", "Invalid OTP or role");
+                    return "index";
+                } else {
+                    logger.warn("OTP verification failed: Invalid OTP");
+                    model.addAttribute("error", "Invalid OTP or login failed");
+                    return "index";
+                }
+            }
+
+            // Handle ADMIN and SERVICE_ADVISOR login with identifier and password
             if (identifier == null || identifier.trim().isEmpty()) {
                 logger.warn("Login failed: Identifier is null or empty");
                 model.addAttribute("error", "Identifier is required");
@@ -158,7 +237,7 @@ public class HomeController {
                         logger.info("Redirecting admin to {}", redirectUrl);
                         break;
                     case "SERVICE_ADVISOR":
-                        Long advisorId = fetchAdvisorId(token);
+                        Long advisorId = fetchAdvisorId1(token);
                         if (advisorId == null) {
                             logger.error("Failed to fetch Advisor ID for SERVICE_ADVISOR role for identifier: {}", identifier);
                             model.addAttribute("error", "Advisor ID not found. Please contact support.");
@@ -166,10 +245,6 @@ public class HomeController {
                         }
                         redirectUrl = "/dashboard/advisor?advisorId=" + advisorId;
                         logger.info("Redirecting service advisor to {}", redirectUrl);
-                        break;
-                    case "CUSTOMER":
-                        redirectUrl = "/dashboard/customer";
-                        logger.info("Redirecting customer to {}", redirectUrl);
                         break;
                     default:
                         redirectUrl = "/";
@@ -181,18 +256,56 @@ public class HomeController {
             model.addAttribute("error", "Invalid credentials: Token or role missing");
             return "index";
         } catch (HttpClientErrorException e) {
-            logger.error("HTTP error during login for identifier {}: Status {}, Response: {}", identifier, e.getStatusCode(), e.getResponseBodyAsString());
+            logger.error("HTTP error during login for identifier/phoneNumber {}: Status {}, Response: {}", 
+                identifier != null ? identifier : phoneNumber, e.getStatusCode(), e.getResponseBodyAsString());
             String errorMessage = e.getStatusCode() == HttpStatus.UNAUTHORIZED
-                ? "Invalid username or password"
+                ? "Invalid credentials or OTP"
                 : "Login failed: " + e.getResponseBodyAsString();
             model.addAttribute("error", errorMessage);
             return "index";
         } catch (Exception e) {
-            logger.error("Login failed for identifier {}: {}", identifier, e.getMessage(), e);
+            logger.error("Login failed for identifier/phoneNumber {}: {}", 
+                identifier != null ? identifier : phoneNumber, e.getMessage(), e);
             model.addAttribute("error", "Login failed: " + e.getMessage());
             return "index";
         }
     }
+
+    // Placeholder for fetchAdvisorId method (unchanged)
+    private Long fetchAdvisorId1(String token) {
+        try {
+            String url = backendApiUrl + "/auth/me";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            ResponseEntity<UserDetailsResponse> response = restTemplate.exchange(
+                url, HttpMethod.POST, request, UserDetailsResponse.class
+            );
+            logger.debug("Fetch advisorId response status: {}, body: {}", response.getStatusCode(), response.getBody());
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Long advisorId = response.getBody().getAdvisorId();
+                if (advisorId != null) {
+                    logger.info("Successfully fetched advisorId: {}", advisorId);
+                    return advisorId;
+                } else {
+                    logger.warn("AdvisorId is null in response: {}", response.getBody());
+                }
+            } else {
+                logger.warn("Failed to fetch advisorId: Status {}", response.getStatusCode());
+            }
+            return null;
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error fetching advisorId: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return null;
+        } catch (Exception e) {
+            logger.error("Error fetching advisorId: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+    
 
     @GetMapping("/dashboard/advisor")
     public String advisorDashboard(@RequestParam("advisorId") Long advisorId, HttpSession session, Model model) {

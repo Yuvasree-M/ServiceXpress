@@ -6,6 +6,7 @@ import com.backend.dto.LoginRequest;
 import com.backend.dto.OtpRequest;
 import com.backend.dto.OtpVerificationRequest;
 import com.backend.repository.AdvisorRepository;
+import com.backend.repository.CustomerRepository;
 import com.backend.service.OtpService;
 import com.backend.service.TokenBlacklistService;
 import com.backend.service.UserService;
@@ -33,14 +34,16 @@ public class AuthController {
     private final TokenBlacklistService tokenBlacklistService;
     private final OtpService otpService;
     private final AdvisorRepository advisorRepository;
+    private final CustomerRepository customerRepository;
 
     @Autowired
-    public AuthController(UserService userService, JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService, OtpService otpService, AdvisorRepository advisorRepository) {
+    public AuthController(UserService userService, JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService, OtpService otpService, AdvisorRepository advisorRepository, CustomerRepository customerRepository) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistService = tokenBlacklistService;
         this.otpService = otpService;
         this.advisorRepository = advisorRepository;
+        this.customerRepository = customerRepository;
     }
 
     @PostMapping("/login")
@@ -142,16 +145,31 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        String username = authentication.getName();
+        String identifier = authentication.getName(); // Phone number for customers
         String role = authentication.getAuthorities().stream()
             .map(auth -> auth.getAuthority().replace("ROLE_", ""))
             .findFirst()
             .orElse(null);
 
-        logger.info("Fetching user details for username: {}, role: {}", username, role);
+        logger.info("Fetching user details for identifier: {}, role: {}", identifier, role);
 
-        if ("SERVICE_ADVISOR".equals(role)) {
-            return advisorRepository.findByUsername(username)
+        if ("CUSTOMER".equals(role)) {
+            return customerRepository.findByPhoneNumber(identifier)
+                .map(customer -> {
+                    UserDetailsResponse response = new UserDetailsResponse();
+                    response.setCustomerId(customer.getId());
+                    response.setName(customer.getUsername());
+                    response.setEmail(customer.getEmail());
+                    response.setPhoneNumber(customer.getPhoneNumber());
+                    logger.info("Customer details fetched: customerId={}", customer.getId());
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    logger.warn("Customer not found for phone number: {}", identifier);
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                });
+        } else if ("SERVICE_ADVISOR".equals(role)) {
+            return advisorRepository.findByUsername(identifier)
                 .map(advisor -> {
                     UserDetailsResponse response = new UserDetailsResponse();
                     response.setAdvisorId(advisor.getId());
@@ -159,7 +177,7 @@ public class AuthController {
                     return ResponseEntity.ok(response);
                 })
                 .orElseGet(() -> {
-                    logger.warn("Advisor not found for username: {}", username);
+                    logger.warn("Advisor not found for username: {}", identifier);
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
                 });
         }
@@ -169,8 +187,21 @@ public class AuthController {
     }
 
     public static class UserDetailsResponse {
+        private Long customerId;
+        private String name;
+        private String email;
+        private String phoneNumber;
         private Long advisorId;
 
+        // Getters and Setters
+        public Long getCustomerId() { return customerId; }
+        public void setCustomerId(Long customerId) { this.customerId = customerId; }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getPhoneNumber() { return phoneNumber; }
+        public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
         public Long getAdvisorId() { return advisorId; }
         public void setAdvisorId(Long advisorId) { this.advisorId = advisorId; }
     }

@@ -4,7 +4,9 @@ import com.frontend.model.Booking;
 import com.frontend.model.Customer;
 import com.frontend.model.CustomerService;
 import com.frontend.model.Service;
+import com.frontend.model.ServiceHistory;
 import com.frontend.model.ServicePackage;
+import com.frontend.model.ServiceStatus;
 import com.frontend.model.VehicleType;
 import com.frontend.model.CustomerDashboardDTO;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,24 +51,22 @@ public class CustomerController {
             return "redirect:/login";
         }
 
-        // Initialize with local data from CustomerService as fallback
-        List<com.frontend.model.ServiceStatus> ongoingServices = customerService.getOngoingServices(customer.getId());
-        List<com.frontend.model.ServiceHistory> serviceHistory = customerService.getServiceHistory(customer.getId());
-
-        // Fetch dashboard data from backend
+        // Fetch dashboard data
         try {
             String url = backendApiUrl + "/customer/dashboard?customerId=" + customer.getId();
-            HttpEntity<String> request = new HttpEntity<>(new HttpHeaders()); // No token needed
+            String token = (String) session.getAttribute("token");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
             ResponseEntity<CustomerDashboardDTO> response = restTemplate.exchange(
                 url, HttpMethod.GET, request, CustomerDashboardDTO.class
             );
             CustomerDashboardDTO dashboardData = response.getBody();
-            if (dashboardData != null) {
-                ongoingServices = dashboardData.getOngoingServices();
-                serviceHistory = dashboardData.getServiceHistory();
-                System.out.println("Backend Ongoing Services: " + ongoingServices);
-                System.out.println("Backend Service History: " + serviceHistory);
-            } else {
+            List<ServiceStatus> ongoingServices = dashboardData != null ? dashboardData.getOngoingServices() : new ArrayList<>();
+            List<ServiceHistory> serviceHistory = dashboardData != null ? dashboardData.getServiceHistory() : new ArrayList<>();
+
+            if (dashboardData == null) {
                 System.err.println("No dashboard data returned from " + url);
                 model.addAttribute("error", "No dashboard data available.");
             }
@@ -80,12 +80,12 @@ public class CustomerController {
 
         model.addAttribute("customer", customer);
         model.addAttribute("cartCount", customerService.getCartCount(customer.getId()));
-        model.addAttribute("ongoingServices", ongoingServices);
-        model.addAttribute("serviceHistory", serviceHistory);
+        model.addAttribute("ongoingServices", customerService.getOngoingServices(customer.getId()));
+        model.addAttribute("serviceHistory", customerService.getServiceHistory(customer.getId()));
 
         return "customer-dashboard";
     }
-
+    
     @GetMapping("/customer/logout")
     public String logout(HttpSession session) {
         session.invalidate();

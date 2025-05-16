@@ -15,5 +15,4 @@ public class Customer {
     private String initials;
     private String email;
     private String mobile;
-    
 }
