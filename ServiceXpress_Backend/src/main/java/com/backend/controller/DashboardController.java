@@ -1,3 +1,4 @@
+
 package com.backend.controller;
 
 import com.backend.dto.AdvisorDTO;
@@ -38,7 +39,7 @@ public class DashboardController {
     private final BookingRequestService bookingRequestService;
     private final BookingAdvisorMappingRepository bookingAdvisorMappingRepository;
     private final AdvisorRepository advisorRepository;
-	private final BillOfMaterialRepository billOfMaterialRepository;
+    private final BillOfMaterialRepository billOfMaterialRepository;
     private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 
     public DashboardController(
@@ -52,7 +53,6 @@ public class DashboardController {
         this.advisorRepository = advisorRepository;
         this.billOfMaterialRepository = billOfMaterialRepository;
     }
-
 
     @GetMapping("/admin")
     public ResponseEntity<DashboardDataDTO> getAdminDashboardData() {
@@ -132,13 +132,14 @@ public class DashboardController {
                 return dto;
             }).collect(Collectors.toList());
 
-            // Fetch completed bookings (Vehicles Completed)
+            // Fetch completed and payment pending bookings (Vehicles Completed)
             List<BookingResponseDTO> completedBookings = bookingRequestService.getCompletedBookings();
-            logger.debug("Fetched {} completed bookings", completedBookings.size());
+            logger.debug("Fetched {} completed or payment pending bookings", completedBookings.size());
 
             List<VehicleCompletedDTO> vehiclesCompleted = completedBookings.stream().map(booking -> {
                 VehicleCompletedDTO dto = new VehicleCompletedDTO();
                 dto.setId(booking.getId());
+                dto.setCustomerId(booking.getCustomerId() != null ? booking.getCustomerId() : 0L); // Prevent null
                 dto.setOwnerName(booking.getCustomerName());
                 dto.setVehicleType(booking.getVehicleType());
                 dto.setVehicleModel(booking.getVehicleModel());
@@ -154,10 +155,6 @@ public class DashboardController {
                 dto.setCompletedDate(booking.getUpdatedAt());
                 dto.setStatus(booking.getStatus());
                 dto.setCustomerEmail(booking.getCustomerEmail());
-                dto.setCustomerId(booking.getCustomerId());
-//                dto.setPaymentRequested(false);
-//                dto.setPaymentReceived(false);
-                // Check if BOM exists and set hasBom
                 boolean hasBom = billOfMaterialRepository.findByBookingId(booking.getId()).isPresent();
                 logger.debug("Booking ID: {}, hasBom: {}", booking.getId(), hasBom);
                 dto.setHasBom(hasBom);
@@ -169,13 +166,13 @@ public class DashboardController {
             dashboardData.setDueCount(vehiclesDue.size());
             dashboardData.setServicingCount(vehiclesUnderService.size());
             dashboardData.setCompletedCount(vehiclesCompleted.size());
-            dashboardData.setAdvisorRequestsCount(0); // Not implemented in this code
+            dashboardData.setAdvisorRequestsCount(0); // Not implemented
             dashboardData.setAssignedCount(vehiclesAssigned.size());
             dashboardData.setProfileName("Admin User");
             dashboardData.setVehiclesDue(vehiclesDue);
             dashboardData.setVehiclesUnderService(vehiclesUnderService);
             dashboardData.setVehiclesCompleted(vehiclesCompleted);
-            dashboardData.setAdvisorRequests(new ArrayList<>()); // Not implemented in this code
+            dashboardData.setAdvisorRequests(new ArrayList<>());
             dashboardData.setVehiclesAssigned(vehiclesAssigned);
 
             logger.info("Admin dashboard data prepared successfully");

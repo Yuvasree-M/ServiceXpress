@@ -2,7 +2,6 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-
 </head>
 <body>
     <th:block th:fragment="navbar">
@@ -25,7 +24,7 @@
                                   th:text="${session.username != null ? session.username : 'Admin'}">Admin</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li><a class="dropdown-item" th:href="@{/history}">History</a></li>
+                            <li><a class="dropdown-item" th:href="@{/history}">Service History</a></li>
                             <li><a class="dropdown-item" th:href="@{/admin/profile}">Profile</a></li>
                             <li><a class="dropdown-item text-danger" th:href="@{/admin/logout}">Logout</a></li>
                         </ul>
@@ -69,21 +68,11 @@
         <!-- JavaScript to dynamically set the active nav link -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // Get the current URL path (e.g., "/service-package")
                 const currentPath = window.location.pathname;
-
-                // Get all nav links
                 const navLinks = document.querySelectorAll('.nav-link');
-
-                // Loop through each nav link
                 navLinks.forEach(link => {
-                    // Get the href attribute of the link (Thymeleaf renders it as the resolved path)
                     const linkPath = link.getAttribute('href');
-
-                    // Remove the 'active' class from all links
                     link.classList.remove('active');
-
-                    // If the current path matches the link's href, add the 'active' class
                     if (currentPath === linkPath) {
                         link.classList.add('active');
                     }

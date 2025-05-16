@@ -1,3 +1,4 @@
+
 package com.backend.service;
 
 import com.backend.dto.*;
@@ -188,9 +189,9 @@ public class BookingRequestService {
     }
 
     public List<BookingResponseDTO> getCompletedBookings() {
-        logger.info("Fetching completed bookings");
-        List<BookingRequest> completedBookings = repository.findByStatusIgnoreCase("COMPLETED");
-        logger.info("Found {} completed bookings", completedBookings.size());
+        logger.info("Fetching completed and payment pending bookings");
+        List<BookingRequest> completedBookings = repository.findByStatusIn(Arrays.asList("COMPLETED", "COMPLETED_PENDING_PAYMENT"));
+        logger.info("Found {} completed or payment pending bookings", completedBookings.size());
         completedBookings.forEach(booking -> logger.info("Booking ID: {}, Status: {}", booking.getId(), booking.getStatus()));
         return mapToBookingResponseDTOs(completedBookings);
     }
@@ -413,7 +414,7 @@ public class BookingRequestService {
         List<VehicleCompletedDTO> vehiclesCompleted = completedBookings.stream().map(booking -> {
             VehicleCompletedDTO dto = new VehicleCompletedDTO();
             dto.setId(booking.getId());
-            dto.setCustomerId(booking.getCustomerId()); // Add customerId
+            dto.setCustomerId(booking.getCustomerId() != null ? booking.getCustomerId() : 0L); // Prevent null
             dto.setOwnerName(booking.getCustomerName());
             dto.setVehicleType(booking.getVehicleType());
             dto.setVehicleModel(booking.getVehicleModel());
@@ -755,5 +756,46 @@ public class BookingRequestService {
 
         logger.info("Successfully fetched BOM for bookingId: {}", bookingId);
         return bomDTO;
+    }
+    
+
+
+    // New method to fetch all service histories
+    public List<ServiceHistory> getAllServiceHistory() {
+        logger.info("Fetching all service histories");
+        List<BookingRequest> bookings = repository.findByStatus("COMPLETED_PAID");
+        logger.info("Found {} completed bookings", bookings.size());
+
+        List<ServiceHistory> serviceHistory = new ArrayList<>();
+
+        for (BookingRequest booking : bookings) {
+            if (booking.getTransactionId() == null) {
+                continue; // Skip bookings without transaction ID
+            }
+
+            String vehicleTypeName = vehicleTypeRepository.findById(booking.getVehicleTypeId())
+                    .map(VehicleType::getName).orElse("Unknown");
+            String vehicleModelName = vehicleModelRepository.findById(booking.getVehicleModelId())
+                    .map(VehicleModel::getModelName).orElse("Unknown");
+            String serviceCenterName = serviceCenterRepository.findById(booking.getServiceCenterId())
+                    .map(ServiceCenter::getCenterName).orElse("Unknown");
+            Double cost = billOfMaterialRepository.findByBookingId(booking.getId())
+                    .map(BillOfMaterial::getTotal).orElse(0.0);
+
+            ServiceHistory history = new ServiceHistory();
+            history.setId(booking.getId());
+            history.setDate(booking.getUpdatedAt().toString());
+            history.setServiceCenterName(serviceCenterName);
+            history.setVehicleTypeName(vehicleTypeName);
+            history.setVehicleModelName(vehicleModelName);
+            history.setWorkDone(booking.getServices());
+            history.setCost(cost);
+            history.setStatus("Completed");
+            history.setTransactionId(booking.getTransactionId());
+            serviceHistory.add(history);
+        }
+
+        logger.info("Returning {} service history entries", serviceHistory.size());
+        return serviceHistory;
     }
 }

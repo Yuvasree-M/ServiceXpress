@@ -1,21 +1,22 @@
-
 package com.backend.controller;
 
 import com.backend.model.BookingRequest;
 import com.backend.service.BookingRequestService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import com.razorpay.RazorpayException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import com.backend.dto.BillOfMaterialDTO;
+import com.backend.dto.CustomerDashboardDTO;
 import com.backend.dto.PaymentRequest;
 import com.backend.dto.PaymentResponse;
 import com.backend.dto.PaymentVerificationRequest;
+import com.backend.dto.ServiceHistory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.razorpay.RazorpayException;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:8082")
@@ -81,7 +82,7 @@ public class BookingRequestController {
         bookingService.sendBill(id);
         return ResponseEntity.ok("Bill sent successfully");
     }
-    
+
     @PostMapping("/start/{id}")
     public ResponseEntity<BookingRequest> startService(@PathVariable Long id) {
         try {
@@ -105,7 +106,7 @@ public class BookingRequestController {
             return ResponseEntity.status(500).body(null);
         }
     }
-    
+
     @PostMapping("/create-payment/{bookingId}")
     public ResponseEntity<PaymentResponse> createPayment(@PathVariable Long bookingId, @RequestBody PaymentRequest request) throws RazorpayException {
         PaymentResponse response = bookingService.createPayment(bookingId, request);
@@ -116,5 +117,15 @@ public class BookingRequestController {
     public ResponseEntity<String> verifyPayment(@RequestBody PaymentVerificationRequest request) throws RazorpayException {
         bookingService.verifyPayment(request);
         return ResponseEntity.ok("Payment verified successfully");
+    }
+
+    @GetMapping("/history/all")
+    public ResponseEntity<?> getAllServiceHistory() {
+        try {
+            List<ServiceHistory> allServiceHistory = bookingService.getAllServiceHistory();
+            return ResponseEntity.ok(allServiceHistory);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch all service history: " + e.getMessage()));
+        }
     }
 }

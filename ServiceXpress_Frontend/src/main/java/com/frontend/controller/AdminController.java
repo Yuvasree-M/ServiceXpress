@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -33,6 +34,7 @@ public class AdminController {
     public AdminController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
+   
 
     @GetMapping("/dashboard/admin")
     public String showDashboard(Model model, HttpSession session) {
@@ -62,6 +64,45 @@ public class AdminController {
         }
         return "admin-dashboard";
     }
+    
+
+    @GetMapping("/history")
+    public String showServiceHistory(Model model, HttpSession session) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            logger.warn("No authentication token found in session. Redirecting to login.");
+            model.addAttribute("error", "No authentication token found. Please log in.");
+            return "redirect:/login";
+        }
+        try {
+            String url = backendApiUrl + "/bookings/history/all";
+            logger.info("Calling backend API: {}", url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+            ResponseEntity<ServiceHistory[]> response = restTemplate.exchange(url, HttpMethod.GET, request, ServiceHistory[].class);
+            logger.info("Backend API response status: {}", response.getStatusCode());
+            ServiceHistory[] serviceHistory = response.getBody();
+            if (serviceHistory == null || serviceHistory.length == 0) {
+                logger.warn("No service history data received from backend. Response body: {}", serviceHistory);
+                model.addAttribute("serviceHistory", Collections.emptyList());
+                model.addAttribute("error", "No service history data received from backend.");
+            } else {
+                logger.info("Service history data received: {}", Arrays.toString(serviceHistory));
+                model.addAttribute("serviceHistory", new ArrayList<>(Arrays.asList(serviceHistory)));
+            }
+        } catch (HttpClientErrorException e) {
+            logger.error("Failed to load service history: {}", e.getMessage(), e);
+            model.addAttribute("serviceHistory", Collections.emptyList());
+            model.addAttribute("error", "Failed to load service history: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error while loading service history: {}", e.getMessage(), e);
+            model.addAttribute("serviceHistory", Collections.emptyList());
+            model.addAttribute("error", "Unexpected error: " + e.getMessage());
+        }
+        return "history";
+    }
 
     @PostMapping("/dashboard/assign-advisor")
     @ResponseBody
@@ -88,6 +129,7 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + e.getMessage());
         }
     }
+    
     
     private List<ServiceItem> fetchInventoryList(String token) {
         String url = backendApiUrl + "/inventory";

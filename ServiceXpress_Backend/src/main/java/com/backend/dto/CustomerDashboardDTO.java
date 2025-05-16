@@ -1,6 +1,6 @@
 package com.backend.dto;
 
-import com.backend.model.ServiceHistory;
+import com.backend.dto.ServiceHistory;
 import com.backend.model.ServiceStatus;
 import lombok.Data;
 
