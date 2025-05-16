@@ -102,6 +102,7 @@ public class SecurityConfig {
                 .requestMatchers("/service-advisor/**").hasRole("SERVICE_ADVISOR") // Advisor web pages
                 .requestMatchers("/customer/**").hasRole("CUSTOMER") // Customer web pages
                 .requestMatchers("/api/vehicle-type/**").hasAnyRole("ADMIN", "CUSTOMER") // Vehicle type management
+                .requestMatchers("/api/customer/me").hasRole("CUSTOMER")
 
                 // Fallback rule for all other requests
                 .anyRequest().authenticated()

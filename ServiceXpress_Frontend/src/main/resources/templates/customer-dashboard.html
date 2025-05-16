@@ -27,16 +27,20 @@
                     <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/customer/services}">Services</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/customer/bookings}">Booking</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown">
-                            <span class="profile-badge">[[${customer.initials}]]</span>
-                            <span>[[${customer.name}]]</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" th:href="@{/customer/history}">Service History</a></li>
-                            <li><a class="dropdown-item" th:href="@{/customer/logout}">Logout</a></li>
-                        </ul>
-                    </li>
+                    <li class="nav-item dropdown" th:if="${customer != null}">
+    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="profile-badge" th:text="${customer.initials != null} ? ${customer.initials} : 'NA'">NA</span>
+        <span th:text="${customer.name != null} ? ${customer.name} : 'Guest'">Guest</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" th:href="@{/customer/history}">Service History</a></li>
+        <li><a class="dropdown-item" th:href="@{/customer/logout}">Logout</a></li>
+    </ul>
+</li>
+<li class="nav-item" th:if="${customer == null}">
+    <a class="nav-link" th:href="@{/login}">Login</a>
+</li>
+                    
                 </ul>
             </div>
         </div>
