@@ -134,11 +134,12 @@ public class DashboardController {
 
            
             List<BookingResponseDTO> completedBookings = bookingRequestService.getCompletedBookings();
-            logger.debug("Fetched {} completed bookings", completedBookings.size());
+            logger.debug("Fetched {} completed or payment pending bookings", completedBookings.size());
 
             List<VehicleCompletedDTO> vehiclesCompleted = completedBookings.stream().map(booking -> {
                 VehicleCompletedDTO dto = new VehicleCompletedDTO();
                 dto.setId(booking.getId());
+                dto.setCustomerId(booking.getCustomerId() != null ? booking.getCustomerId() : 0L); 
                 dto.setOwnerName(booking.getCustomerName());
                 dto.setVehicleType(booking.getVehicleType());
                 dto.setVehicleModel(booking.getVehicleModel());
@@ -154,8 +155,6 @@ public class DashboardController {
                 dto.setCompletedDate(booking.getUpdatedAt());
                 dto.setStatus(booking.getStatus());
                 dto.setCustomerEmail(booking.getCustomerEmail());
-                dto.setCustomerId(booking.getCustomerId());
-
                 boolean hasBom = billOfMaterialRepository.findByBookingId(booking.getId()).isPresent();
                 logger.debug("Booking ID: {}, hasBom: {}", booking.getId(), hasBom);
                 dto.setHasBom(hasBom);
@@ -167,13 +166,13 @@ public class DashboardController {
             dashboardData.setDueCount(vehiclesDue.size());
             dashboardData.setServicingCount(vehiclesUnderService.size());
             dashboardData.setCompletedCount(vehiclesCompleted.size());
-            dashboardData.setAdvisorRequestsCount(0); // Not implemented in this code
+            dashboardData.setAdvisorRequestsCount(0);
             dashboardData.setAssignedCount(vehiclesAssigned.size());
             dashboardData.setProfileName("Admin User");
             dashboardData.setVehiclesDue(vehiclesDue);
             dashboardData.setVehiclesUnderService(vehiclesUnderService);
             dashboardData.setVehiclesCompleted(vehiclesCompleted);
-            dashboardData.setAdvisorRequests(new ArrayList<>()); // Not implemented in this code
+            dashboardData.setAdvisorRequests(new ArrayList<>());
             dashboardData.setVehiclesAssigned(vehiclesAssigned);
 
             logger.info("Admin dashboard data prepared successfully");
