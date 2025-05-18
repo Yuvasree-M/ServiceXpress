@@ -1,5 +1,6 @@
 package com.frontend.controller;
 
+import com.frontend.model.BookingResponseDTO;
 import com.frontend.model.VehicleAssigned;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -135,5 +136,89 @@ public class AdvisorController {
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
+    }
+    
+    @GetMapping("/service-advisor/completed")
+    public String showCompletedBookings(@RequestParam(required = false) Long advisorId,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "10") int size,
+                                       Model model, HttpSession session) {
+        logger.info("Accessing completed bookings for advisorId: {}", advisorId);
+
+        String token = (String) session.getAttribute("token");
+        String username = (String) session.getAttribute("username");
+        if (token == null) {
+            logger.warn("No authentication token found in session. Redirecting to login.");
+            model.addAttribute("error", "No authentication token found. Please log in.");
+            return "redirect:/login";
+        }
+
+        if (advisorId == null) {
+            logger.warn("Advisor ID is null. Setting error message.");
+            model.addAttribute("error", "Advisor ID is required.");
+            model.addAttribute("completedBookings", Collections.emptyList());
+            model.addAttribute("advisorId", 0L);
+            model.addAttribute("token", token);
+            model.addAttribute("username", username != null ? username : "Advisor");
+            return "advisor-completed";
+        }
+
+        List<BookingResponseDTO> completedBookings = Collections.emptyList();
+        try {
+            String url = backendApiUrl + "/bookings/completed/advisor/" + advisorId;
+            logger.debug("Calling backend API: {}", url);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            ResponseEntity<BookingResponseDTO[]> response = restTemplate.exchange(
+                    url, HttpMethod.GET, request, BookingResponseDTO[].class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                completedBookings = response.getBody() != null ? Arrays.asList(response.getBody()) : Collections.emptyList();
+                logger.info("Fetched {} completed bookings for advisorId: {}", completedBookings.size(), advisorId);
+                if (completedBookings.isEmpty()) {
+                    model.addAttribute("error", "No completed bookings found for this advisor.");
+                }
+            } else {
+                logger.error("Backend API returned unexpected status: {}", response.getStatusCode());
+                model.addAttribute("error", "Failed to load completed bookings: HTTP " + response.getStatusCode());
+            }
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error fetching completed bookings for advisorId {}: Status {}, Response: {}",
+                    advisorId, e.getStatusCode(), e.getResponseBodyAsString());
+            String errorMessage;
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                errorMessage = "Unauthorized: Invalid or expired token. Please log in again.";
+            } else if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                errorMessage = "Access denied: You do not have permission to view these bookings.";
+            } else if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                errorMessage = "No completed bookings found for advisor ID: " + advisorId;
+            } else {
+                errorMessage = "Failed to load completed bookings: " + e.getResponseBodyAsString();
+            }
+            model.addAttribute("error", errorMessage);
+        } catch (Exception e) {
+            logger.error("Failed to load completed bookings for advisorId {}: {}", advisorId, e.getMessage(), e);
+            model.addAttribute("error", "Failed to load completed bookings: " + e.getMessage());
+        }
+
+       
+        int totalItems = completedBookings.size();
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+        int start = page * size;
+        int end = Math.min(start + size, totalItems);
+        List<BookingResponseDTO> pagedBookings = start < totalItems ? completedBookings.subList(start, end) : Collections.emptyList();
+
+        model.addAttribute("completedBookings", pagedBookings);
+        model.addAttribute("advisorId", advisorId);
+        model.addAttribute("token", token);
+        model.addAttribute("username", username != null ? username : "Advisor");
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        logger.debug("Completed bookings set in model: {}", pagedBookings);
+        return "advisor-completed";
     }
 }

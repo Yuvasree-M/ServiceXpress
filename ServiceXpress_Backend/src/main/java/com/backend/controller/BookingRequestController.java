@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import com.backend.dto.BillOfMaterialDTO;
+import com.backend.dto.BookingResponseDTO;
 import com.backend.dto.PaymentRequest;
 import com.backend.dto.PaymentResponse;
 import com.backend.dto.PaymentVerificationRequest;
@@ -127,5 +128,11 @@ public class BookingRequestController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch all service history: " + e.getMessage()));
         }
+    }
+    
+    @GetMapping("/completed/advisor/{advisorId}")
+    public ResponseEntity<List<BookingResponseDTO>> getCompletedBookingsForAdvisor(@PathVariable Long advisorId) {
+        List<BookingResponseDTO> completedBookings = bookingService.getCompletedBookingsForAdvisor(advisorId);
+        return completedBookings.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(completedBookings);
     }
 }

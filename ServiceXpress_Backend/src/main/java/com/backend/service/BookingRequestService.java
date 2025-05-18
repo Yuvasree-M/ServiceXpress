@@ -337,7 +337,7 @@ public class BookingRequestService {
         logger.info("Fetching admin dashboard data");
         DashboardDataDTO dashboardData = new DashboardDataDTO();
 
-        // Fetch pending bookings (Vehicles Due)
+       
         List<BookingResponseDTO> pendingBookings = getPendingBookings();
         List<VehicleDueDTO> vehiclesDue = pendingBookings.stream().map(booking -> {
             VehicleDueDTO dto = new VehicleDueDTO();
@@ -366,7 +366,7 @@ public class BookingRequestService {
         dashboardData.setVehiclesDue(vehiclesDue);
         dashboardData.setDueCount(vehiclesDue.size());
 
-        // Fetch assigned bookings (Vehicles Assigned)
+       
         List<BookingResponseDTO> assignedBookings = getAssignedBookings();
         List<VehicleAssignedDTO> vehiclesAssigned = assignedBookings.stream().map(booking -> {
             VehicleAssignedDTO dto = new VehicleAssignedDTO();
@@ -389,7 +389,7 @@ public class BookingRequestService {
         dashboardData.setVehiclesAssigned(vehiclesAssigned);
         dashboardData.setAssignedCount(vehiclesAssigned.size());
 
-        // Fetch in-progress bookings (Vehicles Under Service)
+       
         List<BookingResponseDTO> inProgressBookings = getInProgressBookings();
         List<VehicleUnderServiceDTO> vehiclesUnderService = inProgressBookings.stream().map(booking -> {
             VehicleUnderServiceDTO dto = new VehicleUnderServiceDTO();
@@ -412,7 +412,7 @@ public class BookingRequestService {
         dashboardData.setVehiclesUnderService(vehiclesUnderService);
         dashboardData.setServicingCount(vehiclesUnderService.size());
 
-        // Fetch completed bookings (Vehicles Completed)
+        
         List<BookingResponseDTO> completedBookings = getCompletedBookings();
         List<VehicleCompletedDTO> vehiclesCompleted = completedBookings.stream().map(booking -> {
             VehicleCompletedDTO dto = new VehicleCompletedDTO();
@@ -447,7 +447,7 @@ public class BookingRequestService {
         dashboardData.setVehiclesCompleted(vehiclesCompleted);
         dashboardData.setCompletedCount(vehiclesCompleted.size());
 
-        // Fetch advisor requests
+        
         List<AdvisorRequestDTO> advisorRequests = inProgressBookings.stream()
             .filter(booking -> booking.getStatus().equals("IN_PROGRESS"))
             .map(booking -> {
@@ -726,14 +726,15 @@ public class BookingRequestService {
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
 
-        if (!booking.getCustomerId().equals(customerId)) {
+        // Skip customerId check if customerId is 0 (indicating advisor access)
+        if (customerId != 0 && !booking.getCustomerId().equals(customerId)) {
             logger.warn("Customer ID {} does not match booking ID {} owner", customerId, bookingId);
             throw new IllegalArgumentException("Booking does not belong to customer: " + customerId);
         }
 
-        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT").contains(booking.getStatus())) {
-            logger.warn("Booking ID {} is not in COMPLETED or COMPLETED_PENDING_PAYMENT status, current status: {}", bookingId, booking.getStatus());
-            throw new IllegalArgumentException("Booking must be in COMPLETED or COMPLETED_PENDING_PAYMENT status");
+        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT", "COMPLETED_PAID").contains(booking.getStatus())) {
+            logger.warn("Booking ID {} is not in COMPLETED, COMPLETED_PENDING_PAYMENT, or COMPLETED_PAID status, current status: {}", bookingId, booking.getStatus());
+            throw new IllegalArgumentException("Booking must be in COMPLETED, COMPLETED_PENDING_PAYMENT, or COMPLETED_PAID status");
         }
 
         BillOfMaterial bom = billOfMaterialRepository.findByBookingId(bookingId)
@@ -760,10 +761,7 @@ public class BookingRequestService {
         logger.info("Successfully fetched BOM for bookingId: {}", bookingId);
         return bomDTO;
     }
-    
-
-
-    // New method to fetch all service histories
+  
     public List<ServiceHistory> getAllServiceHistory() {
         logger.info("Fetching all service histories");
         List<BookingRequest> bookings = repository.findByStatus("COMPLETED_PAID");
@@ -804,4 +802,32 @@ public class BookingRequestService {
         logger.info("Returning {} service history entries", serviceHistory.size());
         return serviceHistory;
     }
+    
+    public List<BookingResponseDTO> getCompletedBookingsForAdvisor(Long advisorId) {
+        logger.info("Fetching completed bookings for advisorId: {}", advisorId);
+        List<BookingAdvisorMapping> mappings = bookingAdvisorMappingRepository.findByAdvisorId(advisorId);
+        if (mappings == null || mappings.isEmpty()) {
+            logger.debug("No bookings assigned to advisorId: {}", advisorId);
+            return new ArrayList<>();
+        }
+
+        List<Long> bookingIds = mappings.stream()
+                .map(BookingAdvisorMapping::getBookingId)
+                .collect(Collectors.toList());
+
+        if (bookingIds.isEmpty()) {
+            logger.debug("No booking IDs found for advisorId: {}", advisorId);
+            return new ArrayList<>();
+        }
+
+        List<BookingRequest> completedBookings = repository.findByIdInAndStatusIn(
+            bookingIds, Arrays.asList("COMPLETED", "COMPLETED_PENDING_PAYMENT", "COMPLETED_PAID"));
+        if (completedBookings == null || completedBookings.isEmpty()) {
+            logger.debug("No completed bookings found for advisorId: {}", advisorId);
+            return new ArrayList<>();
+        }
+
+        return mapToBookingResponseDTOs(completedBookings);
+    }
+    
 }

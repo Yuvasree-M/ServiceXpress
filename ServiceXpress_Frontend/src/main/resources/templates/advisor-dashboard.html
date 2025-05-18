@@ -227,8 +227,8 @@
                         <a class="nav-link" href="/service-advisor/dashboard" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''})}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/service-advisor/completed">Completed</a>
-                    </li>
+    <a class="nav-link" th:href="@{'/service-advisor/completed?advisorId=' + ${advisorId}}">Completed</a>
+</li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
