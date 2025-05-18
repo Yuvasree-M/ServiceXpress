@@ -16,6 +16,7 @@ import com.backend.dto.BillOfMaterialDTO;
 import com.backend.dto.PaymentRequest;
 import com.backend.dto.PaymentResponse;
 import com.backend.dto.PaymentVerificationRequest;
+import com.backend.dto.ServiceHistory;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:8082")
@@ -116,5 +117,15 @@ public class BookingRequestController {
     public ResponseEntity<String> verifyPayment(@RequestBody PaymentVerificationRequest request) throws RazorpayException {
         bookingService.verifyPayment(request);
         return ResponseEntity.ok("Payment verified successfully");
+    }
+    
+    @GetMapping("/history/all")
+    public ResponseEntity<?> getAllServiceHistory() {
+        try {
+            List<ServiceHistory> allServiceHistory = bookingService.getAllServiceHistory();
+            return ResponseEntity.ok(allServiceHistory);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to fetch all service history: " + e.getMessage()));
+        }
     }
 }

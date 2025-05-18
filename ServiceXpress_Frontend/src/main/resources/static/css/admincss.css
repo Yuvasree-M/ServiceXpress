@@ -48,7 +48,7 @@ body {
 }
 
 .nav-link {
-    font-size: 1rem;
+    font-size: 2rem;
     font-weight: 500;
     transition: var(--transition);
     position: relative;
@@ -74,16 +74,19 @@ body {
 
 /* Sidebar Styling */
 .sidebar {
-    background-color: var(--white);
-    border-right: 1px solid var(--light-gray);
-    padding-top: 20px;
+        background-color: var(--white);
+            border-right: 1px solid var(--light-gray);
+            padding-top: 20px;
+            width: 250px;
+            flex-shrink: 0;
+            overflow-y: auto;
 }
 
 .sidebar .nav-link {
-    color: var(--secondary-color) !important;
-    padding: 10px 20px;
-    font-weight: 500;
-    font-size: 1.2rem;
+     color: var(--secondary-color) !important;
+            padding: 10px 20px;
+            font-weight: 500;
+            font-size: 1.2rem;
 }
 
 .sidebar .nav-link:hover,

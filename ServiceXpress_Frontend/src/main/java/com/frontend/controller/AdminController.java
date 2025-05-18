@@ -15,6 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -63,6 +67,56 @@ public class AdminController {
         return "admin-dashboard";
     }
 
+    @GetMapping("/history")
+    public String showServiceHistory(Model model, HttpSession session) {
+        String token = (String) session.getAttribute("token");
+        if (token == null) {
+            logger.warn("No authentication token found in session. Redirecting to login.");
+            model.addAttribute("error", "No authentication token found. Please log in.");
+            return "redirect:/login";
+        }
+        try {
+            String url = backendApiUrl + "/bookings/history/all";
+            logger.info("Calling backend API: {}", url);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+            ResponseEntity<ServiceHistory[]> response = restTemplate.exchange(url, HttpMethod.GET, request, ServiceHistory[].class);
+            logger.info("Backend API response status: {}", response.getStatusCode());
+            ServiceHistory[] serviceHistory = response.getBody();
+            logger.info("Raw API response body: {}", serviceHistory != null ? Arrays.toString(serviceHistory) : "null");
+            if (serviceHistory == null || serviceHistory.length == 0) {
+                logger.warn("No service history data received from backend. Response body: {}", serviceHistory);
+                model.addAttribute("serviceHistory", Collections.emptyList());
+                model.addAttribute("error", "No service history data received from backend.");
+            } else {
+                logger.info("Service history data received: {}", Arrays.toString(serviceHistory));
+                List<ServiceHistory> serviceHistoryList = new ArrayList<>(Arrays.asList(serviceHistory));
+                logger.info("Converted service history list size: {}", serviceHistoryList.size());
+                model.addAttribute("serviceHistory", serviceHistoryList);
+            }
+            // Add current date in IST to the model
+            ZoneId istZone = ZoneId.of("Asia/Kolkata");
+            LocalDateTime currentDateTime = LocalDateTime.now(istZone);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a 'IST on' MMMM dd, yyyy");
+            String formattedDateTime = currentDateTime.format(formatter);
+            model.addAttribute("currentDateTime", formattedDateTime);
+            logger.info("Model attributes set - serviceHistory size: {}, currentDateTime: {}", 
+                model.asMap().get("serviceHistory") != null ? ((List<?>) model.asMap().get("serviceHistory")).size() : 0, 
+                formattedDateTime);
+        } catch (HttpClientErrorException e) {
+            logger.error("Failed to load service history: {}", e.getMessage(), e);
+            model.addAttribute("serviceHistory", Collections.emptyList());
+            model.addAttribute("error", "Failed to load service history: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error while loading service history: {}", e.getMessage(), e);
+            model.addAttribute("serviceHistory", Collections.emptyList());
+            model.addAttribute("error", "Unexpected error: " + e.getMessage());
+        }
+        return "history";
+    }
+    
     @PostMapping("/dashboard/assign-advisor")
     @ResponseBody
     public ResponseEntity<String> assignAdvisor(@RequestBody Long advisorId, @RequestParam Long bookingId, HttpSession session) {
