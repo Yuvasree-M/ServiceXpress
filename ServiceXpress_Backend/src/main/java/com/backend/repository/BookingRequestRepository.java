@@ -13,4 +13,5 @@ public interface BookingRequestRepository extends JpaRepository<BookingRequest, 
     List<BookingRequest> findByStatusIgnoreCase(String status);
     List<BookingRequest> findByIdInAndStatus(List<Long> ids, String status);
     List<BookingRequest> findByStatusIn(List<String> statuses);
+    List<BookingRequest> findByIdInAndStatusIn(List<Long> ids, List<String> statuses);
 }
