@@ -1,8 +1,8 @@
 package com.backend.dto;
 
+import lombok.Data;
+
+@Data
 public class OtpRequest {
     private String phoneNumber;
-
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 }

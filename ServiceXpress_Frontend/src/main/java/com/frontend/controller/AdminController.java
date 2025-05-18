@@ -885,11 +885,16 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             HttpEntity<String> request = new HttpEntity<>(headers);
 
+            logger.info("Fetching vehicle model with ID: {}", id);
             ResponseEntity<VehicleModel> response = restTemplate.exchange(
-                    vehicleModelUrl() + "/" + id, HttpMethod.GET, request, VehicleModel.class);
+                    vehicleModelUrl() + "/model/" + id, HttpMethod.GET, request, VehicleModel.class);
             VehicleModel dto = response.getBody();
             if (dto == null) {
-                throw new RuntimeException("Vehicle model not found");
+                model.addAttribute("error", "Vehicle model with ID " + id + " not found.");
+                model.addAttribute("formMode", "none");
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("vehicleModels", fetchVehicleModels(token));
+                return "vehicle-model";
             }
 
             VehicleModel vehicleModel = new VehicleModel();
@@ -904,8 +909,18 @@ public class AdminController {
             model.addAttribute("formMode", "edit");
             model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
             model.addAttribute("vehicleModels", fetchVehicleModels(token));
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error fetching vehicle model with ID {}: Status {}, Response: {}", id, e.getStatusCode(), e.getResponseBodyAsString());
+            model.addAttribute("error", "Vehicle model with ID " + id + " not found.");
+            model.addAttribute("formMode", "none");
+            try {
+                model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                model.addAttribute("vehicleModels", fetchVehicleModels(token));
+            } catch (Exception ex) {
+                model.addAttribute("error", model.asMap().getOrDefault("error", "") + "; Failed to fetch data: " + ex.getMessage());
+            }
         } catch (Exception e) {
-            logger.error("Error fetching vehicle model for edit: {}", e.getMessage(), e);
+            logger.error("Error fetching vehicle model with ID {}: {}", id, e.getMessage(), e);
             model.addAttribute("error", "Failed to fetch vehicle model: " + e.getMessage());
             model.addAttribute("formMode", "none");
             try {
@@ -1069,28 +1084,6 @@ public class AdminController {
         }
     }
 
-//    private List<VehicleType> fetchVehicleTypes(String token) {
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setBearerAuth(token);
-//        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-//        HttpEntity<String> request = new HttpEntity<>(headers);
-//
-//        try {
-//            ResponseEntity<VehicleType[]> response = restTemplate.exchange(
-//                    backendApiUrl + "/vehicle-types", HttpMethod.GET, request, VehicleType[].class);
-//            if (response.getBody() == null) {
-//                return List.of();
-//            }
-//            return Arrays.asList(response.getBody());
-//        } catch (HttpClientErrorException e) {
-//            logger.error("HTTP error fetching vehicle types: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-//            throw new RuntimeException("Failed to fetch vehicle types: " + e.getResponseBodyAsString(), e);
-//        } catch (Exception e) {
-//            logger.error("Error fetching vehicle types: {}", e.getMessage(), e);
-//            throw new RuntimeException("Failed to fetch vehicle types: " + e.getMessage(), e);
-//        }
-//    }
-
     @GetMapping("/service-package")
     public String listServicePackages(Model model, HttpSession session) {
         String token = (String) session.getAttribute("token");
@@ -1233,11 +1226,20 @@ public class AdminController {
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             HttpEntity<String> request = new HttpEntity<>(headers);
 
+            logger.info("Fetching service package with ID: {}", id);
             ResponseEntity<ServicePackage> response = restTemplate.exchange(
-                    servicePackageUrl() + "/" + id, HttpMethod.GET, request, ServicePackage.class);
+                    servicePackageUrl() + "/package/" + id, HttpMethod.GET, request, ServicePackage.class);
             ServicePackage dto = response.getBody();
             if (dto == null) {
-                throw new RuntimeException("Service package not found");
+                model.addAttribute("error", "Service package with ID " + id + " not found.");
+                model.addAttribute("formMode", "none");
+                try {
+                    model.addAttribute("vehicleTypes", fetchVehicleTypes(token));
+                    model.addAttribute("servicePackages", fetchServicePackages(token));
+                } catch (Exception ex) {
+                    model.addAttribute("error", "Failed to fetch data: " + ex.getMessage());
+                }
+                return "service-package";
             }
 
             model.addAttribute("servicePackage", dto);

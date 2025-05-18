@@ -28,7 +28,7 @@ public class BillOfMaterial {
     private String serviceName;
 
     @Column(columnDefinition = "TEXT")
-    private String materials; // Stored as JSON string
+    private String materials;
 
     @Column
     private Double total;

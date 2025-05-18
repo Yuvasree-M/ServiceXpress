@@ -1,6 +1,7 @@
 package com.backend.service;
 
 import com.backend.model.Advisor;
+import com.backend.model.Customer;
 import com.backend.repository.AdvisorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,25 +16,25 @@ public class AdvisorService {
     @Autowired
     private AdvisorRepository advisorRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    
     @Autowired
     public AdvisorService(BCryptPasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
     public List<Advisor> getAllAdvisors() {
-        return advisorRepository.findAllActive(); // Fetch only active advisors
+        return advisorRepository.findAllActive(); 
     }
 
     public Optional<Advisor> getAdvisorById(Long id) {
         return advisorRepository.findById(id)
-                .filter(Advisor::getActive); // Ensure the advisor is active
+                .filter(Advisor::getActive); 
     }
 
     public Advisor createAdvisor(Advisor advisor) {
-        // Encrypt the password before saving
         if (advisor.getPassword() != null && !isPasswordEncrypted(advisor.getPassword())) {
             advisor.setPassword(passwordEncoder.encode(advisor.getPassword()));
         }
-        advisor.setActive(true); // Ensure new advisors are active
+        advisor.setActive(true); 
         return advisorRepository.save(advisor);
     }
 
@@ -44,7 +45,6 @@ public class AdvisorService {
             advisor.setUsername(updatedAdvisor.getUsername());
             advisor.setEmail(updatedAdvisor.getEmail());
             advisor.setPhoneNumber(updatedAdvisor.getPhoneNumber());
-            // Only encrypt the password if a new one is provided and it's not already encrypted
             if (updatedAdvisor.getPassword() != null && !updatedAdvisor.getPassword().isEmpty() 
                     && !isPasswordEncrypted(updatedAdvisor.getPassword())) {
                 advisor.setPassword(passwordEncoder.encode(updatedAdvisor.getPassword()));
@@ -57,13 +57,20 @@ public class AdvisorService {
 
     public boolean softDeleteAdvisor(Long id) {
         return advisorRepository.findById(id).map(advisor -> {
-            advisor.setActive(false); // Mark as inactive instead of deleting
+            advisor.setActive(false);
             advisorRepository.save(advisor);
             return true;
         }).orElse(false);
     }
 
-    // Helper method to check if a password is already encrypted (BCrypt passwords start with $2a$, $2b$, or $2y$)
+    public boolean ReactiveAdvisor(Long id) {
+        return advisorRepository.findById(id).map(advisor -> {
+            advisor.setActive(true);
+            advisorRepository.save(advisor);
+            return true;
+        }).orElse(false);
+    }
+
     private boolean isPasswordEncrypted(String password) {
         return password != null && password.matches("^\\$2[aby]\\$.*");
     }

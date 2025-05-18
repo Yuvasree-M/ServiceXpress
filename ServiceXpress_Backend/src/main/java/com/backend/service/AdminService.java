@@ -1,6 +1,6 @@
 package com.backend.service;
 
-import com.backend.enums.ServiceStatus;
+
 import com.backend.model.*;
 import com.backend.repository.*;
 import org.slf4j.Logger;
@@ -20,30 +20,13 @@ public class AdminService {
     private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[1-9]\\d{9,14}$");
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$");
-
-    @Autowired
-    private VehicleTypeRepository vehicleTypeRepository;
-    
-    @Autowired
-    private VehicleModelRepository vehicleModelRepository;
-    
-    @Autowired
-    private ServicePackageRepository servicePackageRepository;
     
     @Autowired
     private AdminRepository adminRepository;
     
     @Autowired
-    private CustomerRepository customerRepository;
-    
-    @Autowired
-    private AdvisorRepository advisorRepository;
-    
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JavaMailSender mailSender;
     
     public Admin getAdminByUsername(String username) {
         logger.debug("Fetching admin with username: {}", username);
@@ -99,17 +82,5 @@ public class AdminService {
             throw new RuntimeException("Failed to save updated profile: " + e.getMessage());
         }
     }
-
-    public ServicePackage saveServicePackage(ServicePackage servicePackage) {
-        logger.debug("Saving service package: {}", servicePackage.getId());
-        return servicePackageRepository.save(servicePackage);
-    }
-  
-    
-    public void deleteServicePackage(Integer id) {
-        logger.debug("Deleting service package: {}", id);
-        servicePackageRepository.deleteById(id);
-    }
-
    
 }

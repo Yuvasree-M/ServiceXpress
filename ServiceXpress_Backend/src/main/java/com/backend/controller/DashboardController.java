@@ -58,7 +58,7 @@ public class DashboardController {
     public ResponseEntity<DashboardDataDTO> getAdminDashboardData() {
         logger.info("Fetching admin dashboard data");
         try {
-            // Fetch pending bookings (Vehicles Due)
+            
             List<BookingResponseDTO> pendingBookings = bookingRequestService.getPendingBookings();
             logger.debug("Fetched {} pending bookings", pendingBookings.size());
 
@@ -86,7 +86,7 @@ public class DashboardController {
                 return vehicleDue;
             }).collect(Collectors.toList());
 
-            // Fetch in-progress bookings (Vehicles Under Service)
+           
             List<BookingResponseDTO> inProgressBookings = bookingRequestService.getInProgressBookings();
             logger.debug("Fetched {} in-progress bookings", inProgressBookings.size());
 
@@ -109,7 +109,7 @@ public class DashboardController {
                 return dto;
             }).collect(Collectors.toList());
 
-            // Fetch assigned bookings (Vehicles Assigned)
+           
             List<BookingResponseDTO> assignedBookings = bookingRequestService.getAssignedBookings();
             logger.debug("Fetched {} assigned bookings", assignedBookings.size());
 
@@ -132,7 +132,7 @@ public class DashboardController {
                 return dto;
             }).collect(Collectors.toList());
 
-            // Fetch completed bookings (Vehicles Completed)
+           
             List<BookingResponseDTO> completedBookings = bookingRequestService.getCompletedBookings();
             logger.debug("Fetched {} completed bookings", completedBookings.size());
 
@@ -155,16 +155,14 @@ public class DashboardController {
                 dto.setStatus(booking.getStatus());
                 dto.setCustomerEmail(booking.getCustomerEmail());
                 dto.setCustomerId(booking.getCustomerId());
-//                dto.setPaymentRequested(false);
-//                dto.setPaymentReceived(false);
-                // Check if BOM exists and set hasBom
+
                 boolean hasBom = billOfMaterialRepository.findByBookingId(booking.getId()).isPresent();
                 logger.debug("Booking ID: {}, hasBom: {}", booking.getId(), hasBom);
                 dto.setHasBom(hasBom);
                 return dto;
             }).collect(Collectors.toList());
 
-            // Populate DashboardDataDTO
+
             DashboardDataDTO dashboardData = new DashboardDataDTO();
             dashboardData.setDueCount(vehiclesDue.size());
             dashboardData.setServicingCount(vehiclesUnderService.size());
@@ -186,39 +184,4 @@ public class DashboardController {
         }
     }
 
-    @GetMapping("/advisor")
-    public ResponseEntity<List<BookingResponseDTO>> getAdvisorBookings(@RequestParam Long advisorId) {
-        logger.info("Fetching bookings for advisorId: {}", advisorId);
-        try {
-            if (advisorId == null) {
-                logger.warn("Advisor ID is null");
-                return ResponseEntity.badRequest().body(Collections.emptyList());
-            }
-
-            List<BookingResponseDTO> advisorBookings = bookingRequestService.getAssignedBookingsForAdvisor(advisorId);
-            logger.info("Fetched {} bookings for advisorId: {}", advisorBookings.size(), advisorId);
-            return ResponseEntity.ok(advisorBookings);
-        } catch (Exception e) {
-            logger.error("Error fetching advisor bookings for advisorId {}: {}", advisorId, e.getMessage(), e);
-            return ResponseEntity.status(500).body(Collections.emptyList());
-        }
-    }
-
-    @PostMapping("/start-service")
-    public ResponseEntity<BookingRequest> startService(@RequestParam Long bookingId) {
-        logger.info("Starting service for bookingId: {}", bookingId);
-        try {
-            if (bookingId == null) {
-                logger.warn("Booking ID is null");
-                return ResponseEntity.badRequest().build();
-            }
-
-            BookingRequest updatedBooking = bookingRequestService.startService(bookingId);
-            logger.info("Service started successfully for bookingId: {}", bookingId);
-            return ResponseEntity.ok(updatedBooking);
-        } catch (Exception e) {
-            logger.error("Error starting service for bookingId {}: {}", bookingId, e.getMessage(), e);
-            return ResponseEntity.status(500).build();
-        }
-    }
 }

@@ -124,31 +124,7 @@ public class SecurityConfig {
         return source;
     }
     
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return identifier -> {
-            return adminRepository.findByUsername(identifier)
-                .map(u -> org.springframework.security.core.userdetails.User
-                        .withUsername(u.getUsername())
-                        .password(u.getPassword())
-                        .roles(u.getRole().name())
-                        .build())
-                .or(() -> customerRepository.findByUsername(identifier)
-                    .map(u -> org.springframework.security.core.userdetails.User
-                        .withUsername(u.getUsername())
-                        .password(u.getPassword())
-                        .roles(u.getRole().name())
-                        .build()))
-                .or(() -> advisorRepository.findByUsername(identifier)
-                    .map(u -> org.springframework.security.core.userdetails.User
-                        .withUsername(u.getUsername())
-                        .password(u.getPassword())
-                        .roles(u.getRole().name())
-                        .build()))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
-        };
-    }
-
+    
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

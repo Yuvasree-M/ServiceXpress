@@ -5,6 +5,7 @@ import com.backend.dto.AuthResponse;
 import com.backend.dto.LoginRequest;
 import com.backend.dto.OtpRequest;
 import com.backend.dto.OtpVerificationRequest;
+import com.backend.dto.UserDetailsResponse;
 import com.backend.repository.AdvisorRepository;
 import com.backend.repository.CustomerRepository;
 import com.backend.service.OtpService;
@@ -186,23 +187,4 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
 
-    public static class UserDetailsResponse {
-        private Long customerId;
-        private String name;
-        private String email;
-        private String phoneNumber;
-        private Long advisorId;
-
-        // Getters and Setters
-        public Long getCustomerId() { return customerId; }
-        public void setCustomerId(Long customerId) { this.customerId = customerId; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPhoneNumber() { return phoneNumber; }
-        public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-        public Long getAdvisorId() { return advisorId; }
-        public void setAdvisorId(Long advisorId) { this.advisorId = advisorId; }
-    }
 }

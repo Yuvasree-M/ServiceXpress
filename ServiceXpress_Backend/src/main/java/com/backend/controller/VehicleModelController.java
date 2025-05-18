@@ -1,6 +1,7 @@
 package com.backend.controller;
 
 import com.backend.dto.VehicleModelDTO;
+import com.backend.model.VehicleModel;
 import com.backend.service.VehicleModelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -71,4 +72,5 @@ public class VehicleModelController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+    
 }

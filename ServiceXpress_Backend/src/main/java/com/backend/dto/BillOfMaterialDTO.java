@@ -2,6 +2,13 @@ package com.backend.dto;
 
 import java.util.List;
 
+import lombok.*;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+
 public class BillOfMaterialDTO {
     private Long bookingId;
     private String customerName;
@@ -10,31 +17,12 @@ public class BillOfMaterialDTO {
     private List<Material> materials;
     private Double total;
 
-    // Getters and Setters
-    public Long getBookingId() { return bookingId; }
-    public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-    public String getAdvisorName() { return advisorName; }
-    public void setAdvisorName(String advisorName) { this.advisorName = advisorName; }
-    public String getServiceName() { return serviceName; }
-    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
-    public List<Material> getMaterials() { return materials; }
-    public void setMaterials(List<Material> materials) { this.materials = materials; }
-    public Double getTotal() { return total; }
-    public void setTotal(Double total) { this.total = total; }
-
+@Getter
+@Setter
     public static class Material {
         private String materialName;
         private Integer quantity;
         private Double price;
 
-        // Getters and Setters
-        public String getMaterialName() { return materialName; }
-        public void setMaterialName(String materialName) { this.materialName = materialName; }
-        public Integer getQuantity() { return quantity; }
-        public void setQuantity(Integer quantity) { this.quantity = quantity; }
-        public Double getPrice() { return price; }
-        public void setPrice(Double price) { this.price = price; }
     }
 }

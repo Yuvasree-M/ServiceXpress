@@ -15,8 +15,8 @@ public class Inventory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String workitems;  // Name of the work item
-    private int quantity;      // Quantity of the item
-    private double prices;     // Price of the item
-    private LocalDate lastUpdated;  // The date the item was last updated
+    private String workitems; 
+    private int quantity;     
+    private double prices;    
+    private LocalDate lastUpdated; 
 }

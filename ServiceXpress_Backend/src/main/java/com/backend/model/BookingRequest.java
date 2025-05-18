@@ -71,5 +71,5 @@ public class BookingRequest {
     private LocalDateTime updatedAt;
 
     @Column
-    private String transactionId; // Added for completed bookings
+    private String transactionId;
 }

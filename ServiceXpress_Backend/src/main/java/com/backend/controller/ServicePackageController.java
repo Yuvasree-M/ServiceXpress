@@ -49,7 +49,7 @@ public class ServicePackageController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
+    
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ServicePackageDTO> update(@PathVariable Integer id, @RequestBody ServicePackageDTO sp) {
@@ -61,8 +61,6 @@ public class ServicePackageController {
         }
     }
     
-    
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {

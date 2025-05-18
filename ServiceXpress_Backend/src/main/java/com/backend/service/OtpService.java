@@ -33,15 +33,15 @@ public class OtpService {
 
     public void sendOtp(String phoneNumber, String otp) {
         try {
-            // Validate phone number format (E.164)
+           
             if (!phoneNumber.matches("\\+?[1-9]\\d{1,14}")) {
                 throw new IllegalArgumentException("Invalid phone number format: " + phoneNumber);
             }
 
             Twilio.init(accountSid, authToken);
             Message message = Message.creator(
-                    new PhoneNumber(phoneNumber), // To
-                    new PhoneNumber(twilioPhoneNumber), // From
+                    new PhoneNumber(phoneNumber),
+                    new PhoneNumber(twilioPhoneNumber),
                     "Your ServiceXpress OTP is: " + otp
             ).create();
             System.out.println("OTP sent to " + phoneNumber + ": " + message.getSid());
@@ -54,7 +54,7 @@ public class OtpService {
     public boolean verifyOtp(String phoneNumber, String otp) {
         String storedOtp = otpStore.get(phoneNumber);
         if (storedOtp != null && storedOtp.equals(otp)) {
-            otpStore.remove(phoneNumber); // Clear OTP after verification
+            otpStore.remove(phoneNumber); 
             return true;
         }
         return false;

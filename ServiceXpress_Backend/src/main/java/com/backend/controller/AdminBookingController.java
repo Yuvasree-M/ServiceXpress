@@ -42,19 +42,6 @@ public class AdminBookingController {
     }
     
 
-    @GetMapping("/advisors")
-    public ResponseEntity<List<Advisor>> getAllAdvisors() {
-        System.out.println("Fetching all advisors");
-        List<Advisor> advisors = bookingService.getAllAdvisors();
-        return advisors.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(advisors);
-    }
-
-    @GetMapping("/dashboard/admin")
-    public ResponseEntity<DashboardDataDTO> getAdminDashboard() {
-        System.out.println("Fetching admin dashboard data");
-        DashboardDataDTO dashboardData = bookingService.getAdminDashboardData();
-        return ResponseEntity.ok(dashboardData);
-    }
 
     @PostMapping("/bookings/{bookingId}/mark-completed")
     public ResponseEntity<BookingRequest> markBookingCompleted(@PathVariable Long bookingId) {

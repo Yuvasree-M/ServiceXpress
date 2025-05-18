@@ -52,7 +52,6 @@ public class CustomerApiController {
             }
             Map<String, Object> receiptData = bookingRequestService.getReceiptData(id);
 
-            // Verify customer ownership
             Long bookingCustomerId;
             try {
                 bookingCustomerId = Long.parseLong(receiptData.get("customerId").toString());
@@ -65,7 +64,6 @@ public class CustomerApiController {
                 return ResponseEntity.status(403).build();
             }
 
-            // Generate PDF
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
@@ -73,7 +71,6 @@ public class CustomerApiController {
 
             document.add(new Paragraph("Service Receipt").setBold().setFontSize(16));
 
-            // Create table for receipt details
             Table table = new Table(new float[]{1, 3});
             table.addCell(new Cell().add(new Paragraph("Field")));
             table.addCell(new Cell().add(new Paragraph("Value")));
