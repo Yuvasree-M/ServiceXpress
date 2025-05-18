@@ -59,17 +59,4 @@ public class InventoryService {
         return inventoryRepository.save(inventory);
     }
 
-    public boolean useItem(Long id, int quantityUsed) {
-        Optional<Inventory> inventoryOpt = inventoryRepository.findById(id);
-        if (inventoryOpt.isPresent()) {
-            Inventory inventory = inventoryOpt.get();
-            if (inventory.getQuantity() >= quantityUsed) {
-                inventory.setQuantity(inventory.getQuantity() - quantityUsed);
-                inventory.setLastUpdated(LocalDate.now());
-                inventoryRepository.save(inventory);
-                return true;
-            }
-        }
-        return false;
-    }
 }

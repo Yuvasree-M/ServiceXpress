@@ -64,14 +64,4 @@ public class InventoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/use/{id}/{quantity}")
-    @PreAuthorize("hasRole('SERVICE_ADVISOR')")
-    public ResponseEntity<String> useItem(@PathVariable Long id, @PathVariable int quantity) {
-        boolean success = inventoryService.useItem(id, quantity);
-        if (success) {
-            return ResponseEntity.ok("Item used successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Not enough inventory");
-        }
-    }
 }
