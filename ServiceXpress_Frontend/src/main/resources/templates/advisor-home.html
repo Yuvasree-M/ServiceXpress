@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Service Advisor Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <input type="hidden" id="backendApiUrl" th:value="${@environment.getProperty('backend.api.url')}">
+    <style>
+        :root {
+            --primary-color: #FF6200;
+            --secondary-color: #00274D;
+            --light-bg: #D9D9D9;
+            --white: #FFFFFF;
+            --text-muted: #4B4B4B;
+            --success-color: #28A745;
+            --warning-color: #FFC107;
+            --danger-color: #DC3545;
+            --shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --dark-gray: #343a40;
+            --light-gray: #e9ecef;
+            --light-background: #F4F4F4;
+            --medium-gray: #6c757d;
+        }
+
+        body {
+            background: linear-gradient(135deg, #D9D9D9, #e9ecef);
+            font-family: Arial, sans-serif;
+            padding-top: 90px;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar-custom {
+            background-color: rgba(255, 255, 255, 0.95);
+            height: 70px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 0 15px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand:hover img,
+        .navbar-brand:focus img {
+            transform: scale(1.05);
+        }
+
+        .navbar-nav.center-nav {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--secondary-color) !important;
+        }
+
+        .nav-link:hover::after,
+        .nav-link:focus::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+        }
+
+        .profile-circle {
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .profile-circle:hover,
+        .profile-circle:focus {
+            transform: scale(1.1);
+        }
+
+        .stats-container {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .chart-container {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <input type="hidden" id="token" th:value="${token != null ? token : ''}">
+    <input type="hidden" id="advisorId" th:value="${advisorId != null ? advisorId : ''}">
+    <input type="hidden" id="username" th:value="${session.username != null ? session.username : 'Advisor'}">
+
+    <nav class="navbar navbar-expand-lg navbar-custom" aria-label="Main navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/dashboard/admin}" aria-label="ServiceXpress Home">
+                <img src="/images/logo.jpg" alt="ServiceXpress Logo" onerror="this.src='https://via.placeholder.com/40';">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav center-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{'/service-advisor/home?advisorId=' + ${advisorId}}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{'/service-advisor/completed?advisorId=' + ${advisorId}}">Completed</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="text-dark dropdown-toggle d-flex align-items-center"
+                           data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Profile">
+                            <div class="profile-circle me-2"
+                                 th:text="${#strings.substring(session.username, 0, 1) != null ? #strings.toUpperCase(#strings.substring(session.username, 0, 1)) : 'A'}"
+                                 aria-hidden="true">A</div>
+                            <span class="fw-medium me-2"
+                                  th:text="${session.username != null ? session.username : 'Advisor'}">Advisor</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item text-danger" th:href="@{/advisor/logout}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5 pt-4">
+        <div class="stats-container">
+            <h2 class="mb-4">Service Advisor Home</h2>
+
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <span th:text="${error}">Error message</span>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>Assigned Vehicles</h3>
+                        <p id="assignedCount">0</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>In Progress</h3>
+                        <p id="inProgressCount">0</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>Completed</h3>
+                        <p id="completedCount">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Booking Status Distribution</h3>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const advisorId = $('#advisorId').val();
+            const token = $('#token').val();
+
+            // Fetch statistics
+            $.ajax({
+                url: $('#backendApiUrl').val() + '/advisors/statistics?advisorId=' + advisorId,
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                success: function(data) {
+                    console.log('Statistics fetched:', data);
+                    $('#assignedCount').text(data.assigned || 0);
+                    $('#inProgressCount').text(data.inProgress || 0);
+                    const totalCompleted = (data.completed || 0) + (data.completedPaid || 0) + (data.completedPendingPayment || 0);
+                    $('#completedCount').text(totalCompleted);
+
+                    // Initialize Chart
+                    const ctx = document.getElementById('statusChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Assigned', 'In Progress', 'Completed', 'Completed Paid', 'Completed Pending Payment'],
+                            datasets: [{
+                                label: 'Number of Vehicles',
+                                data: [
+                                    data.assigned || 0,
+                                    data.inProgress || 0,
+                                    data.completed || 0,
+                                    data.completedPaid || 0,
+                                    data.completedPendingPayment || 0
+                                ],
+                                backgroundColor: [
+                                    'rgba(54, 162, 235, 0.6)',  // Assigned
+                                    'rgba(255, 206, 86, 0.6)',  // In Progress
+                                    'rgba(75, 192, 192, 0.6)',  // Completed
+                                    'rgba(153, 102, 255, 0.6)', // Completed Paid
+                                    'rgba(255, 159, 64, 0.6)'   // Completed Pending Payment
+                                ],
+                                borderColor: [
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(75, 192, 192, 1)',
+                                    'rgba(153, 102, 255, 1)',
+                                    'rgba(255, 159, 64, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Number of Vehicles'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Status'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching statistics:', xhr.status, xhr.responseText, error);
+                    $('.stats-container').prepend('<div class="alert alert-danger">Failed to load statistics: ' + (xhr.responseText || 'Status ' + xhr.status) + '</div>');
+                }
+            });
+
+            // Active link handling
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const linkPath = link.getAttribute('href');
+                link.classList.remove('active');
+                if (currentPath.includes('/service-advisor/home') && linkPath.includes('/service-advisor/home')) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

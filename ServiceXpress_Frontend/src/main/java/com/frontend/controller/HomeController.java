@@ -108,47 +108,6 @@ public class HomeController {
         return "redirect:/?login=true";
     }
 
-//    @PostMapping("/login")
-//    public String login(@RequestParam String phoneNumber, @RequestParam String otp, HttpSession session, Model model) {
-//        logger.info("Verifying OTP for phone number: {}", phoneNumber);
-//        try {
-//            String url = backendApiUrl + "/auth/customer/verify-otp";
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//            HomeController.VerifyOtpRequest requestBody = new HomeController.VerifyOtpRequest();
-//            HttpEntity<HomeController.VerifyOtpRequest> request = new HttpEntity<>(requestBody, headers);
-//
-//            ResponseEntity<AuthResponse> response = restTemplate.exchange(
-//                url, HttpMethod.POST, request, AuthResponse.class
-//            );
-//
-//            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-//                AuthResponse authResponse = response.getBody();
-//                if (authResponse.getToken() != null && "CUSTOMER".equals(authResponse.getRole())) {
-//                    session.setAttribute("token", authResponse.getToken());
-//                    session.setAttribute("username", phoneNumber); // Store phone number as username
-//                    logger.info("OTP verified successfully, redirecting customer to /dashboard/customer");
-//                    return "redirect:/dashboard/customer";
-//                }
-//                logger.warn("OTP verification failed: Invalid role or token");
-//                model.addAttribute("error", "Invalid OTP or role");
-//                return "index";
-//            } else {
-//                logger.warn("OTP verification failed: Invalid OTP");
-//                model.addAttribute("error", "Invalid OTP or login failed");
-//                return "index";
-//            }
-//        } catch (HttpClientErrorException e) {
-//            logger.error("HTTP error during OTP verification for {}: Status {}, Response: {}", phoneNumber, e.getStatusCode(), e.getResponseBodyAsString());
-//            model.addAttribute("error", "Verification failed: " + e.getResponseBodyAsString());
-//            return "index";
-//        } catch (Exception e) {
-//            logger.error("OTP verification failed for phone number {}: {}", phoneNumber, e.getMessage(), e);
-//            model.addAttribute("error", "Verification failed: " + e.getMessage());
-//            return "index";
-//        }
-//    }
-    
     @PostMapping("/login")
     public String login(@RequestParam(required = false) String identifier,
                        @RequestParam(required = false) String password,
@@ -165,6 +124,8 @@ public class HomeController {
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 VerifyOtpRequest requestBody = new VerifyOtpRequest();
+                requestBody.setPhoneNumber(phoneNumber);
+                requestBody.setOtp(otp);
                 HttpEntity<VerifyOtpRequest> request = new HttpEntity<>(requestBody, headers);
 
                 ResponseEntity<AuthResponse> response = restTemplate.exchange(
@@ -227,7 +188,6 @@ public class HomeController {
                 session.setAttribute("token", token);
                 session.setAttribute("username", identifier);
                 session.setAttribute("role", response.getRole());
-                logger.info("Authentication successful for identifier: {}, role: {}", identifier, response.getRole());
 
                 String role = response.getRole();
                 String redirectUrl;
@@ -237,13 +197,14 @@ public class HomeController {
                         logger.info("Redirecting admin to {}", redirectUrl);
                         break;
                     case "SERVICE_ADVISOR":
-                        Long advisorId = fetchAdvisorId1(token);
+                        Long advisorId = fetchAdvisorId(token);
                         if (advisorId == null) {
                             logger.error("Failed to fetch Advisor ID for SERVICE_ADVISOR role for identifier: {}", identifier);
                             model.addAttribute("error", "Advisor ID not found. Please contact support.");
                             return "index";
                         }
-                        redirectUrl = "/dashboard/advisor?advisorId=" + advisorId;
+                        session.setAttribute("advisorId", advisorId); // Store advisorId in session
+                        redirectUrl = "/service-advisor/home?advisorId=" + advisorId;
                         logger.info("Redirecting service advisor to {}", redirectUrl);
                         break;
                     default:
@@ -271,8 +232,7 @@ public class HomeController {
         }
     }
 
-    // Placeholder for fetchAdvisorId method (unchanged)
-    private Long fetchAdvisorId1(String token) {
+    private Long fetchAdvisorId(String token) {
         try {
             String url = backendApiUrl + "/auth/me";
             HttpHeaders headers = new HttpHeaders();
@@ -305,36 +265,6 @@ public class HomeController {
             return null;
         }
     }
-    
-
-    @GetMapping("/dashboard/advisor")
-    public String advisorDashboard(@RequestParam("advisorId") Long advisorId, HttpSession session, Model model) {
-        logger.info("Accessing advisor dashboard for advisorId: {}", advisorId);
-        
-        // Verify the user is a SERVICE_ADVISOR
-        String token = (String) session.getAttribute("token");
-        String username = (String) session.getAttribute("username");
-        String role = (String) session.getAttribute("role");
-        
-        if (token == null || username == null || role == null) {
-            logger.warn("Unauthorized access to advisor dashboard: No token, username, or role in session");
-            model.addAttribute("error", "Please log in to access the advisor dashboard");
-            return "redirect:/login";
-        }
-
-        if (!"SERVICE_ADVISOR".equals(role)) {
-            logger.warn("Unauthorized access to advisor dashboard by user: {}. Role: {}", username, role);
-            model.addAttribute("error", "You do not have permission to access the advisor dashboard");
-            return "redirect:/";
-        }
-
-        model.addAttribute("advisorId", advisorId);
-        model.addAttribute("username", username);
-        model.addAttribute("dashboardTitle", "Service Advisor Dashboard");
-        model.addAttribute("welcomeMessage", "Welcome, " + username + "!");
-        
-        return "advisor-dashboard";
-    }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
@@ -357,30 +287,6 @@ public class HomeController {
         session.invalidate();
         logger.info("Session invalidated, redirecting to home page");
         return "redirect:/";
-    }
-
-    private Long fetchAdvisorId(String token) {
-        try {
-            String url = backendApiUrl + "/auth/me";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(token);
-            HttpEntity<String> request = new HttpEntity<>(headers);
-
-            ResponseEntity<UserDetailsResponse> response = restTemplate.postForEntity(url, request, UserDetailsResponse.class);
-            logger.debug("Fetch advisorId response: {}", response.getBody());
-
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Long advisorId = response.getBody().getAdvisorId();
-                logger.info("Successfully fetched advisorId: {}", advisorId);
-                return advisorId;
-            }
-            logger.warn("Failed to fetch advisorId: Invalid response");
-            return null;
-        } catch (Exception e) {
-            logger.error("Error fetching advisorId: {}", e.getMessage(), e);
-            return null;
-        }
     }
 
     @PostMapping("/auth/send-otp")
@@ -464,7 +370,6 @@ public class HomeController {
 
     public static class UserDetailsResponse {
         private Long advisorId;
-
         public Long getAdvisorId() { return advisorId; }
         public void setAdvisorId(Long advisorId) { this.advisorId = advisorId; }
     }

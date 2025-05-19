@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class AdvisorController {
@@ -32,16 +33,101 @@ public class AdvisorController {
         this.restTemplate = restTemplate;
     }
 
+    @GetMapping("/service-advisor/home")
+    public String showAdvisorHome(@RequestParam(required = false) Long advisorId, Model model, HttpSession session) {
+        logger.info("Accessing advisor home for advisorId: {}", advisorId);
+
+        String token = (String) session.getAttribute("token");
+        String username = (String) session.getAttribute("username");
+        Long sessionAdvisorId = (Long) session.getAttribute("advisorId");
+
+        if (token == null) {
+            logger.warn("No authentication token found in session. Redirecting to login.");
+            model.addAttribute("error", "No authentication token found. Please log in.");
+            return "redirect:/login";
+        }
+
+        // Use session advisorId if query parameter is not provided
+        if (advisorId == null) {
+            advisorId = sessionAdvisorId;
+        }
+
+        if (advisorId == null) {
+            logger.warn("Advisor ID is null. Setting error message.");
+            model.addAttribute("error", "Advisor ID is required.");
+            model.addAttribute("advisorId", 0L);
+            model.addAttribute("token", token);
+            model.addAttribute("username", username != null ? username : "Advisor");
+            return "advisor-home";
+        }
+
+        Map<String, Long> statistics = Collections.emptyMap();
+        try {
+            String url = backendApiUrl + "/advisors/statistics?advisorId=" + advisorId;
+            logger.debug("Calling backend API: {}", url);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url, HttpMethod.GET, request, Map.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                statistics = response.getBody() != null ? response.getBody() : Collections.emptyMap();
+                logger.info("Fetched statistics for advisorId: {}", advisorId);
+                if (statistics.isEmpty()) {
+                    model.addAttribute("error", "No statistics available for this advisor.");
+                }
+            } else {
+                logger.error("Backend API returned unexpected status: {}", response.getStatusCode());
+                model.addAttribute("error", "Failed to load statistics: HTTP " + response.getStatusCode());
+            }
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error fetching statistics for advisorId {}: Status {}, Response: {}",
+                    advisorId, e.getStatusCode(), e.getResponseBodyAsString());
+            String errorMessage;
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                errorMessage = "Unauthorized: Invalid or expired token. Please log in again.";
+            } else if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
+                errorMessage = "Access denied: You do not have permission to view these statistics.";
+            } else if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                errorMessage = "No statistics found for advisor ID: " + advisorId;
+            } else {
+                errorMessage = "Failed to load statistics: " + e.getResponseBodyAsString();
+            }
+            model.addAttribute("error", errorMessage);
+        } catch (Exception e) {
+            logger.error("Failed to load advisor home for advisorId {}: {}", advisorId, e.getMessage(), e);
+            model.addAttribute("error", "Failed to load statistics: " + e.getMessage());
+        }
+
+        model.addAttribute("statistics", statistics);
+        model.addAttribute("advisorId", advisorId);
+        model.addAttribute("token", token);
+        model.addAttribute("username", username != null ? username : "Advisor");
+        logger.debug("Statistics set in model: {}", statistics);
+        return "advisor-home";
+    }
+
     @GetMapping("/service-advisor/dashboard")
     public String showAdvisorDashboard(@RequestParam(required = false) Long advisorId, Model model, HttpSession session) {
         logger.info("Accessing advisor dashboard for advisorId: {}", advisorId);
 
         String token = (String) session.getAttribute("token");
         String username = (String) session.getAttribute("username");
+        Long sessionAdvisorId = (Long) session.getAttribute("advisorId");
+
         if (token == null) {
             logger.warn("No authentication token found in session. Redirecting to login.");
             model.addAttribute("error", "No authentication token found. Please log in.");
             return "redirect:/login";
+        }
+
+        // Use session advisorId if query parameter is not provided
+        if (advisorId == null) {
+            advisorId = sessionAdvisorId;
         }
 
         if (advisorId == null) {
@@ -131,13 +217,13 @@ public class AdvisorController {
 
         return "redirect:/service-advisor/dashboard?advisorId=" + advisorId;
     }
-    
+
     @GetMapping("/advisor/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/";
     }
-    
+
     @GetMapping("/service-advisor/completed")
     public String showCompletedBookings(@RequestParam(required = false) Long advisorId,
                                        @RequestParam(defaultValue = "0") int page,
@@ -147,10 +233,17 @@ public class AdvisorController {
 
         String token = (String) session.getAttribute("token");
         String username = (String) session.getAttribute("username");
+        Long sessionAdvisorId = (Long) session.getAttribute("advisorId");
+
         if (token == null) {
             logger.warn("No authentication token found in session. Redirecting to login.");
             model.addAttribute("error", "No authentication token found. Please log in.");
             return "redirect:/login";
+        }
+
+        // Use session advisorId if query parameter is not provided
+        if (advisorId == null) {
+            advisorId = sessionAdvisorId;
         }
 
         if (advisorId == null) {
@@ -205,7 +298,6 @@ public class AdvisorController {
             model.addAttribute("error", "Failed to load completed bookings: " + e.getMessage());
         }
 
-       
         int totalItems = completedBookings.size();
         int totalPages = (int) Math.ceil((double) totalItems / size);
         int start = page * size;
