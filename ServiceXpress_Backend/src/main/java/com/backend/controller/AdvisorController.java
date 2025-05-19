@@ -22,7 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -131,5 +133,21 @@ public class AdvisorController {
         return ResponseEntity.ok(vehicleAssignedDTOs);
     }
 
+    @GetMapping("/advisors/statistics")
+    public ResponseEntity<Map<String, Long>> getAdvisorStatistics(@RequestParam Long advisorId) {
+        logger.info("Fetching statistics for advisorId: {}", advisorId);
 
+        List<BookingAdvisorMapping> mappings = bookingService.getBookingAdvisorMappingRepository().findByAdvisorId(advisorId);
+        List<Long> bookingIds = mappings.stream().map(BookingAdvisorMapping::getBookingId).collect(Collectors.toList());
+
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("assigned", (long) bookingService.getBookingRequestRepository().findByIdInAndStatus(bookingIds, "ASSIGNED").size());
+        stats.put("inProgress", (long) bookingService.getBookingRequestRepository().findByIdInAndStatus(bookingIds, "IN_PROGRESS").size());
+        stats.put("completed", (long) bookingService.getBookingRequestRepository().findByIdInAndStatus(bookingIds, "COMPLETED").size());
+        stats.put("completedPaid", (long) bookingService.getBookingRequestRepository().findByIdInAndStatus(bookingIds, "COMPLETED_PAID").size());
+        stats.put("completedPendingPayment", (long) bookingService.getBookingRequestRepository().findByIdInAndStatus(bookingIds, "COMPLETED_PENDING_PAYMENT").size());
+
+        logger.info("Returning statistics for advisorId: {}", advisorId);
+        return ResponseEntity.ok(stats);
+    }
 }

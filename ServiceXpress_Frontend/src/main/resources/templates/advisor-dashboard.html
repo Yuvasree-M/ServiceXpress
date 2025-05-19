@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <input type="hidden" id="backendApiUrl" th:value="${@environment.getProperty('backend.api.url')}">
-    
     <style>
         :root {
             --primary-color: #FF6200;
@@ -34,7 +33,6 @@
             line-height: 1.6;
         }
 
-        /* Navbar Styles */
         .navbar-custom {
             background-color: rgba(255, 255, 255, 0.95);
             height: 70px;
@@ -57,7 +55,6 @@
             transform: scale(1.05);
         }
 
-        /* Center the nav links */
         .navbar-nav.center-nav {
             flex-grow: 1;
             display: flex;
@@ -89,7 +86,6 @@
             font-weight: bold;
         }
 
-        /* Profile Circle */
         .profile-circle {
             width: 45px;
             height: 45px;
@@ -109,7 +105,6 @@
             transform: scale(1.1);
         }
 
-        /* Table Container */
         .table-container {
             background: var(--white);
             border-radius: 8px;
@@ -127,14 +122,12 @@
             background-color: var(--light-gray);
         }
 
-        /* Sortable Column Headers */
         .sortable {
             cursor: pointer;
             position: relative;
             user-select: none;
         }
 
-        /* Button Styles */
         .btn-orange {
             background-color: var(--primary-color);
             color: var(--white);
@@ -147,7 +140,6 @@
             color: var(--white);
         }
 
-        /* Pagination Styles */
         .pagination .page-item.active .page-link {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
@@ -164,13 +156,11 @@
             color: var(--primary-color);
         }
 
-        /* Search Input */
         .form-control:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.25);
         }
 
-        /* Dropdown Menu */
         .dropdown-menu {
             border: none;
             box-shadow: var(--shadow);
@@ -180,7 +170,6 @@
             background-color: var(--light-gray);
         }
 
-        /* Modal Styles */
         .modal-content {
             border-radius: 8px;
         }
@@ -204,12 +193,10 @@
     </style>
 </head>
 <body>
-    <!-- Hidden inputs for token and advisorId -->
     <input type="hidden" id="token" th:value="${token != null ? token : ''}">
     <input type="hidden" id="advisorId" th:value="${advisorId != null ? advisorId : ''}">
     <input type="hidden" id="username" th:value="${session.username != null ? session.username : 'Advisor'}">
 
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-custom" aria-label="Main navigation">
         <div class="container-fluid">
             <a class="navbar-brand" th:href="@{/dashboard/admin}" aria-label="ServiceXpress Home">
@@ -221,24 +208,24 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav center-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link" th:href="@{'/service-advisor/home?advisorId=' + ${advisorId}}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/service-advisor/dashboard" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''})}">Dashboard</a>
+                        <a class="nav-link active" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-    <a class="nav-link" th:href="@{'/service-advisor/completed?advisorId=' + ${advisorId}}">Completed</a>
-</li>
+                        <a class="nav-link" th:href="@{'/service-advisor/completed?advisorId=' + ${advisorId}}">Completed</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
                         <a href="#" class="text-dark dropdown-toggle d-flex align-items-center"
                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Profile">
-                            <div class="profile-circle me-2" 
-                                 th:text="${#strings.substring(session.username, 0, 1) != null ? #strings.toUpperCase(#strings.substring(session.username, 0, 1)) : 'A'}" 
+                            <div class="profile-circle me-2"
+                                 th:text="${#strings.substring(session.username, 0, 1) != null ? #strings.toUpperCase(#strings.substring(session.username, 0, 1)) : 'A'}"
                                  aria-hidden="true">A</div>
-                            <span class="fw-medium me-2" 
-                                  th:text="${session.username != null ? session.username : 'Admin'}">Admin</span>
+                            <span class="fw-medium me-2"
+                                  th:text="${session.username != null ? session.username : 'Advisor'}">Advisor</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item text-danger" th:href="@{/advisor/logout}">Logout</a></li>
@@ -250,16 +237,13 @@
     </nav>
 
     <main class="container mt-5 pt-4">
-        <!-- Assigned Vehicles Table -->
         <div class="table-container">
             <h2 class="mb-4">Service Advisor Dashboard</h2>
 
-            <!-- Error Message -->
             <div th:if="${error}" class="alert alert-danger" role="alert">
                 <span th:text="${error}">Error message</span>
             </div>
 
-            <!-- Search Bar -->
             <div class="mb-4">
                 <input type="text" class="form-control" id="searchInput" placeholder="Search by Vehicle ID, Details, or Customer Name...">
             </div>
@@ -277,52 +261,50 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="vehicle : ${assignedVehicles}" 
-        th:if="${assignedVehicles != null} and ${vehicle.status == 'ASSIGNED' or vehicle.status == 'IN_PROGRESS'}">
-        <td th:text="'V00' + ${vehicle.id}">V00123</td>
-        <td th:text="${vehicle.vehicleModel != null ? vehicle.vehicleModel : 'N/A'}">Toyota Camry - ABC-1234</td>
-        <td th:text="${vehicle.customerName != null ? vehicle.customerName : 'N/A'}">Jane Smith</td>
-        <td th:text="${vehicle.assignedDate != null ? #temporals.format(vehicle.assignedDate, 'MMM dd, yyyy') : 'N/A'}">March 26, 2025</td>
-        <td th:text="${vehicle.servicesNeeded != null ? vehicle.servicesNeeded : 'N/A'}">Engine Oil, Wheel Alignment</td>
-        <td th:text="${vehicle.status != null ? vehicle.status : 'N/A'}">Assigned</td>
-        <td>
-            <form th:if="${vehicle.status == 'ASSIGNED'}" th:action="@{'/service-advisor/start-service'}" method="post" style="display:inline;">
-                <input type="hidden" name="bookingId" th:value="${vehicle.id}"/>
-                <input type="hidden" name="advisorId" th:value="${advisorId != null ? advisorId : ''}"/>
-                <button type="submit" class="btn btn-sm btn-orange">Start Service</button>
-            </form>
-            <button th:if="${vehicle.status == 'IN_PROGRESS'}" 
-                    class="btn btn-sm btn-orange manage-service-btn"
-                    data-bs-toggle="modal"
-                    data-bs-target="#bomModal"
-                    th:attr="data-booking-id=${vehicle.id},data-customer-name=${vehicle.customerName},data-services=${vehicle.servicesNeeded}">
-                Manage Service
-            </button>
-        </td>
-    </tr>
-    <tr th:if="${assignedVehicles == null or assignedVehicles.isEmpty()}">
-        <td colspan="7" class="text-center">No assigned vehicles found.</td>
-    </tr>
+                    <tr th:each="vehicle : ${assignedVehicles}"
+                        th:if="${assignedVehicles != null} and ${vehicle.status == 'ASSIGNED' or vehicle.status == 'IN_PROGRESS'}">
+                        <td th:text="'V00' + ${vehicle.id}">V00123</td>
+                        <td th:text="${vehicle.vehicleModel != null ? vehicle.vehicleModel : 'N/A'}">Toyota Camry - ABC-1234</td>
+                        <td th:text="${vehicle.customerName != null ? vehicle.customerName : 'N/A'}">Jane Smith</td>
+                        <td th:text="${vehicle.assignedDate != null ? #temporals.format(vehicle.assignedDate, 'MMM dd, yyyy') : 'N/A'}">March 26, 2025</td>
+                        <td th:text="${vehicle.servicesNeeded != null ? vehicle.servicesNeeded : 'N/A'}">Engine Oil, Wheel Alignment</td>
+                        <td th:text="${vehicle.status != null ? vehicle.status : 'N/A'}">Assigned</td>
+                        <td>
+                            <form th:if="${vehicle.status == 'ASSIGNED'}" th:action="@{'/service-advisor/start-service'}" method="post" style="display:inline;">
+                                <input type="hidden" name="bookingId" th:value="${vehicle.id}"/>
+                                <input type="hidden" name="advisorId" th:value="${advisorId != null ? advisorId : ''}"/>
+                                <button type="submit" class="btn btn-sm btn-orange">Start Service</button>
+                            </form>
+                            <button th:if="${vehicle.status == 'IN_PROGRESS'}"
+                                    class="btn btn-sm btn-orange manage-service-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#bomModal"
+                                    th:attr="data-booking-id=${vehicle.id},data-customer-name=${vehicle.customerName},data-services=${vehicle.servicesNeeded}">
+                                Manage Service
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${assignedVehicles == null or assignedVehicles.isEmpty()}">
+                        <td colspan="7" class="text-center">No assigned vehicles found.</td>
+                    </tr>
                 </tbody>
             </table>
 
-            <!-- Pagination -->
             <nav aria-label="Page navigation" th:if="${totalPages != null and totalPages > 0}">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${currentPage - 1}}" tabindex="-1">Prev</a>
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId} + '&page=' + ${currentPage - 1}}" tabindex="-1">Prev</a>
                     </li>
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
-                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${i}}" th:text="${i + 1}">1</a>
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId} + '&page=' + ${i}}" th:text="${i + 1}">1</a>
                     </li>
                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}(${advisorId != null ? advisorId : ''}) + '&page=' + ${currentPage + 1}}">Next</a>
+                        <a class="page-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId} + '&page=' + ${currentPage + 1}}">Next</a>
                     </li>
                 </ul>
             </nav>
         </div>
 
-        <!-- BOM Modal -->
         <div class="modal fade" id="bomModal" tabindex="-1" aria-labelledby="bomModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -386,12 +368,10 @@
         </div>
     </main>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Search functionality
             $('#searchInput').on('keyup', function() {
                 var value = $(this).val().toLowerCase();
                 $('#vehiclesTable tbody tr').filter(function() {
@@ -399,7 +379,6 @@
                 });
             });
 
-            // Sorting functionality
             $('.sortable').on('click', function() {
                 var table = $('#vehiclesTable');
                 var tbody = table.find('tbody');
@@ -433,22 +412,19 @@
                 });
             });
 
-            // Active link handling
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('.nav-link');
             navLinks.forEach(link => {
                 const linkPath = link.getAttribute('href');
                 link.classList.remove('active');
-                if (currentPath === linkPath || (currentPath.includes('/service-advisor/dashboard') && linkPath.includes('/service-advisor/dashboard'))) {
+                if (currentPath.includes('/service-advisor/dashboard') && linkPath.includes('/service-advisor/dashboard')) {
                     link.classList.add('active');
                 }
             });
 
-            // BOM Modal Handling
             let materialCount = 1;
-            let inventoryData = []; // Store inventory data to avoid multiple AJAX calls
+            let inventoryData = [];
 
-            // Fetch inventory items
             function loadInventory($targetSelect) {
                 if (inventoryData.length > 0) {
                     populateDropdown($targetSelect);
@@ -463,18 +439,16 @@
                     },
                     success: function(data) {
                         console.log('Inventory fetched:', data);
-                        // Validate inventory data structure
                         if (!Array.isArray(data) || data.length === 0) {
                             console.error('Inventory data is empty or not an array');
                             alert('No inventory items available.');
                             return;
                         }
-                        // Filter out items with missing required fields
-                        inventoryData = data.filter(item => 
-                            item.id != null && 
-                            item.workitems != null && 
-                            item.quantity != null && 
-                            item.quantity > 0 &&  // Ensure quantity is positive
+                        inventoryData = data.filter(item =>
+                            item.id != null &&
+                            item.workitems != null &&
+                            item.quantity != null &&
+                            item.quantity > 0 &&
                             item.prices != null
                         );
                         if (inventoryData.length === 0) {
@@ -494,7 +468,6 @@
                 });
             }
 
-            // Populate a specific dropdown while preserving selection
             function populateDropdown($select) {
                 const selectedValue = $select.val();
                 $select.empty().append('<option value="">Select Material</option>');
@@ -515,7 +488,6 @@
                 }
             }
 
-            // Open BOM modal
             $('.manage-service-btn').on('click', function() {
                 const bookingId = $(this).data('booking-id');
                 const customerName = $(this).data('customer-name');
@@ -556,7 +528,6 @@
                 loadInventory($('#materialSelect0'));
             });
 
-            // Add material row
             $('#addMaterial').on('click', function() {
                 const newRow = `
                     <div class="material-row row">
@@ -589,7 +560,6 @@
                 materialCount++;
             });
 
-            // Remove material row
             $(document).on('click', '.remove-material', function() {
                 if ($('.material-row').length > 1) {
                     $(this).closest('.material-row').remove();
@@ -597,7 +567,6 @@
                 }
             });
 
-            // Function to update price for a specific row
             function updateRowPrice($row) {
                 const $materialSelect = $row.find('.material-select');
                 const $quantityInput = $row.find('.quantity-input');
@@ -620,7 +589,6 @@
                 }
             }
 
-            // Update price when material is selected
             $(document).on('change', '.material-select', function() {
                 const $row = $(this).closest('.material-row');
                 console.log('Material changed - ID:', $(this).attr('id'), 'Value:', $(this).val());
@@ -628,7 +596,6 @@
                 calculateTotal();
             });
 
-            // Update price when quantity changes
             $(document).on('input', '.quantity-input', function() {
                 const $row = $(this).closest('.material-row');
                 console.log('Quantity changed - ID:', $(this).attr('id'), 'Value:', $(this).val());
@@ -636,7 +603,6 @@
                 calculateTotal();
             });
 
-            // Calculate total price across all materials
             function calculateTotal() {
                 let total = 0;
                 $('.material-row').each(function() {
@@ -649,7 +615,6 @@
                 console.log('Final Total Price:', total);
             }
 
-            // Submit BOM
             $('#submitBom').on('click', function() {
                 const bomData = {
                     bookingId: $('#bookingId').val(),
