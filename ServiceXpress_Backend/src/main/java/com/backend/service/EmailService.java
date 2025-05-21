@@ -90,4 +90,24 @@ public class EmailService {
         mailSender.send(message);
         logger.info("Bill email sent to: {}", to);
     }
+    
+    public void sendSupportQueryNotification(String name, String email, String subject, String message) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+            helper.setTo("boomikamohan316@gmail.com");
+            helper.setSubject("New Support Query: " + subject);
+            helper.setText(
+                "<h3>New Support Query</h3>" +
+                "<p><strong>Name:</strong> " + name + "</p>" +
+                "<p><strong>Email:</strong> " + email + "</p>" +
+                "<p><strong>Subject:</strong> " + subject + "</p>" +
+                "<p><strong>Message:</strong> " + message + "</p>",
+                true
+            );
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email notification: " + e.getMessage());
+        }
+    }
 }

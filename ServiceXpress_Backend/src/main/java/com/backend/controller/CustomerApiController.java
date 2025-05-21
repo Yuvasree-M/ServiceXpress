@@ -1,29 +1,53 @@
 package com.backend.controller;
 
+import com.backend.dto.ContactRequestDTO;
 import com.backend.dto.CustomerDashboardDTO;
+import com.backend.dto.CustomerProfileDTO;
+import com.backend.model.Customer;
+import com.backend.repository.CustomerRepository;
 import com.backend.service.BookingRequestService;
+import com.backend.service.SupportTicketService;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:8082}")
 @RequestMapping("/api")
 public class CustomerApiController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CustomerApiController.class);
+
     @Autowired
     private BookingRequestService bookingRequestService;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private SupportTicketService supportTicketService;
 
     @GetMapping("/customer/dashboard")
     public ResponseEntity<CustomerDashboardDTO> getDashboardData(@RequestParam("customerId") Long customerId) {
@@ -116,4 +140,161 @@ public class CustomerApiController {
             return ResponseEntity.status(500).build();
         }
     }
-}
+
+    @GetMapping("/customer/profile")
+    public ResponseEntity<CustomerProfileDTO> getCustomerProfile(@RequestParam Long customerId) {
+        logger.debug("Fetching profile for customer ID: {}", customerId);
+        try {
+            Optional<Customer> customerOpt = customerRepository.findById(customerId);
+            if (!customerOpt.isPresent()) {
+                logger.warn("Customer not found for ID: {}", customerId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new CustomerProfileDTO(null, null, null, null));
+            }
+
+            Customer customer = customerOpt.get();
+            CustomerProfileDTO customerProfileDTO = new CustomerProfileDTO();
+            customerProfileDTO.setUsername(customer.getUsername());
+            customerProfileDTO.setEmail(customer.getEmail());
+            customerProfileDTO.setPhoneNumber(customer.getPhoneNumber());
+            customerProfileDTO.setRole(customer.getRole().toString());
+
+            logger.info("Profile fetched successfully for customer ID: {}. Response: {}", customerId, customerProfileDTO);
+            return ResponseEntity.ok(customerProfileDTO);
+        } catch (Exception e) {
+            logger.error("Unexpected error fetching customer profile for ID: {}. Exception: {}", customerId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new CustomerProfileDTO(null, null, null, null));
+        }
+    }
+
+    @PostMapping("/customer/profile/update")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public ResponseEntity<String> updateCustomerProfile(
+            @RequestParam Long customerId,
+            @RequestParam(value = "username", required = false) String username,
+            @RequestParam(value = "email", required = false) String email) {
+        logger.debug("Updating profile for customer ID: {}. Username: {}, Email: {}",
+                customerId, username, email);
+        try {
+            Optional<Customer> customerOpt = customerRepository.findById(customerId);
+            if (!customerOpt.isPresent()) {
+                logger.warn("Customer not found for ID: {}", customerId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Customer not found");
+            }
+
+            Customer customer = customerOpt.get();
+
+            // Validate required fields before update
+            if (customer.getUsername() == null || customer.getEmail() == null ||
+                customer.getPassword() == null || customer.getRole() == null) {
+                throw new RuntimeException("Customer record has missing required fields");
+            }
+
+            boolean hasChanges = false;
+
+            // Track if fields are provided
+            boolean usernameProvided = username != null && !username.trim().isEmpty();
+            boolean emailProvided = email != null && !email.trim().isEmpty();
+
+            // Update username if provided and different
+            if (usernameProvided) {
+                if (username.length() < 3) {
+                    throw new RuntimeException("Username must be at least 3 characters long");
+                }
+                Optional<Customer> existingCustomer = customerRepository.findByUsername(username);
+                if (existingCustomer.isPresent() && !existingCustomer.get().getId().equals(customerId)) {
+                    logger.warn("Username already in use: {}", username);
+                    throw new RuntimeException("Username is already in use");
+                }
+                String currentUsername = customer.getUsername() != null ? customer.getUsername().trim() : "";
+                if (!username.trim().equalsIgnoreCase(currentUsername)) {
+                    customer.setUsername(username.trim());
+                    hasChanges = true;
+                }
+            }
+
+            // Update email if provided and different
+            if (emailProvided) {
+                if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                    throw new RuntimeException("Invalid email format");
+                }
+                Optional<Customer> existingCustomer = customerRepository.findByEmail(email);
+                if (existingCustomer.isPresent() && !existingCustomer.get().getId().equals(customerId)) {
+                    logger.warn("Email already in use: {}", email);
+                    throw new RuntimeException("Email is already in use");
+                }
+                String currentEmail = customer.getEmail() != null ? customer.getEmail().trim() : "";
+                if (!email.trim().equalsIgnoreCase(currentEmail)) {
+                    customer.setEmail(email.trim());
+                    hasChanges = true;
+                }
+            }
+
+            // Check if any fields were provided
+            if (!usernameProvided && !emailProvided) {
+                logger.info("No fields provided for customer ID: {}", customerId);
+                throw new RuntimeException("No fields provided to update");
+            }
+
+            // Check if there are actual changes
+            if (!hasChanges) {
+                logger.info("No changes detected for customer ID: {}", customerId);
+                throw new RuntimeException("No changes provided to update");
+            }
+
+            // Save the updated customer
+            Customer updatedCustomer = customerRepository.save(customer);
+
+            CustomerProfileDTO customerProfileDTO = new CustomerProfileDTO();
+            customerProfileDTO.setUsername(updatedCustomer.getUsername());
+            customerProfileDTO.setEmail(updatedCustomer.getEmail());
+            customerProfileDTO.setPhoneNumber(updatedCustomer.getPhoneNumber());
+            customerProfileDTO.setRole(updatedCustomer.getRole().toString());
+
+            logger.info("Profile updated successfully for customer ID: {}. Response: {}", customerId, customerProfileDTO);
+            return ResponseEntity.ok(customerProfileDTO.toString());
+        } catch (RuntimeException e) {
+            logger.error("Error updating customer profile for ID: {}. Message: {}", customerId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error updating customer profile for ID: {}. Exception: {}", customerId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error: " + e.getMessage());
+        }
+    }
+    @PostMapping("/contact")
+    public ResponseEntity<String> submitContactForm(@RequestBody ContactRequestDTO request) {
+        logger.debug("Received contact form submission: {}", request);
+        try {
+            // Validate request
+            if (request.getName() == null || request.getName().trim().length() < 3) {
+                throw new IllegalArgumentException("Name must be at least 3 characters long");
+            }
+            if (request.getEmail() == null || !request.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                throw new IllegalArgumentException("Invalid email format");
+            }
+            if (request.getSubject() == null || request.getSubject().trim().length() < 5) {
+                throw new IllegalArgumentException("Subject must be at least 5 characters long");
+            }
+            if (request.getMessage() == null || request.getMessage().trim().length() < 10) {
+                throw new IllegalArgumentException("Message must be at least 10 characters long");
+            }
+
+            // Create support ticket
+            supportTicketService.createSupportTicket(request);
+
+            logger.info("Support ticket created successfully for email: {}", request.getEmail());
+            return ResponseEntity.ok("Support query submitted successfully");
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid contact form submission: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error processing contact form: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit support query: " + e.getMessage());
+        }
+    }
+
+    }

@@ -747,7 +747,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" th:href="@{/contact}">
                             <span class="material-icons align-middle me-1">contact_support</span> Contact
                         </a>
                     </li>
@@ -758,7 +758,7 @@
                             <span class="username" th:text="${customer.name}">Customer Name</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li><a class="dropdown-item" th:href="@{/service-history}">
+                            <li><a class="dropdown-item" th:href="@{/dashboard/customer}">
                                 <span class="material-icons">history</span> Service History
                             </a></li>
                             <li><a class="dropdown-item" th:href="@{/profile-management}">
