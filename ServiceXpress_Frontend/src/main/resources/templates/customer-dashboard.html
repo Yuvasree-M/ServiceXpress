@@ -340,7 +340,7 @@
                     <li class="nav-item"><a class="nav-link" th:href="@{/customer/services}"><span class="material-icons align-middle me-1">build</span>Services</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/customer/bookings}">   <span class="material-icons align-middle me-1">calendar_month</span>Booking</a></li>
                      <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" th:href="@{/contact}">
                             <span class="material-icons align-middle me-1">contact_support</span> Contact
                         </a>
                     </li>
@@ -349,10 +349,17 @@
         <span class="profile-badge" th:text="${customer.initials != null} ? ${customer.initials} : 'NA'">NA</span>
         <span th:text="${customer.name != null} ? ${customer.name} : 'Guest'">Guest</span>
     </a>
-    <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" th:href="@{/customer/history}">Service History</a></li>
-        <li><a class="dropdown-item" th:href="@{/customer/logout}">Logout</a></li>
-    </ul>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" th:href="@{/dashboard/customer}">
+                                <span class="material-icons">history</span> Service History
+                            </a></li>
+                            <li><a class="dropdown-item" th:href="@{/profile-management}">
+                                <span class="material-icons">manage_accounts</span> Profile Management
+                            </a></li>
+                            <li><a class="dropdown-item" th:href="@{/customer/logout}" onclick="logout()">
+                                <span class="material-icons">logout</span> Logout
+                            </a></li>
+                        </ul>
 </li>
 <li class="nav-item" th:if="${customer == null}">
     <a class="nav-link" th:href="@{/login}">Login</a>
@@ -473,7 +480,7 @@
         </div>
     </div>
 
-    <th:block th:replace="fragments/footer :: footer"></th:block>
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

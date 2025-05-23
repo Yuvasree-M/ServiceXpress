@@ -60,6 +60,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/vehicle-models/**").permitAll()
                 .requestMatchers("/api/bookings/**").permitAll()
                 .requestMatchers("/api/customer/**").permitAll()
+                .requestMatchers("/api/contact").permitAll()
 
                 // Admin-only endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
