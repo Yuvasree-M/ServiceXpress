@@ -230,54 +230,59 @@
         </div>
 
         <div class="modal fade" id="viewBillModal" tabindex="-1" aria-labelledby="viewBillModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewBillModalLabel">Bill of Materials</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" id="modalBookingId">
-                        <input type="hidden" id="modalCustomerEmail">
-                        <input type="hidden" id="modalCustomerId">
-                        <div class="mb-3">
-                            <label class="form-label">Customer Name</label>
-                            <input type="text" class="form-control" id="modalCustomerName" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Advisor Name</label>
-                            <input type="text" class="form-control" id="modalAdvisorName" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Service Name</label>
-                            <input type="text" class="form-control" id="modalServiceName" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Materials</label>
-                            <table class="table table-bordered" id="modalMaterialsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Material</th>
-                                        <th>Quantity</th>
-                                        <th>Unit Price</th>
-                                        <th>Total Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Total</label>
-                            <input type="text" class="form-control" id="modalTotal" readonly>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="sendBillBtn">Send Bill to Customer</button>
-                    </div>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewBillModalLabel">Bill of Materials</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalBookingId">
+                <input type="hidden" id="modalCustomerEmail">
+                <input type="hidden" id="modalCustomerId">
+                <div class="mb-3">
+                    <label class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="modalCustomerName" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Advisor Name</label>
+                    <input type="text" class="form-control" id="modalAdvisorName" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Service Name</label>
+                    <input type="text" class="form-control" id="modalServiceName" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Materials</label>
+                    <table class="table table-bordered" id="modalMaterialsTable">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Service Charges (₹)</label>
+                    <input type="number" class="form-control" id="modalServiceCharges" step="0.01" min="0">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Total</label>
+                    <input type="text" class="form-control" id="modalTotal" readonly>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveServiceChargesBtn">Save Service Charges</button>
+                <button type="button" class="btn btn-primary" id="sendBillBtn">Send Bill to Customer</button>
+            </div>
         </div>
+    </div>
+</div>
 
         <div id="advisorTable" class="table-container mt-4">
             <h4>Advisor Requests</h4>
@@ -415,6 +420,7 @@
                     $('#modalCustomerName').val(data.customerName || 'N/A');
                     $('#modalAdvisorName').val(data.advisorName || 'N/A');
                     $('#modalServiceName').val(data.serviceName || 'N/A');
+                    $('#modalServiceCharges').val(data.serviceCharges ? data.serviceCharges.toFixed(2) : '0.00');
                     $('#modalTotal').val(data.total ? '₹' + data.total.toFixed(2) : '₹0.00');
 
                     const materialsTableBody = $('#modalMaterialsTable tbody');
@@ -439,6 +445,40 @@
                     const errorMsg = xhr.responseJSON ? xhr.responseJSON.error : xhr.responseText || 'Unknown error';
                     console.log('Error fetching BOM for booking ID ' + bookingId + ': ' + errorMsg);
                     alert('Failed to load bill: ' + errorMsg);
+                }
+            });
+        });
+
+        $('#saveServiceChargesBtn').on('click', function() {
+            const bookingId = $('#modalBookingId').val();
+            const serviceCharges = parseFloat($('#modalServiceCharges').val());
+            const token = $('#token').val();
+            const backendApiUrl = $('#backendApiUrl').val();
+
+            if (!token) {
+                alert('Authentication token missing. Please log in again.');
+                return;
+            }
+
+            if (isNaN(serviceCharges) || serviceCharges < 0) {
+                alert('Please enter valid service charges.');
+                return;
+            }
+
+            $.ajax({
+                url: backendApiUrl + '/admin/bookings/bom/' + bookingId + '/service-charges',
+                method: 'PUT',
+                contentType: 'application/json',
+                headers: { 'Authorization': 'Bearer ' + token },
+                data: JSON.stringify({ serviceCharges: serviceCharges }),
+                success: function(data) {
+                    $('#modalServiceCharges').val(data.serviceCharges ? data.serviceCharges.toFixed(2) : '0.00');
+                    $('#modalTotal').val(data.total ? '₹' + data.total.toFixed(2) : '₹0.00');
+                    alert('Service charges updated successfully.');
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON ? xhr.responseJSON.error : xhr.responseText || 'Unknown error';
+                    alert('Failed to update service charges: ' + errorMsg);
                 }
             });
         });
@@ -469,6 +509,7 @@
                 }
             });
         });
+ 
 
         document.addEventListener("DOMContentLoaded", function() {
             showTable('dueTable');

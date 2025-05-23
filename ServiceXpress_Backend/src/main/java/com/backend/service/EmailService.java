@@ -49,48 +49,53 @@ public class EmailService {
                         "<p>Thank you for choosing our service!</p>";
         sendEmail(to, "Booking Confirmation - ID: " + booking.getId(), content);
     }
-    public void sendBillEmail(String to, String customerName, Long bookingId, String customerNameInBom, 
-                             String advisorName, String serviceName, List<BillOfMaterialDTO.Material> materials, 
-                             Double total) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    public void sendBillEmail(String to, String customerName, Long bookingId, String customerNameInBom,
+            String advisorName, String serviceName, List<BillOfMaterialDTO.Material> materials,
+            Double total, Double serviceCharges) throws MessagingException {
+MimeMessage message = mailSender.createMimeMessage();
+MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        helper.setTo(to);
-        helper.setSubject("Bill for Booking ID: " + bookingId);
-        helper.setFrom("noreply@yourdomain.com");
+helper.setTo(to);
+helper.setSubject("Bill for Booking ID: " + bookingId);
+helper.setFrom("noreply@yourdomain.com");
 
-        StringBuilder materialsHtml = new StringBuilder();
-        materialsHtml.append("<table border='1' style='border-collapse: collapse; width: 100%;'>" +
-                "<tr><th>Material</th><th>Quantity</th><th>Unit Price</th><th>Total Price</th></tr>");
-        for (BillOfMaterialDTO.Material material : materials) {
-            double totalPrice = material.getQuantity() * material.getPrice();
-            materialsHtml.append("<tr>" +
-                    "<td>").append(material.getMaterialName()).append("</td>" +
-                    "<td>").append(material.getQuantity()).append("</td>" +
-                    "<td>$").append(String.format("%.2f", material.getPrice())).append("</td>" +
-                    "<td>$").append(String.format("%.2f", totalPrice)).append("</td>" +
-                    "</tr>");
-        }
-        materialsHtml.append("</table>");
+StringBuilder materialsHtml = new StringBuilder();
+materialsHtml.append("<table border='1' style='border-collapse: collapse; width: 100%;'>" +
+"<tr><th>Material</th><th>Quantity</th><th>Unit Price</th><th>Total Price</th></tr>");
+double materialsTotal = 0.0;
+for (BillOfMaterialDTO.Material material : materials) {
+double totalPrice = material.getQuantity() * material.getPrice();
+materialsTotal += totalPrice;
+materialsHtml.append("<tr>" +
+  "<td>").append(material.getMaterialName()).append("</td>" +
+  "<td>").append(material.getQuantity()).append("</td>" +
+  "<td>₹").append(String.format("%.2f", material.getPrice())).append("</td>" +
+  "<td>₹").append(String.format("%.2f", totalPrice)).append("</td>" +
+  "</tr>");
+}
+materialsHtml.append("</table>");
 
-        String htmlContent = "<h3>Dear " + customerName + ",</h3>" +
-                "<p>Below is the bill for your recent service (Booking ID: " + bookingId + "):</p>" +
-                "<ul>" +
-                "<li><strong>Customer Name:</strong> " + customerNameInBom + "</li>" +
-                "<li><strong>Advisor Name:</strong> " + advisorName + "</li>" +
-                "<li><strong>Service Name:</strong> " + serviceName + "</li>" +
-                "</ul>" +
-                "<h4>Materials Used:</h4>" +
-                materialsHtml.toString() +
-                "<p><strong>Total Amount:</strong> $" + String.format("%.2f", total) + "</p>" +
-                "<p>Please make the payment at your earliest convenience.</p>" +
-                "<p>Thank you for choosing our service!</p>";
+String htmlContent = "<h3>Dear " + customerName + ",</h3>" +
+"<p>Below is the bill for your recent service (Booking ID: " + bookingId + "):</p>" +
+"<ul>" +
+"<li><strong>Customer Name:</strong> " + customerNameInBom + "</li>" +
+"<li><strong>Advisor Name:</strong> " + advisorName + "</li>" +
+"<li><strong>Service Name:</strong> " + serviceName + "</li>" +
+"</ul>" +
+"<h4>Materials Used:</h4>" +
+materialsHtml.toString() +
+"<p><strong>Materials Total:</strong> ₹" + String.format("%.2f", materialsTotal) + "</p>" +
+"<p><strong>Service Charges:</strong> ₹" + String.format("%.2f", serviceCharges != null ? serviceCharges : 0.0) + "</p>" +
+"<p><strong>Total Amount:</strong> ₹" + String.format("%.2f", total) + "</p>" +
+"<p><a href='http://localhost:8082/customer/dashboard?bookingId=" + bookingId + "'>Click here to make payment</a></p>" +
+"<p>Thank you for choosing our service!</p>";
 
-        helper.setText(htmlContent, true);
-        mailSender.send(message);
-        logger.info("Bill email sent to: {}", to);
-    }
-    
+
+helper.setText(htmlContent, true);
+mailSender.send(message);
+logger.info("Bill email sent to: {}", to);
+}
+
     public void sendSupportQueryNotification(String name, String email, String subject, String message) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -110,4 +115,3 @@ public class EmailService {
             throw new RuntimeException("Failed to send email notification: " + e.getMessage());
         }
     }
-}

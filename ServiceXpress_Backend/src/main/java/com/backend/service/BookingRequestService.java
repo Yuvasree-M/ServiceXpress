@@ -11,6 +11,8 @@ import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
+
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -563,10 +565,47 @@ public class BookingRequestService {
         return receiptData;
     }
 
-    public void sendBillEmail(String to, String customerName, Long bookingId, String customerNameInBom,
-                             String advisorName, String serviceName, List<BillOfMaterialDTO.Material> materials,
-                             Double total) throws Exception {
-        emailService.sendBillEmail(to, customerName, bookingId, customerNameInBom, advisorName, serviceName, materials, total);
+    @Transactional
+    public void sendBill(Long bookingId) {
+        BookingRequest booking = repository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+        if (!"COMPLETED".equals(booking.getStatus())) {
+            throw new IllegalStateException("Booking must be completed to send bill");
+        }
+
+        BillOfMaterial bom = billOfMaterialRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Bill of Material not found for booking: " + bookingId));
+
+        List<BillOfMaterialDTO.Material> materials = new ArrayList<>();
+        try {
+            if (bom.getMaterials() != null && !bom.getMaterials().isEmpty()) {
+                materials = objectMapper.readValue(bom.getMaterials(), new TypeReference<List<BillOfMaterialDTO.Material>>() {});
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("Error parsing materials JSON for BOM ID {}: {}", bom.getId(), e.getMessage(), e);
+            throw new RuntimeException("Failed to parse materials for bill email", e);
+        }
+
+        try {
+            emailService.sendBillEmail(
+                    booking.getCustomerEmail(),
+                    booking.getCustomerName(),
+                    bookingId,
+                    bom.getCustomerName(),
+                    bom.getAdvisorName(),
+                    bom.getServiceName(),
+                    materials,
+                    bom.getTotal(),
+                    bom.getServiceCharges()
+            );
+        } catch (MessagingException e) {
+            logger.error("Error sending bill email for booking ID {}: {}", bookingId, e.getMessage(), e);
+            throw new RuntimeException("Failed to send bill email", e);
+        }
+
+        booking.setStatus("COMPLETED_PENDING_PAYMENT");
+        booking.setUpdatedAt(LocalDateTime.now());
+        repository.save(booking);
     }
     
     
@@ -644,30 +683,7 @@ public class BookingRequestService {
         return dtos;
     }
 
-    @Transactional
-    public void sendBill(Long bookingId) {
-        BookingRequest booking = repository.findById(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
-        if (!"COMPLETED".equals(booking.getStatus())) {
-            throw new IllegalStateException("Booking must be completed to send bill");
-        }
-
-        BillOfMaterial bom = billOfMaterialRepository.findByBookingId(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException("Bill of Material not found for booking: " + bookingId));
-
-        String paymentLink = "http://localhost:8082/customer/dashboard?bookingId=" + bookingId;
-        String emailContent = generateBillEmailContent(bom, paymentLink);
-
-        emailService.sendEmail(
-            booking.getCustomerEmail(),
-            "Service Bill for Booking ID: " + bookingId,
-            emailContent
-        );
-
-        booking.setStatus("COMPLETED_PENDING_PAYMENT");
-        booking.setUpdatedAt(LocalDateTime.now());
-        repository.save(booking);
-    }
+   
 
     private String generateBillEmailContent(BillOfMaterial bom, String paymentLink) {
         StringBuilder content = new StringBuilder();
@@ -751,7 +767,7 @@ public class BookingRequestService {
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
 
-        // Skip customerId check if customerId is 0 (indicating advisor access)
+
         if (customerId != 0 && !booking.getCustomerId().equals(customerId)) {
             logger.warn("Customer ID {} does not match booking ID {} owner", customerId, bookingId);
             throw new IllegalArgumentException("Booking does not belong to customer: " + customerId);
@@ -853,6 +869,64 @@ public class BookingRequestService {
         }
 
         return mapToBookingResponseDTOs(completedBookings);
+    }
+    
+    @Transactional
+    public BillOfMaterialDTO updateBillWithServiceCharges(Long bookingId, Long customerId, Double serviceCharges) {
+        logger.info("Updating BOM with service charges for bookingId: {}, customerId: {}", bookingId, customerId);
+
+        BookingRequest booking = repository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
+
+        // Skip customerId check if customerId is 0 (indicating admin/advisor access)
+        if (customerId != 0 && !booking.getCustomerId().equals(customerId)) {
+            logger.warn("Customer ID {} does not match booking ID {} owner", customerId, bookingId);
+            throw new IllegalArgumentException("Booking does not belong to customer: " + customerId);
+        }
+
+        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT").contains(booking.getStatus())) {
+            logger.warn("Booking ID {} is not in COMPLETED or COMPLETED_PENDING_PAYMENT status, current status: {}", bookingId, booking.getStatus());
+            throw new IllegalArgumentException("Booking must be in COMPLETED or COMPLETED_PENDING_PAYMENT status");
+        }
+
+        BillOfMaterial bom = billOfMaterialRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Bill of Material not found for booking ID: " + bookingId));
+
+        // Update service charges and recalculate total
+        bom.setServiceCharges(serviceCharges != null ? serviceCharges : 0.0);
+        Double materialTotal = 0.0;
+        try {
+            if (bom.getMaterials() != null && !bom.getMaterials().isEmpty()) {
+                List<BillOfMaterialDTO.Material> materials = objectMapper.readValue(bom.getMaterials(), new TypeReference<List<BillOfMaterialDTO.Material>>() {});
+                materialTotal = materials.stream().mapToDouble(m -> m.getPrice() * m.getQuantity()).sum();
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("Error parsing materials JSON for booking ID {}: {}", bookingId, e.getMessage(), e);
+            throw new RuntimeException("Error parsing materials data for booking ID: " + bookingId);
+        }
+        bom.setTotal(materialTotal + bom.getServiceCharges());
+        billOfMaterialRepository.save(bom);
+
+        // Convert to DTO
+        BillOfMaterialDTO bomDTO = new BillOfMaterialDTO();
+        bomDTO.setBookingId(bookingId);
+        bomDTO.setCustomerName(bom.getCustomerName());
+        bomDTO.setAdvisorName(bom.getAdvisorName());
+        bomDTO.setServiceName(bom.getServiceName());
+        bomDTO.setTotal(bom.getTotal());
+        bomDTO.setServiceCharges(bom.getServiceCharges());
+        try {
+            List<BillOfMaterialDTO.Material> materials = bom.getMaterials() != null && !bom.getMaterials().isEmpty()
+                    ? objectMapper.readValue(bom.getMaterials(), new TypeReference<List<BillOfMaterialDTO.Material>>() {})
+                    : new ArrayList<>();
+            bomDTO.setMaterials(materials);
+        } catch (JsonProcessingException e) {
+            logger.error("Error parsing materials JSON for booking ID {}: {}", bookingId, e.getMessage(), e);
+            throw new RuntimeException("Error parsing materials data for booking ID: " + bookingId);
+        }
+
+        logger.info("Successfully updated BOM with service charges for bookingId: {}", bookingId);
+        return bomDTO;
     }
     
 }

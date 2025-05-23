@@ -28,6 +28,7 @@ public class BillOfMaterialService {
             bom.setAdvisorName(bomDTO.getAdvisorName());
             bom.setServiceName(bomDTO.getServiceName());
             bom.setTotal(bomDTO.getTotal());
+            bom.setServiceCharges(bomDTO.getServiceCharges() != null ? bomDTO.getServiceCharges() : 0.0);
 
             String materialsJson = objectMapper.writeValueAsString(bomDTO.getMaterials());
             bom.setMaterials(materialsJson);
