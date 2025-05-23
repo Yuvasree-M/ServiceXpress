@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceXpress - Customer Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #343a40;
+            --secondary-color: #F97316;
+            --background-color: #F3F4F6;
+            --text-color: #4B5563;
+            --white: #FFFFFF;
+            --gradient-primary: linear-gradient(135deg, #343a40, #636363);
+            --gradient-secondary: linear-gradient(135deg, #F97316, #FB923C);
+            --primary-orange: #ff6200;
+            --dark-gray: #343a40;
+            --light-gray: #e9ecef;
+            --soft-orange: #ff8c40;
+            --gray-hover: #495057;
+            --light-background: #F4F4F4;
+            --medium-gray: #6c757d;
+            --dark-theme-bg: #2a2e33;
+            --dark-theme-text: #d3d7db;
+        }
+
+        * {
+            transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: var(--white);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 15px 20px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--primary-color);
+            font-weight: 500;
+            position: relative;
+            margin-left: 20px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--secondary-color);
+            transition: width 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .profile-dropdown {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-left: 20px;
+        }
+
+        .profile-dropdown .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+
+        .profile-badge {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 8px;
+            text-transform: uppercase;
+        }
+
+        .dropdown-toggle::after {
+            border: none;
+            content: 'expand_more';
+            font-family: 'Material+Icons';
+            vertical-align: middle;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .dropdown-menu {
+            background: var(--white);
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            color: var(--primary-color);
+            font-weight: 500;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(145deg, #F9FAFB, #F3F4F6);
+            color: var(--secondary-color);
+        }
+
+        .dropdown-item .material-icons {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            padding: 60px 15px;
+            flex: 1;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 42px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .profile-container {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            margin: 0 auto;
+            max-width: 600px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #343a40, #636363);
+            color: var(--white);
+            padding: 20px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            text-align: center;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 16px;
+            color: #cccccc;
+        }
+
+        .profile-details {
+            padding: 20px;
+        }
+
+        .profile-field {
+            margin-bottom: 15px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-field i {
+            margin-right: 10px;
+            color: var(--medium-gray);
+        }
+
+        .profile-field label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .profile-field span {
+            color: var(--text-color);
+        }
+
+        .edit-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background: linear-gradient(135deg, #343a40, #636363);
+            color: var(--white);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .edit-button:hover {
+            background: linear-gradient(135deg, #636363, #343a40);
+        }
+
+        .edit-form {
+            padding: 20px;
+        }
+
+        .edit-form .profile-field label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .edit-form .profile-field input[type="text"],
+        .edit-form .profile-field input[type="email"] {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+        }
+
+        .error {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+            text-align: center;
+        }
+
+        .success {
+            color: #388e3c;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .edit-form button {
+            padding: 10px 20px;
+            background: var(--gradient-secondary);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .edit-form button:hover {
+            background: linear-gradient(135deg, #FB923C, #F97316);
+        }
+
+        .readonly {
+            color: var(--medium-gray);
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--medium-gray);
+            margin-top: 5px;
+            display: block;
+        }
+
+        .breadcrumb {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            background-color: transparent;
+            padding: 0;
+            justify-content: center;
+        }
+
+        .breadcrumb-item a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--primary-color);
+        }
+
+        footer {
+            background-color: var(--dark-gray);
+            color: white;
+            padding: 60px 20px 40px;
+            flex-shrink: 0;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        footer h5 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--primary-orange);
+        }
+
+        footer p, footer a {
+            font-size: 0.95rem;
+            color: white;
+            transition: color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        footer .contact-link {
+            color: white;
+            text-decoration: none;
+        }
+
+        footer .contact-link:hover {
+            color: var(--primary-orange);
+        }
+
+        footer .quick-links a {
+            display: block;
+            margin-bottom: 10px;
+            color: white;
+            text-decoration: none;
+        }
+
+        footer .quick-links a:hover {
+            color: var(--primary-orange);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 25px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .social-icon {
+            color: white;
+            font-size: 26px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .social-icon:hover {
+            color: var(--primary-orange);
+            transform: scale(1.2);
+        }
+
+        footer .footer-bottom {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer .footer-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        footer .footer-column.follow-us {
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            footer .text-center-mobile {
+                text-align: center;
+                margin-bottom: 50px;
+            }
+
+            footer .footer-column {
+                align-items: center;
+            }
+
+            footer .social-icons {
+                justify-content: center;
+            }
+
+            footer {
+                padding: 40px 15px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><img th:src="@{/images/logo.jpg}" style="height: 40px;"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dashboard/customer}"><span class="material-icons align-middle me-1">home</span>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/services}"><span class="material-icons align-middle me-1">build</span>Services</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/bookings}"><span class="material-icons align-middle me-1">calendar_month</span>Booking</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/contact}">
+                            <span class="material-icons align-middle me-1">contact_support</span>Contact
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" th:if="${session.customerId != null}">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="profile-badge" th:text="${session.customerInitials != null} ? ${session.customerInitials} : 'NA'">NA</span>
+                            <span th:text="${session.customerName != null} ? ${session.customerName} : 'Guest'">Guest</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" th:href="@{/service-history}">
+                                <span class="material-icons">history</span> Service History
+                            </a></li>
+                            <li><a class="dropdown-item active" th:href="@{/profile-management}">
+                                <span class="material-icons">manage_accounts</span> Profile Management
+                            </a></li>
+                            <li><a class="dropdown-item" th:href="@{/customer/logout}" onclick="logout()">
+                                <span class="material-icons">logout</span> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" th:if="${customer == null}">
+                        <a class="nav-link" th:href="@{/login}">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a id="breadcrumb-prev-link" href="#">Previous Page</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Profile Management</li>
+            </ol>
+        </nav>
+
+        <h1>My Profile</h1>
+
+        <div class="profile-container">
+            <div th:if="${error}" class="error" th:text="${error}"></div>
+            <div th:if="${success}" class="success" th:text="${success}"></div>
+
+            <div th:if="${profile != null}">
+                <!-- Profile View Mode -->
+                <div th:unless="${mode == 'edit'}">
+                    <div class="header">
+                        <h2 th:text="${profile.username} ?: 'Unknown'"></h2>
+                        <p th:text="${profile.role} ?: 'Unknown'"></p>
+                    </div>
+                    <div class="profile-details">
+                        <div class="profile-field">
+                            <i class="fas fa-user"></i>
+                            <label>Full Name</label>
+                            <span th:text="${profile.username} ?: 'Not set'"></span>
+                        </div>
+                        <div class="profile-field">
+                            <i class="fas fa-envelope"></i>
+                            <label>Email Address</label>
+                            <span th:text="${profile.email} ?: 'Not set'"></span>
+                        </div>
+                        <div class="profile-field">
+                            <i class="fas fa-phone"></i>
+                            <label>Phone Number</label>
+                            <span th:text="${profile.phoneNumber} ?: 'Not set'"></span>
+                        </div>
+                        <a th:href="@{/profile-management(mode='edit')}" class="edit-button">Edit Profile</a>
+                    </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div th:if="${mode == 'edit'}">
+                    <div th:if="${customerUpdate != null}" class="edit-form">
+                        <form th:action="@{/profile-management/update}" method="post" onsubmit="return validateForm()">
+                            <div class="profile-field">
+                                <label>Full Name:</label>
+                                <input type="text" th:field="${customerUpdate.username}" placeholder="Enter your name" minlength="3"/>
+                                <span class="note">Minimum 3 characters</span>
+                            </div>
+                            <div class="profile-field">
+                                <label>Email Address:</label>
+                                <input type="email" th:field="${customerUpdate.email}" placeholder="Enter your email" id="emailInput"/>
+                                <span class="note">Must be a valid email address</span>
+                            </div>
+                            <div class="profile-field">
+                                <label></label>
+                                <button type="submit">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div th:unless="${customerUpdate != null}" class="error">
+                        Unable to load the edit form. Please try again.
+                    </div>
+                </div>
+            </div>
+            <div th:unless="${profile != null}" class="error">
+                Profile data is unavailable. Please try again later.
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const referrer = document.referrer;
+            const prevLink = document.getElementById('breadcrumb-prev-link');
+
+            const pageMap = {
+                '/dashboard/customer': 'Dashboard',
+                '/customer/services': 'Services',
+                '/customer/bookings': 'Bookings',
+                '/service-history': 'Service History',
+                '/profile-management': 'Profile Management'
+            };
+
+            let referrerPath = '';
+            if (referrer) {
+                try {
+                    const url = new URL(referrer);
+                    referrerPath = url.pathname;
+                } catch (e) {
+                    console.error('Invalid referrer URL:', e);
+                }
+            }
+
+            if (referrerPath && pageMap[referrerPath] && referrerPath !== '/profile-management') {
+                prevLink.textContent = pageMap[referrerPath];
+                prevLink.setAttribute('href', referrerPath);
+            } else {
+                prevLink.textContent = 'Dashboard';
+                prevLink.setAttribute('href', '/dashboard/customer');
+            }
+        });
+
+        function logout() {
+            // Optional: Add any client-side logout logic if needed
+        }
+    </script>
+    <script>
+        function validateForm() {
+            const usernameInput = document.querySelector('input[name="username"]').value;
+            const emailInput = document.getElementById("emailInput").value;
+
+            // Username validation
+            if (usernameInput && usernameInput.trim().length < 3) {
+                alert("Username must be at least 3 characters long.");
+                return false;
+            }
+
+            // Email validation
+            const emailPattern = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+            if (emailInput && !emailPattern.test(emailInput)) {
+                alert("Please enter a valid email address (e.g., example@domain.com).");
+                return false;
+            }
+
+            // Ensure at least one field is provided
+            if (!usernameInput.trim() && !emailInput.trim()) {
+                alert("Please provide at least one field to update (username or email).");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>

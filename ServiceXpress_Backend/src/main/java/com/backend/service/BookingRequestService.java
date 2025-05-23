@@ -64,6 +64,9 @@ public class BookingRequestService {
 
     @Value("${razorpay.key.secret}")
     private String razorpayKeySecret;
+    
+    @Autowired
+    private ServicePackageRepository servicePackageRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(BookingRequestService.class);
 
@@ -295,7 +298,7 @@ public class BookingRequestService {
                                 .map(VehicleModel::getModelName)
                                 .orElse("Unknown") : "Unknown";
 
-                Double cost = calculateCost(booking.getServices());
+                Double cost = calculateCost(booking.getServices(), booking.getVehicleTypeId());
 
                 if (List.of("PENDING", "ASSIGNED", "IN_PROGRESS", "COMPLETED_PENDING_PAYMENT").contains(booking.getStatus())) {
                     ServiceStatus status = new ServiceStatus();
@@ -565,18 +568,40 @@ public class BookingRequestService {
                              Double total) throws Exception {
         emailService.sendBillEmail(to, customerName, bookingId, customerNameInBom, advisorName, serviceName, materials, total);
     }
+    
+    
 
-    private Double calculateCost(String services) {
+    private Double calculateCost(String services, Integer vehicleTypeId) {
         if (services == null || services.isEmpty()) return 0.0;
-        Map<String, Double> serviceCosts = new HashMap<>();
-        serviceCosts.put("Basic Wash", 50.0);
-        serviceCosts.put("Oil Change", 100.0);
-        serviceCosts.put("Full Service", 200.0);
-        return Arrays.stream(services.split(","))
+
+        // Fetch service packages for the given vehicle type
+        List<ServicePackage> servicePackages = servicePackageRepository.findByVehicleTypeId(vehicleTypeId);
+        if (servicePackages.isEmpty()) {
+            logger.warn("No service packages found for vehicleTypeId: {}", vehicleTypeId);
+            return 0.0;
+        }
+
+        // Map service package names to their prices
+        Map<String, Double> serviceCosts = servicePackages.stream()
+                .collect(Collectors.toMap(ServicePackage::getPackageName, ServicePackage::getPrice));
+
+        // Log the available service costs for debugging
+        logger.debug("Service costs for vehicleTypeId {}: {}", vehicleTypeId, serviceCosts);
+
+        // Calculate the total cost by summing the prices of matching services
+        double totalCost = Arrays.stream(services.split(","))
                 .map(String::trim)
+                .peek(service -> {
+                    if (!serviceCosts.containsKey(service)) {
+                        logger.warn("Service '{}' not found in service packages for vehicleTypeId: {}", service, vehicleTypeId);
+                    }
+                })
                 .filter(serviceCosts::containsKey)
                 .mapToDouble(serviceCosts::get)
                 .sum();
+
+        logger.info("Calculated cost for services '{}' (vehicleTypeId: {}): {}", services, vehicleTypeId, totalCost);
+        return totalCost;
     }
 
     private List<BookingResponseDTO> mapToBookingResponseDTOs(List<BookingRequest> bookings) {

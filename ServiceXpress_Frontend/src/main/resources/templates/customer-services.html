@@ -508,7 +508,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" th:href="@{/contact}">
                             <span class="material-icons align-middle me-1">contact_support</span> Contact
                         </a>
                     </li>
@@ -519,12 +519,12 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                             <li>
-                                <a class="dropdown-item" th:href="@{/customer/history}">
+                                <a class="dropdown-item" th:href="@{/dashboard/customer}">
                                     <span class="material-icons">history</span> Service History
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" th:href="@{/customer/cart}">
+                                <a class="dropdown-item" th:href="@{/customer/services}">
                                     <span class="material-icons">shopping_cart</span> My Cart
                                     <span class="badge bg-secondary ms-2" id="cart-count">0</span>
                                 </a>
