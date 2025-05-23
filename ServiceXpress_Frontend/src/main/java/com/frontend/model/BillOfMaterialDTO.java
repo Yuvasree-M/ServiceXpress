@@ -10,6 +10,7 @@ public class BillOfMaterialDTO {
     private String serviceName;
     private List<Material> materials;
     private Double total;
+    private Double serviceCharges;
 
     // Getters and Setters
     public Long getBookingId() { return bookingId; }
@@ -24,7 +25,13 @@ public class BillOfMaterialDTO {
     public void setMaterials(List<Material> materials) { this.materials = materials; }
     public Double getTotal() { return total; }
     public void setTotal(Double total) { this.total = total; }
+    public Double getServiceCharges() {
+        return serviceCharges;
+    }
 
+    public void setServiceCharges(Double serviceCharges) {
+        this.serviceCharges = serviceCharges;
+    }
     public static class Material {
         private String materialName;
         private Integer quantity;

@@ -30,6 +30,9 @@ public class BillOfMaterial {
     @Column(columnDefinition = "TEXT")
     private String materials;
 
+    @Column(name = "service_charges")
+    private Double serviceCharges;
+    
     @Column
     private Double total;
 }

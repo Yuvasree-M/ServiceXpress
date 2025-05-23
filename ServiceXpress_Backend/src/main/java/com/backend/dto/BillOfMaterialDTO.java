@@ -16,6 +16,7 @@ public class BillOfMaterialDTO {
     private String serviceName;
     private List<Material> materials;
     private Double total;
+    private Double serviceCharges;
 
 @Getter
 @Setter
