@@ -1,4 +1,3 @@
-
 package com.backend.service;
 
 import com.backend.dto.*;
@@ -28,9 +27,9 @@ import java.util.stream.Collectors;
 @Service
 public class BookingRequestService {
 
-	@Autowired
-	private CustomerRepository customerRepository;
-	
+    @Autowired
+    private CustomerRepository customerRepository;
+    
     @Autowired
     private BookingRequestRepository repository;
 
@@ -69,6 +68,9 @@ public class BookingRequestService {
     
     @Autowired
     private ServicePackageRepository servicePackageRepository;
+    
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(BookingRequestService.class);
 
@@ -198,7 +200,7 @@ public class BookingRequestService {
 
     public List<BookingResponseDTO> getCompletedBookings() {
         logger.info("Fetching completed and payment pending bookings");
-        List<BookingRequest> completedBookings = repository.findByStatusIn(Arrays.asList("COMPLETED", "COMPLETED_PENDING_PAYMENT"));
+        List<BookingRequest> completedBookings = repository.findByStatusIn(Arrays.asList("COMPLETED", "COMPLETED_PENDING_PAYMENT", "COMPLETED_PAID"));
         logger.info("Found {} completed or payment pending bookings", completedBookings.size());
         completedBookings.forEach(booking -> logger.info("Booking ID: {}, Status: {}", booking.getId(), booking.getStatus()));
         return mapToBookingResponseDTOs(completedBookings);
@@ -325,6 +327,7 @@ public class BookingRequestService {
                     history.setCost(cost);
                     history.setStatus("Completed");
                     history.setTransactionId(booking.getTransactionId());
+                    history.setReviewed(reviewRepository.findByBookingId(booking.getId()).isPresent());
                     serviceHistory.add(history);
                 }
             } catch (Exception e) {
@@ -342,7 +345,6 @@ public class BookingRequestService {
         logger.info("Fetching admin dashboard data");
         DashboardDataDTO dashboardData = new DashboardDataDTO();
 
-       
         List<BookingResponseDTO> pendingBookings = getPendingBookings();
         List<VehicleDueDTO> vehiclesDue = pendingBookings.stream().map(booking -> {
             VehicleDueDTO dto = new VehicleDueDTO();
@@ -371,7 +373,6 @@ public class BookingRequestService {
         dashboardData.setVehiclesDue(vehiclesDue);
         dashboardData.setDueCount(vehiclesDue.size());
 
-       
         List<BookingResponseDTO> assignedBookings = getAssignedBookings();
         List<VehicleAssignedDTO> vehiclesAssigned = assignedBookings.stream().map(booking -> {
             VehicleAssignedDTO dto = new VehicleAssignedDTO();
@@ -394,7 +395,6 @@ public class BookingRequestService {
         dashboardData.setVehiclesAssigned(vehiclesAssigned);
         dashboardData.setAssignedCount(vehiclesAssigned.size());
 
-       
         List<BookingResponseDTO> inProgressBookings = getInProgressBookings();
         List<VehicleUnderServiceDTO> vehiclesUnderService = inProgressBookings.stream().map(booking -> {
             VehicleUnderServiceDTO dto = new VehicleUnderServiceDTO();
@@ -417,7 +417,6 @@ public class BookingRequestService {
         dashboardData.setVehiclesUnderService(vehiclesUnderService);
         dashboardData.setServicingCount(vehiclesUnderService.size());
 
-        
         List<BookingResponseDTO> completedBookings = getCompletedBookings();
         List<VehicleCompletedDTO> vehiclesCompleted = completedBookings.stream().map(booking -> {
             VehicleCompletedDTO dto = new VehicleCompletedDTO();
@@ -452,7 +451,6 @@ public class BookingRequestService {
         dashboardData.setVehiclesCompleted(vehiclesCompleted);
         dashboardData.setCompletedCount(vehiclesCompleted.size());
 
-        
         List<AdvisorRequestDTO> advisorRequests = inProgressBookings.stream()
             .filter(booking -> booking.getStatus().equals("IN_PROGRESS"))
             .map(booking -> {
@@ -535,8 +533,8 @@ public class BookingRequestService {
     public Map<String, Object> getReceiptData(Long bookingId) {
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
-        if (!"COMPLETED".equalsIgnoreCase(booking.getStatus())) {
-            throw new IllegalStateException("Receipt available only for completed bookings");
+        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT", "COMPLETED_PAID").contains(booking.getStatus())) {
+            throw new IllegalStateException("Receipt available only for completed bookings (COMPLETED, COMPLETED_PENDING_PAYMENT, or COMPLETED_PAID)");
         }
 
         Optional<BillOfMaterial> bomOptional = billOfMaterialRepository.findByBookingId(bookingId);
@@ -545,11 +543,32 @@ public class BookingRequestService {
         }
         BillOfMaterial bom = bomOptional.get();
 
+        String vehicleTypeName = booking.getVehicleTypeId() != null ?
+                vehicleTypeRepository.findById(Integer.valueOf(booking.getVehicleTypeId()))
+                        .map(VehicleType::getName)
+                        .orElse("Unknown") : "Unknown";
+        String vehicleModelName = booking.getVehicleModelId() != null ?
+                vehicleModelRepository.findById(Integer.valueOf(booking.getVehicleModelId()))
+                        .map(VehicleModel::getModelName)
+                        .orElse("Unknown") : "Unknown";
+        String serviceCenterName = booking.getServiceCenterId() != null ?
+                serviceCenterRepository.findById(booking.getServiceCenterId())
+                        .map(sc -> sc.getCenterName() + " (" + sc.getCityName() + ")")
+                        .orElse("Unknown") : "Unknown";
+
         Map<String, Object> receiptData = new HashMap<>();
+        receiptData.put("customerId", booking.getCustomerId());
+        receiptData.put("bookingId", booking.getId());
+        receiptData.put("transactionId", booking.getTransactionId());
         receiptData.put("customerName", bom.getCustomerName());
-        receiptData.put("advisorName", bom.getAdvisorName());
-        receiptData.put("serviceName", bom.getServiceName());
-        receiptData.put("total", bom.getTotal());
+        receiptData.put("customerEmail", booking.getCustomerEmail());
+        receiptData.put("serviceCenterName", serviceCenterName);
+        receiptData.put("vehicleTypeName", vehicleTypeName);
+        receiptData.put("vehicleModelName", vehicleModelName);
+        receiptData.put("vehicleRegistrationNumber", booking.getVehicleRegistrationNumber());
+        receiptData.put("services", bom.getServiceName());
+        receiptData.put("cost", bom.getTotal());
+        receiptData.put("completionDate", booking.getUpdatedAt().toString());
 
         List<Map<String, Object>> materials = new ArrayList<>();
         try {
@@ -608,26 +627,20 @@ public class BookingRequestService {
         repository.save(booking);
     }
     
-    
-
     private Double calculateCost(String services, Integer vehicleTypeId) {
         if (services == null || services.isEmpty()) return 0.0;
 
-        // Fetch service packages for the given vehicle type
         List<ServicePackage> servicePackages = servicePackageRepository.findByVehicleTypeId(vehicleTypeId);
         if (servicePackages.isEmpty()) {
             logger.warn("No service packages found for vehicleTypeId: {}", vehicleTypeId);
             return 0.0;
         }
 
-        // Map service package names to their prices
         Map<String, Double> serviceCosts = servicePackages.stream()
                 .collect(Collectors.toMap(ServicePackage::getPackageName, ServicePackage::getPrice));
 
-        // Log the available service costs for debugging
         logger.debug("Service costs for vehicleTypeId {}: {}", vehicleTypeId, serviceCosts);
 
-        // Calculate the total cost by summing the prices of matching services
         double totalCost = Arrays.stream(services.split(","))
                 .map(String::trim)
                 .peek(service -> {
@@ -682,8 +695,6 @@ public class BookingRequestService {
         logger.info("Mapped to {} DTOs", dtos.size());
         return dtos;
     }
-
-   
 
     private String generateBillEmailContent(BillOfMaterial bom, String paymentLink) {
         StringBuilder content = new StringBuilder();
@@ -767,7 +778,6 @@ public class BookingRequestService {
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
 
-
         if (customerId != 0 && !booking.getCustomerId().equals(customerId)) {
             logger.warn("Customer ID {} does not match booking ID {} owner", customerId, bookingId);
             throw new IllegalArgumentException("Booking does not belong to customer: " + customerId);
@@ -837,6 +847,7 @@ public class BookingRequestService {
             history.setStatus("Completed");
             history.setTransactionId(booking.getTransactionId());
             history.setCustomerName(customerName);
+            history.setReviewed(reviewRepository.findByBookingId(booking.getId()).isPresent());
             serviceHistory.add(history);
         }
 
@@ -878,7 +889,6 @@ public class BookingRequestService {
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with id: " + bookingId));
 
-        // Skip customerId check if customerId is 0 (indicating admin/advisor access)
         if (customerId != 0 && !booking.getCustomerId().equals(customerId)) {
             logger.warn("Customer ID {} does not match booking ID {} owner", customerId, bookingId);
             throw new IllegalArgumentException("Booking does not belong to customer: " + customerId);
@@ -892,7 +902,6 @@ public class BookingRequestService {
         BillOfMaterial bom = billOfMaterialRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Bill of Material not found for booking ID: " + bookingId));
 
-        // Update service charges and recalculate total
         bom.setServiceCharges(serviceCharges != null ? serviceCharges : 0.0);
         Double materialTotal = 0.0;
         try {
@@ -907,7 +916,6 @@ public class BookingRequestService {
         bom.setTotal(materialTotal + bom.getServiceCharges());
         billOfMaterialRepository.save(bom);
 
-        // Convert to DTO
         BillOfMaterialDTO bomDTO = new BillOfMaterialDTO();
         bomDTO.setBookingId(bookingId);
         bomDTO.setCustomerName(bom.getCustomerName());
@@ -928,5 +936,4 @@ public class BookingRequestService {
         logger.info("Successfully updated BOM with service charges for bookingId: {}", bookingId);
         return bomDTO;
     }
-    
 }

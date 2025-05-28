@@ -3,14 +3,19 @@ package com.backend.controller;
 import com.backend.dto.ContactRequestDTO;
 import com.backend.dto.CustomerDashboardDTO;
 import com.backend.dto.CustomerProfileDTO;
+import com.backend.dto.ReviewDTO;
 import com.backend.model.Customer;
 import com.backend.repository.CustomerRepository;
 import com.backend.service.BookingRequestService;
+import com.backend.service.ReviewService;
 import com.backend.service.SupportTicketService;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import org.slf4j.Logger;
@@ -27,6 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,6 +57,9 @@ public class CustomerApiController {
     
     @Autowired
     private SupportTicketService supportTicketService;
+    
+    @Autowired
+    private ReviewService reviewService;
 
     @GetMapping("/customer/dashboard")
     public ResponseEntity<CustomerDashboardDTO> getDashboardData(@RequestParam("customerId") Long customerId) {
@@ -71,7 +83,7 @@ public class CustomerApiController {
     public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long id, @RequestParam("customerId") Long customerId) {
         try {
             if (customerId == null || customerId <= 0) {
-                System.err.println("Invalid customer ID for receipt ID " + id);
+                logger.error("Invalid customer ID for receipt ID {}: customerId must be a positive number", id);
                 return ResponseEntity.badRequest().build();
             }
             Map<String, Object> receiptData = bookingRequestService.getReceiptData(id);
@@ -80,64 +92,169 @@ public class CustomerApiController {
             try {
                 bookingCustomerId = Long.parseLong(receiptData.get("customerId").toString());
             } catch (NumberFormatException e) {
-                System.err.println("Invalid customer ID format in receipt data for booking ID " + id + ": " + e.getMessage());
+                logger.error("Invalid customer ID format in receipt data for booking ID {}: {}", id, e.getMessage());
                 return ResponseEntity.badRequest().build();
             }
             if (!customerId.equals(bookingCustomerId)) {
-                System.err.println("Unauthorized access attempt for receipt ID " + id + " by customer ID " + customerId);
-                return ResponseEntity.status(403).build();
+                logger.error("Unauthorized access attempt for receipt ID {} by customer ID {}", id, customerId);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
+            // Fetch customer details for the invoice
+            Optional<Customer> customerOpt = customerRepository.findById(customerId);
+            if (!customerOpt.isPresent()) {
+                logger.error("Customer not found for ID: {}", customerId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            Customer customer = customerOpt.get();
+            String customerPhone = customer.getPhoneNumber() != null ? customer.getPhoneNumber() : "Not provided";
+
+            // Generate PDF using iText
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
 
-            document.add(new Paragraph("Service Receipt").setBold().setFontSize(16));
+            // Header
+            Paragraph header = new Paragraph("ServiceXpress")
+                    .setFontSize(20)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(header);
 
-            Table table = new Table(new float[]{1, 3});
-            table.addCell(new Cell().add(new Paragraph("Field")));
-            table.addCell(new Cell().add(new Paragraph("Value")));
-            table.addCell(new Cell().add(new Paragraph("Booking ID")));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("bookingId")))));
-            table.addCell(new Cell().add(new Paragraph("Transaction ID")));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("transactionId")))));
-            table.addCell(new Cell().add(new Paragraph("Customer")));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("customerName")))));
-            table.addCell(new Cell().add(new Paragraph("Email")));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("customerEmail")))));
-            table.addCell(new Cell().add(new Paragraph("Service Center")));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("serviceCenterName")))));
-            table.addCell(new Cell().add(new Paragraph("Vehicle")));
-            table.addCell(new Cell().add(new Paragraph(receiptData.get("vehicleTypeName") + " - " + receiptData.get("vehicleModelName"))));
-            table.addCell(new Cell().add(new Paragraph("Registration")));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("vehicleRegistrationNumber")))));
-            table.addCell(new Cell().add(new Paragraph("Services")));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("services")))));
-            table.addCell(new Cell().add(new Paragraph("Total Cost")));
-            table.addCell(new Cell().add(new Paragraph("$" + receiptData.get("cost"))));
-            table.addCell(new Cell().add(new Paragraph("Completion Date")));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("completionDate")))));
+            Paragraph subHeader = new Paragraph("123 Service Lane, Tech City, TC 12345\nPhone: (123) 456-7890 | Email: support@servicexpress.com")
+                    .setFontSize(10)
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(subHeader);
 
-            document.add(table);
+            String currentDate = LocalDateTime.now(ZoneId.of("Asia/Kolkata"))
+                    .format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+            Paragraph invoiceTitle = new Paragraph("Invoice")
+                    .setFontSize(16)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(10);
+            document.add(invoiceTitle);
+
+            Paragraph invoiceDetails = new Paragraph(String.format("Invoice No: #%d | Date: %s", id, currentDate))
+                    .setFontSize(10)
+                    .setTextAlignment(TextAlignment.CENTER);
+            document.add(invoiceDetails);
+
+            // Billed To and Invoice Details
+            Table infoTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}))
+                    .setWidth(UnitValue.createPercentValue(100))
+                    .setMarginTop(20);
+            infoTable.addCell(new Cell().add(new Paragraph("Billed To:")
+                    .setBold()));
+            infoTable.addCell(new Cell().add(new Paragraph("Invoice Details:")
+                    .setBold()));
+            infoTable.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("customerName")))));
+            infoTable.addCell(new Cell().add(new Paragraph(String.format("Booking ID: %s", receiptData.get("bookingId")))));
+            infoTable.addCell(new Cell().add(new Paragraph(String.format("Email: %s", receiptData.get("customerEmail")))));
+            infoTable.addCell(new Cell().add(new Paragraph(String.format("Transaction ID: %s", receiptData.get("transactionId") != null ? receiptData.get("transactionId") : "N/A"))));
+            infoTable.addCell(new Cell().add(new Paragraph(String.format("Phone: %s", customerPhone))));
+            infoTable.addCell(new Cell().add(new Paragraph(String.format("Completion Date: %s", receiptData.get("completionDate")))));
+            infoTable.addCell(new Cell().add(new Paragraph("")));
+            infoTable.addCell(new Cell().add(new Paragraph(String.format("Service Center: %s", receiptData.get("serviceCenterName")))));
+            document.add(infoTable);
+
+            // Services Table
+            Table serviceTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1, 1}))
+                    .setWidth(UnitValue.createPercentValue(100))
+                    .setMarginTop(20);
+            serviceTable.addHeaderCell(new Cell().add(new Paragraph("Vehicle").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            serviceTable.addHeaderCell(new Cell().add(new Paragraph("Registration").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            serviceTable.addHeaderCell(new Cell().add(new Paragraph("Services").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            serviceTable.addHeaderCell(new Cell().add(new Paragraph("Cost").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            serviceTable.addHeaderCell(new Cell().add(new Paragraph("Advisor").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            serviceTable.addCell(new Cell().add(new Paragraph(String.format("%s - %s", receiptData.get("vehicleTypeName"), receiptData.get("vehicleModelName")))));
+            serviceTable.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("vehicleRegistrationNumber")))));
+            serviceTable.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("services")))));
+            serviceTable.addCell(new Cell().add(new Paragraph(String.format("₹%s", receiptData.get("cost")))));
+            serviceTable.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("advisorName") != null ? receiptData.get("advisorName") : "N/A"))));
+            document.add(serviceTable);
+
+            // Materials Table
+            document.add(new Paragraph("Materials Used:").setBold().setMarginTop(20));
+            Table materialsTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1}))
+                    .setWidth(UnitValue.createPercentValue(100));
+            materialsTable.addHeaderCell(new Cell().add(new Paragraph("Material").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            materialsTable.addHeaderCell(new Cell().add(new Paragraph("Quantity").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            materialsTable.addHeaderCell(new Cell().add(new Paragraph("Unit Price").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+            materialsTable.addHeaderCell(new Cell().add(new Paragraph("Total").setBold()).setBackgroundColor(ColorConstants.LIGHT_GRAY));
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> materials = (List<Map<String, Object>>) receiptData.get("materials");
+            if (materials != null && !materials.isEmpty()) {
+                for (Map<String, Object> material : materials) {
+                    String materialName = material.get("materialName") != null ? String.valueOf(material.get("materialName")) : "Unknown";
+                    String quantity = material.get("quantity") != null ? String.valueOf(material.get("quantity")) : "0";
+                    String price = material.get("price") != null ? String.valueOf(material.get("price")) : "0";
+                    double total;
+                    try {
+                        double priceValue = Double.parseDouble(price);
+                        double quantityValue = Double.parseDouble(quantity);
+                        total = priceValue * quantityValue;
+                    } catch (NumberFormatException e) {
+                        logger.warn("Invalid price or quantity for material in booking ID {}: price={}, quantity={}", id, price, quantity);
+                        total = 0.0;
+                    }
+                    materialsTable.addCell(new Cell().add(new Paragraph(materialName)));
+                    materialsTable.addCell(new Cell().add(new Paragraph(quantity)));
+                    materialsTable.addCell(new Cell().add(new Paragraph(String.format("₹%s", price))));
+                    materialsTable.addCell(new Cell().add(new Paragraph(String.format("₹%.2f", total))));
+                }
+            } else {
+                materialsTable.addCell(new Cell().add(new Paragraph("No materials used")));
+                materialsTable.addCell(new Cell().add(new Paragraph("-")));
+                materialsTable.addCell(new Cell().add(new Paragraph("-")));
+                materialsTable.addCell(new Cell().add(new Paragraph("-")));
+            }
+            document.add(materialsTable);
+
+            // Total Cost
+            Table totalTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}))
+                    .setWidth(UnitValue.createPercentValue(100))
+                    .setMarginTop(20);
+            totalTable.addCell(new Cell().add(new Paragraph("")));
+            totalTable.addCell(new Cell().add(new Paragraph(String.format("Total Cost: ₹%s", receiptData.get("cost")))
+                    .setBold()));
+            document.add(totalTable);
+
+            // Footer
+            Paragraph footer = new Paragraph("Thank You for Choosing ServiceXpress!")
+                    .setFontSize(14)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(30);
+            document.add(footer);
+
+            Paragraph footerSub = new Paragraph("We value your trust in us. For any queries, feel free to contact us at support@servicexpress.com.\nDrive Safe, Service Smart!")
+                    .setFontSize(10)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setItalic();
+            document.add(footerSub);
+
             document.close();
 
             byte[] pdfBytes = baos.toByteArray();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("attachment", "receipt_" + id + ".pdf");
+            headers.setContentDispositionFormData("attachment", "invoice_" + id + ".pdf");
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(pdfBytes);
         } catch (IllegalStateException e) {
-            System.err.println("Invalid request for receipt ID " + id + ": " + e.getMessage());
+            logger.error("Invalid request for receipt ID {}: {}", id, e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
-            System.err.println("Booking not found for receipt ID " + id + ": " + e.getMessage());
+            logger.error("Booking not found for receipt ID {}: {}", id, e.getMessage());
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            System.err.println("Error generating receipt for ID " + id + ": " + e.getMessage());
-            return ResponseEntity.status(500).build();
+            logger.error("Error generating receipt for ID {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 
@@ -294,6 +411,25 @@ public class CustomerApiController {
         } catch (Exception e) {
             logger.error("Unexpected error processing contact form: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit support query: " + e.getMessage());
+        }
+    }
+    
+    @PostMapping("/reviews")
+    public ResponseEntity<String> submitReview(@RequestBody ReviewDTO reviewDTO) {
+        logger.debug("Received review submission: {}", reviewDTO);
+        try {
+            reviewService.createReview(reviewDTO);
+            logger.info("Review submitted successfully for booking ID: {}", reviewDTO.getBookingId());
+            return ResponseEntity.ok("Review submitted successfully");
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid review submission: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            logger.error("Invalid state for review submission: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error processing review: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit review: " + e.getMessage());
         }
     }
 

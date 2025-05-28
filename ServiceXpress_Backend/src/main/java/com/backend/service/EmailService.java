@@ -115,3 +115,4 @@ logger.info("Bill email sent to: {}", to);
             throw new RuntimeException("Failed to send email notification: " + e.getMessage());
         }
     }
+}

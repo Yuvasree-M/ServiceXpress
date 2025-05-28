@@ -14,4 +14,5 @@ public class ServiceHistory {
     private String status;
     private String transactionId;
     private String customerName;
+    private boolean reviewed;
 }

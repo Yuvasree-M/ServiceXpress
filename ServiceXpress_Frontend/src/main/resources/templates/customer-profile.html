@@ -456,7 +456,7 @@
                             <span th:text="${session.customerName != null} ? ${session.customerName} : 'Guest'">Guest</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li><a class="dropdown-item" th:href="@{/service-history}">
+                            <li><a class="dropdown-item" th:href="@{/customer/service-history}">
                                 <span class="material-icons">history</span> Service History
                             </a></li>
                             <li><a class="dropdown-item active" th:href="@{/profile-management}">
