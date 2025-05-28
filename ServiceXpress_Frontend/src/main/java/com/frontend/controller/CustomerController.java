@@ -19,9 +19,6 @@ import java.util.List;
 
 @Controller
 public class CustomerController {
-	
-	
-
     @Value("${backend.api.url:http://localhost:8081/api}")
     private String backendApiUrl;
 
@@ -57,6 +54,9 @@ public class CustomerController {
             if (dashboardData != null) {
                 ongoingServices = dashboardData.getOngoingServices() != null ? dashboardData.getOngoingServices() : new ArrayList<>();
                 serviceHistory = dashboardData.getServiceHistory() != null ? dashboardData.getServiceHistory() : new ArrayList<>();
+                if (serviceHistory.size() > 3) {
+                    serviceHistory = serviceHistory.subList(serviceHistory.size() - 3, serviceHistory.size());
+                }
             } else {
                 System.err.println("No dashboard data returned from " + url);
                 model.addAttribute("error", "No dashboard data available.");
@@ -75,6 +75,45 @@ public class CustomerController {
         model.addAttribute("serviceHistory", serviceHistory);
 
         return "customer-dashboard";
+    }
+
+    @GetMapping("/customer/service-history")
+    public String showServiceHistory(Model model, HttpSession session) {
+        Customer customer = customerService.getLoggedInCustomer();
+        if (customer == null) {
+            model.addAttribute("error", "No logged-in customer found. Please log in.");
+            return "redirect:/login";
+        }
+
+        List<ServiceHistory> serviceHistory = new ArrayList<>();
+        try {
+            String url = backendApiUrl + "/customer/dashboard?customerId=" + customer.getId();
+            String token = (String) session.getAttribute("token");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+
+            ResponseEntity<CustomerDashboardDTO> response = restTemplate.exchange(
+                url, HttpMethod.GET, request, CustomerDashboardDTO.class
+            );
+            CustomerDashboardDTO dashboardData = response.getBody();
+            if (dashboardData != null) {
+                serviceHistory = dashboardData.getServiceHistory() != null ? dashboardData.getServiceHistory() : new ArrayList<>();
+            } else {
+                System.err.println("No dashboard data returned from " + url);
+                model.addAttribute("error", "No service history data available.");
+            }
+        } catch (HttpClientErrorException e) {
+            System.err.println("HTTP error fetching service history: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            model.addAttribute("error", "Unable to fetch service history: " + e.getStatusCode() + " : " + e.getResponseBodyAsString());
+        } catch (Exception e) {
+            System.err.println("Error fetching service history: " + e.getMessage());
+            model.addAttribute("error", "Unable to fetch service history: " + e.getMessage());
+        }
+
+        model.addAttribute("customer", customer);
+        model.addAttribute("serviceHistory", serviceHistory);
+        return "customer-service-history";
     }
 
     @GetMapping("/customer/logout")
@@ -402,7 +441,7 @@ public class CustomerController {
         model.addAttribute("customer", customer);
         return "customer-profile";
     }
-    
+
     @GetMapping("/contact")
     public String showContactPage(Model model, HttpSession session) {
         Customer customer = (Customer) session.getAttribute("customer");

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceXpress - Service History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #343a40;
+            --secondary-color: #F97316;
+            --background-color: #F3F4F6;
+            --text-color: #4B5563;
+            --white: #FFFFFF;
+            --gradient-primary: linear-gradient(135deg, #343a40, #636363);
+            --gradient-secondary: linear-gradient(135deg, #F97316, #FB923C);
+            --primary-orange: #ff6200;
+            --dark-gray: #343a40;
+            --light-gray: #e9ecef;
+            --soft-orange: #ff8c40;
+            --gray-hover: #495057;
+            --light-background: #F4F4F4;
+            --medium-gray: #6c757d;
+            --dark-theme-bg: #2a2e33;
+            --dark-theme-text: #d3d7db;
+        }
+
+        * {
+            transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: var(--white);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 15px 20px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 60px;
+            width: 250px;
+            object-fit: contain;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--primary-color);
+            font-weight: 500;
+            position: relative;
+            margin-left: 20px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--secondary-color);
+            transition: width 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .profile-dropdown {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-left: 20px;
+        }
+
+        .profile-dropdown .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+
+        .profile-badge {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 8px;
+            text-transform: uppercase;
+        }
+
+        .username {
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 16px;
+            margin-right: 5px;
+        }
+
+        .dropdown-toggle::after {
+            border: none;
+            content: 'expand_more';
+            font-family: 'Material+Icons';
+            vertical-align: middle;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .dropdown-menu {
+            background: var(--white);
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            color: var(--primary-color);
+            font-weight: 500;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(145deg, #F9FAFB, #F3F4F6);
+            color: var(--secondary-color);
+        }
+
+        .dropdown-item .material-icons {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            padding: 60px 15px;
+            flex: 1;
+        }
+
+        h1, h3 {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 42px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        h3 {
+            font-weight: 600;
+            font-size: 32px;
+            margin: 50px 0 30px;
+            position: relative;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        h3::before, h3::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 2px;
+            background: var(--gradient-secondary);
+        }
+
+        h3::before {
+            left: 0;
+        }
+
+        h3::after {
+            right: 0;
+        }
+
+        .card {
+            background: #FFFFFF;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #343a40, #636363);
+            color: #FFFFFF;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .page-link {
+            color: var(--primary-color);
+        }
+
+        .page-link:hover {
+            color: var(--secondary-color);
+            background-color: var(--light-gray);
+        }
+
+        .btn-download, .btn-feedback {
+            border-radius: 20px;
+            font-weight: 500;
+            padding: 8px 16px;
+            margin-right: 8px;
+        }
+
+        .btn-download {
+            background: var(--light-gray);
+            color: var(--primary-color);
+        }
+
+        .btn-download:hover {
+            background: var(--gray-hover);
+            color: var(--white);
+        }
+
+        .btn-feedback {
+            background: var(--gradient-secondary);
+            color: var(--white);
+        }
+
+        .btn-feedback:hover {
+            background: var(--secondary-color);
+            color: --white;
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .star-rating .fa-star {
+            font-size: 24px;
+            color: #ccc;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .star-rating .fa-star.checked {
+            color: #F97316;
+        }
+
+        .review-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        footer {
+            background-color: var(--dark-gray);
+            color: white;
+            padding: 60px 20px 40px;
+            flex-shrink: 0;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        footer h5 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--primary-orange);
+        }
+
+        footer p, footer a {
+            font-size: 0.95rem;
+            color: white;
+            transition: color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        footer .contact-link {
+            color: white;
+            text-decoration: none;
+        }
+
+        footer .contact-link:hover {
+            color: var(--primary-orange);
+        }
+
+        footer .quick-links a {
+            display: block;
+            margin-bottom: 10px;
+            color: white;
+            text-decoration: none;
+        }
+
+        footer .quick-links a:hover {
+            color: var(--primary-orange);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 25px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .social-icon {
+            color: white;
+            font-size: 26px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .social-icon:hover {
+            color: var(--primary-orange);
+            transform: scale(1.2);
+        }
+
+        footer .footer-bottom {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer .footer-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        footer .footer-column.follow-us {
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            footer .text-center-mobile {
+                text-align: center;
+                margin-bottom: 50px;
+            }
+
+            footer .footer-column {
+                align-items: center;
+            }
+
+            footer .social-icons {
+                justify-content: center;
+            }
+
+            footer {
+                padding: 40px 15px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><img th:src="@{/images/logo.jpg}" style="height: 40px;"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dashboard/customer}"><span class="material-icons align-middle me-1">home</span>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/services}"><span class="material-icons align-middle me-1">build</span>Services</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/bookings}"><span class="material-icons align-middle me-1">calendar_month</span>Booking</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/contact}">
+                            <span class="material-icons align-middle me-1">contact_support</span> Contact
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" th:if="${customer != null}">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="profile-badge" th:text="${customer.initials != null} ? ${customer.initials} : 'NA'">NA</span>
+                            <span th:text="${customer.name != null} ? ${customer.name} : 'Guest'">Guest</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item active" th:href="@{/customer/service-history}">
+                                <span class="material-icons">history</span> Service History
+                            </a></li>
+                            <li><a class="dropdown-item" th:href="@{/profile-management}">
+                                <span class="material-icons">manage_accounts</span> Profile Management
+                            </a></li>
+                            <li><a class="dropdown-item" th:href="@{/customer/logout}" onclick="logout()">
+                                <span class="material-icons">logout</span> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" th:if="${customer == null}">
+                        <a class="nav-link" th:href="@{/login}">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+        <h1>Service History</h1>
+        <div class="card history-card">
+            <div class="card-header">Service History</div>
+            <div class="card-body">
+                <table class="table table-striped" id="serviceHistoryTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Vehicle</th>
+                            <th>Work Done</th>
+                            <th>Cost</th>
+                            <th>Status</th>
+                            <th>Transaction ID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serviceHistoryBody">
+                        <tr th:each="history, iterStat : ${serviceHistory}" th:class="'history-row ' + (${iterStat.index} < 5 ? '' : 'd-none')">
+                            <td>[[${history.date}]]</td>
+                            <td>[[${history.vehicleTypeName + ' - ' + history.vehicleModelName}]]</td>
+                            <td>[[${history.workDone}]]</td>
+                            <td>₹[[${history.cost}]]</td>
+                            <td>[[${history.status}]]</td>
+                            <td>[[${history.transactionId}]]</td>
+                            <td>
+                                <button class="btn btn-download" 
+                                        th:attr="data-id=${history.id},data-customer-id=${customer.id}"
+                                        onclick="downloadInvoice(this.getAttribute('data-id'), this.getAttribute('data-customer-id'))">
+                                    Invoice
+                                </button>
+                                <button th:if="${history.status == 'Completed' and not history.reviewed}" 
+                                        class="btn btn-feedback leave-feedback-btn" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#reviewModal"
+                                        th:attr="data-id=${history.id},data-customer-id=${customer.id}">
+                                    Leave Feedback
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <nav aria-label="Service history pagination">
+                    <ul class="pagination">
+                        <li class="page-item" id="prevPage">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">« Previous</span>
+                            </a>
+                        </li>
+                        <div id="pageNumbers" class="d-flex align-items-center"></div>
+                        <li class="page-item" id="nextPage">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">Next »</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">Leave Your Feedback</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="reviewBookingId">
+                    <input type="hidden" id="reviewCustomerId">
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <div class="star-rating">
+                            <i class="fas fa-star" data-value="1"></i>
+                            <i class="fas fa-star" data-value="2"></i>
+                            <i class="fas fa-star" data-value="3"></i>
+                            <i class="fas fa-star" data-value="4"></i>
+                            <i class="fas fa-star" data-value="5"></i>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Review (Optional)</label>
+                        <textarea class="form-control review-textarea" id="reviewMessage" placeholder="Share your experience..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Skip</button>
+                    <button type="button" class="btn btn-feedback" id="submitReviewBtn">Submit Review</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        const backendApiUrl = 'http://localhost:8081/api';
+        const token = '[[${session.token}]]';
+        const customerId = '[[${customer.id}]]';
+
+        // Pagination logic
+        const rowsPerPage = 5;
+        let currentPage = 1;
+        const rows = document.querySelectorAll('#serviceHistoryBody .history-row');
+        const totalRows = rows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        function updatePagination() {
+            rows.forEach(row => row.classList.add('d-none'));
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = Math.min(start + rowsPerPage, totalRows);
+            for (let i = start; i < end; i++) {
+                rows[i].classList.remove('d-none');
+            }
+            const prevPage = document.getElementById('prevPage');
+            const nextPage = document.getElementById('nextPage');
+            prevPage.classList.toggle('disabled', currentPage === 1);
+            nextPage.classList.toggle('disabled', currentPage === totalPages);
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const pageItem = document.createElement('li');
+                pageItem.classList.add('page-item');
+                if (i === currentPage) pageItem.classList.add('active');
+                pageItem.innerHTML = `<a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>`;
+                pageNumbers.appendChild(pageItem);
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            updatePagination();
+        }
+
+        document.getElementById('prevPage').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                updatePagination();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePagination();
+            }
+        });
+
+        updatePagination();
+
+        async function downloadInvoice(bookingId, customerId) {
+            const url = `${backendApiUrl}/bookings/receipt/${bookingId}?customerId=${customerId}`;
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/pdf' }
+                });
+                if (!response.ok) throw new Error(`Failed to download invoice: ${response.status}`);
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `invoice_${bookingId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+            } catch (error) {
+                alert('Failed to download invoice: ' + error.message);
+            }
+        }
+
+        // Star rating interaction
+        $('.star-rating .fa-star').on('click', function() {
+            const value = $(this).data('value');
+            $('.star-rating .fa-star').each(function() {
+                if ($(this).data('value') <= value) {
+                    $(this).addClass('checked');
+                } else {
+                    $(this).removeClass('checked');
+                }
+            });
+        });
+
+        $('.leave-feedback-btn').on('click', function() {
+            const bookingId = $(this).data('id');
+            const customerId = $(this).data('customer-id');
+            $('#reviewBookingId').val(bookingId);
+            $('#reviewCustomerId').val(customerId);
+            $('.star-rating .fa-star').removeClass('checked');
+            $('#reviewMessage').val('');
+        });
+
+        $('#submitReviewBtn').on('click', function() {
+            const bookingId = $('#reviewBookingId').val();
+            const customerId = $('#reviewCustomerId').val();
+            const rating = $('.star-rating .fa-star.checked').length;
+            const message = $('#reviewMessage').val().trim();
+
+            if (rating === 0) {
+                alert('Please select a rating.');
+                return;
+            }
+
+            $.ajax({
+                url: `${backendApiUrl}/reviews`,
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                data: JSON.stringify({
+                    bookingId: bookingId,
+                    customerId: customerId,
+                    rating: rating,
+                    message: message || null
+                }),
+                success: function(response) {
+                    alert('Review submitted successfully!');
+                    $('#reviewModal').modal('hide');
+                    window.location.reload();
+                },
+                error: function(xhr) {
+                    alert('Failed to submit review: ' + (xhr.responseText || 'Unknown error'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

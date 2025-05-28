@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ServiceXpress - Available Services</title>
-    <title>Customer Dashboard</title>
+    <title>ServiceXpress - Customer Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
-       :root {
+        :root {
             --primary-color: #343a40;
             --secondary-color: #F97316;
             --background-color: #F3F4F6;
@@ -34,7 +33,7 @@
             transition: all 0.3s ease;
         }
 
-  body {
+        body {
             background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
             font-family: 'Poppins', sans-serif;
             color: var(--text-color);
@@ -85,6 +84,7 @@
             color: var(--secondary-color);
             font-weight: 600;
         }
+
         .navbar-nav .nav-link::after {
             content: '';
             position: absolute;
@@ -221,15 +221,110 @@
         h3::after {
             right: 0;
         }
-        .status-card { background: #FFFFFF; border-radius: 15px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08); }
-        .card-header { background: linear-gradient(135deg, #343a40, #636363); color: #FFFFFF; }
-        .btn-payment { background: linear-gradient(135deg, #F97316, #FB923C); color: #FFFFFF; border-radius: 20px; }
-        .modal-content { border-radius: 15px; }
-        .status-completed { color: #28a745; font-weight: bold; }
-        .status-under { color: #007bff; font-weight: bold; }
-        .status-awaiting { color: #ffc107; font-weight: bold; }
-        
-          footer {
+
+        .status-card {
+            background: #FFFFFF;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #343a40, #636363);
+            color: #FFFFFF;
+        }
+
+        .btn-payment {
+            background: linear-gradient(135deg, #F97316, #FB923C);
+            color: #FFFFFF;
+            border-radius: 20px;
+        }
+
+        .btn-view-all {
+            background: var(--gradient-secondary);
+            color: var(--white);
+            border-radius: 20px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-view-all:hover {
+            background: var(--secondary-color);
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        .status-completed {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-under {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .status-awaiting {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .btn-download, .btn-feedback {
+            border-radius: 20px;
+            font-weight: 500;
+            padding: 8px 16px;
+            margin-right: 8px;
+        }
+
+        .btn-download {
+            background: var(--light-gray);
+            color: var(--primary-color);
+        }
+
+        .btn-download:hover {
+            background: var(--gray-hover);
+            color: var(--white);
+        }
+
+        .btn-feedback {
+            background: var(--gradient-secondary);
+            color: var(--white);
+        }
+
+        .btn-feedback:hover {
+            background: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .star-rating .fa-star {
+            font-size: 24px;
+            color: #ccc;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .star-rating .fa-star.checked {
+            color: #F97316;
+        }
+
+        .review-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        footer {
             background-color: var(--dark-gray);
             color: white;
             padding: 60px 20px 40px;
@@ -324,33 +419,32 @@
                 padding: 40px 15px 30px;
             }
         }
-        
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#"><img th:src="@{/images/logo.jpg}" style="height: 40px;"></a>
-               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link active" href="#"> <span class="material-icons align-middle me-1">home</span>Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/customer/services}"><span class="material-icons align-middle me-1">build</span>Services</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/bookings}">   <span class="material-icons align-middle me-1">calendar_month</span>Booking</a></li>
-                     <li class="nav-item">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/customer/bookings}"> <span class="material-icons align-middle me-1">calendar_month</span>Booking</a></li>
+                    <li class="nav-item">
                         <a class="nav-link" th:href="@{/contact}">
                             <span class="material-icons align-middle me-1">contact_support</span> Contact
                         </a>
                     </li>
                     <li class="nav-item dropdown" th:if="${customer != null}">
-    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="profile-badge" th:text="${customer.initials != null} ? ${customer.initials} : 'NA'">NA</span>
-        <span th:text="${customer.name != null} ? ${customer.name} : 'Guest'">Guest</span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li><a class="dropdown-item" th:href="@{/dashboard/customer}">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="profile-badge" th:text="${customer.initials != null} ? ${customer.initials} : 'NA'">NA</span>
+                            <span th:text="${customer.name != null} ? ${customer.name} : 'Guest'">Guest</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" th:href="@{/customer/service-history}">
                                 <span class="material-icons">history</span> Service History
                             </a></li>
                             <li><a class="dropdown-item" th:href="@{/profile-management}">
@@ -360,11 +454,10 @@
                                 <span class="material-icons">logout</span> Logout
                             </a></li>
                         </ul>
-</li>
-<li class="nav-item" th:if="${customer == null}">
-    <a class="nav-link" th:href="@{/login}">Login</a>
-</li>
-                    
+                    </li>
+                    <li class="nav-item" th:if="${customer == null}">
+                        <a class="nav-link" th:href="@{/login}">Login</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -396,9 +489,9 @@
         </div>
 
         <div class="card history-card">
-            <div class="card-header">Service History</div>
+            <div class="card-header">Recent Service History</div>
             <div class="card-body">
-                <table class="table table-striped">
+                <table class="table table-striped" id="serviceHistoryTable">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -410,7 +503,7 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="serviceHistoryBody">
                         <tr th:each="history : ${serviceHistory}">
                             <td>[[${history.date}]]</td>
                             <td>[[${history.vehicleTypeName + ' - ' + history.vehicleModelName}]]</td>
@@ -422,12 +515,22 @@
                                 <button class="btn btn-download" 
                                         th:attr="data-id=${history.id},data-customer-id=${customer.id}"
                                         onclick="downloadInvoice(this.getAttribute('data-id'), this.getAttribute('data-customer-id'))">
-                                    Download Invoice
+                                    Invoice
+                                </button>
+                                <button th:if="${history.status == 'Completed' and not history.reviewed}" 
+                                        class="btn btn-feedback leave-feedback-btn" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#reviewModal"
+                                        th:attr="data-id=${history.id},data-customer-id=${customer.id}">
+                                    Leave Feedback
                                 </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+                <div class="text-center mt-3">
+                    <a th:href="@{/customer/service-history}" class="btn-view-all">View All Service History</a>
+                </div>
             </div>
         </div>
     </div>
@@ -480,23 +583,44 @@
         </div>
     </div>
 
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">Leave Your Feedback</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="reviewBookingId">
+                    <input type="hidden" id="reviewCustomerId">
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <div class="star-rating">
+                            <i class="fas fa-star" data-value="1"></i>
+                            <i class="fas fa-star" data-value="2"></i>
+                            <i class="fas fa-star" data-value="3"></i>
+                            <i class="fas fa-star" data-value="4"></i>
+                            <i class="fas fa-star" data-value="5"></i>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Review (Optional)</label>
+                        <textarea class="form-control review-textarea" id="reviewMessage" placeholder="Share your experience..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Skip</button>
+                    <button type="button" class="btn btn-feedback" id="submitReviewBtn">Submit Review</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <th:block th:replace="~{fragments/footer :: footer}"></th:block>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-
-    // Toggle details functionality
-    document.querySelectorAll('.toggle-icon').forEach(icon => {
-        icon.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            const details = document.getElementById(targetId);
-            const isExpanded = details.style.display === 'block';
-            details.style.display = isExpanded ? 'none' : 'block';
-            this.textContent = isExpanded ? 'expand_more' : 'expand_less';
-        });
-    });
-    
         const backendApiUrl = 'http://localhost:8081/api';
         const token = '[[${session.token}]]';
         const customerId = '[[${customer.id}]]';
@@ -607,6 +731,59 @@
                 },
                 error: function(xhr) {
                     alert('Failed to initiate payment: ' + (xhr.responseText || 'Unknown error'));
+                }
+            });
+        });
+
+        // Star rating interaction
+        $('.star-rating .fa-star').on('click', function() {
+            const value = $(this).data('value');
+            $('.star-rating .fa-star').each(function() {
+                if ($(this).data('value') <= value) {
+                    $(this).addClass('checked');
+                } else {
+                    $(this).removeClass('checked');
+                }
+            });
+        });
+
+        $('.leave-feedback-btn').on('click', function() {
+            const bookingId = $(this).data('id');
+            const customerId = $(this).data('customer-id');
+            $('#reviewBookingId').val(bookingId);
+            $('#reviewCustomerId').val(customerId);
+            $('.star-rating .fa-star').removeClass('checked');
+            $('#reviewMessage').val('');
+        });
+
+        $('#submitReviewBtn').on('click', function() {
+            const bookingId = $('#reviewBookingId').val();
+            const customerId = $('#reviewCustomerId').val();
+            const rating = $('.star-rating .fa-star.checked').length;
+            const message = $('#reviewMessage').val().trim();
+
+            if (rating === 0) {
+                alert('Please select a rating.');
+                return;
+            }
+
+            $.ajax({
+                url: `${backendApiUrl}/reviews`,
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                data: JSON.stringify({
+                    bookingId: bookingId,
+                    customerId: customerId,
+                    rating: rating,
+                    message: message || null
+                }),
+                success: function(response) {
+                    alert('Review submitted successfully!');
+                    $('#reviewModal').modal('hide');
+                    window.location.reload();
+                },
+                error: function(xhr) {
+                    alert('Failed to submit review: ' + (xhr.responseText || 'Unknown error'));
                 }
             });
         });

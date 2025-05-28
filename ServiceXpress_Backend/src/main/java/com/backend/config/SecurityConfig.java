@@ -61,6 +61,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/bookings/**").permitAll()
                 .requestMatchers("/api/customer/**").permitAll()
                 .requestMatchers("/api/contact").permitAll()
+                .requestMatchers("/api/reviews").permitAll()
+                .requestMatchers("api/bookings/receipt/**").permitAll()
+               
 
                 // Admin-only endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
