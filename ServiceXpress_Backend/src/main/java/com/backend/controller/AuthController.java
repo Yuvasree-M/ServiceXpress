@@ -71,6 +71,7 @@ public class AuthController {
             }
         } catch (Exception e) {
             logger.error("Login failed for identifier {}: {}", request.getIdentifier(), e.getMessage(), e);
+            
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Login failed: " + e.getMessage());
         }
     }
