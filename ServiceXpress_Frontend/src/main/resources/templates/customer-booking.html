@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServiceXpress - Book a Service</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Icons -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -952,48 +950,10 @@
     </div>
 
     <!-- Footer -->
-    <footer id="contact">
-        <div class="container-fluid col-md-11 mx-auto">
-            <div class="row">
-                <div class="col-md-4 text-center-mobile footer-column">
-                    <h5>About</h5>
-                    <p>Your trusted partner in vehicle maintenance since 2025.</p>
-                </div>
-                <div class="col-md-2 text-center-mobile footer-column">
-                    <h5>Quick Links</h5>
-                    <div class="quick-links">
-                        <a th:href="@{/}">Home</a>
-                        <a th:href="@{/customer/services}">Services</a>
-                        <a th:href="@{/about}">About</a>
-                        <a th:href="@{/contact}">Contact</a>
-                    </div>
-                </div>
-                <div class="col-md-3 text-center-mobile footer-column">
-                    <h5>Contact</h5>
-                    <p><i class="fas fa-phone me-2"></i> <a href="tel:+12345678900" class="contact-link">+1 234 567 8900</a></p>
-                    <p><i class="fas fa-envelope me-2"></i> <a href="mailto:info@servicexpress.com" class="contact-link">info@servicexpress.com</a></p>
-                    <p><i class="fas fa-map-marker-alt me-2"></i> 123 Service St, Auto City</p>
-                </div>
-                <div class="col-md-3 text-center-mobile footer-column follow-us">
-                    <h5>Follow Us</h5>
-                    <div class="social-icons">
-                        <a href="https://facebook.com/servicexpress" target="_blank" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://twitter.com/servicexpress" target="_blank" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="https://instagram.com/servicexpress" target="_blank" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="https://linkedin.com/company/servicexpress" target="_blank" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p class="text-center mb-0">© 2025 ServiceXpress. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+<th:block th:replace="~{fragments/footer :: footer}"></th:block>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Font Awesome for footer icons -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const token = '[[${session.token}]]'; // Get token from session

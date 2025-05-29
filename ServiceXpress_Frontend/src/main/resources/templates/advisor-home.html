@@ -6,191 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/advisorcss.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <input type="hidden" id="backendApiUrl" th:value="${@environment.getProperty('backend.api.url')}">
-    <style>
-        :root {
-            --primary-color: #FF6200;
-            --secondary-color: #00274D;
-            --light-bg: #D9D9D9;
-            --white: #FFFFFF;
-            --text-muted: #4B4B4B;
-            --success-color: #28A745;
-            --warning-color: #FFC107;
-            --danger-color: #DC3545;
-            --shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-            --dark-gray: #343a40;
-            --light-gray: #e9ecef;
-            --light-background: #F4F4F4;
-            --medium-gray: #6c757d;
-        }
-
-        body {
-            background: linear-gradient(135deg, #D9D9D9, #e9ecef);
-            font-family: Arial, sans-serif;
-            padding-top: 90px;
-            min-height: 100vh;
-            line-height: 1.6;
-        }
-
-        .navbar-custom {
-            background-color: rgba(255, 255, 255, 0.95);
-            height: 70px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 0 15px;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .navbar-brand img {
-            height: 40px;
-            transition: transform 0.2s ease;
-        }
-
-        .navbar-brand:hover img,
-        .navbar-brand:focus img {
-            transform: scale(1.05);
-        }
-
-        .navbar-nav.center-nav {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-        }
-
-        .nav-link {
-            position: relative;
-            transition: color 0.3s ease;
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--secondary-color) !important;
-        }
-
-        .nav-link:hover::after,
-        .nav-link:focus::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: var(--primary-color);
-        }
-
-        .nav-link.active {
-            color: var(--primary-color) !important;
-            font-weight: bold;
-        }
-
-        .profile-circle {
-            width: 45px;
-            height: 45px;
-            background-color: var(--primary-color);
-            color: var(--white);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            transition: var(--transition);
-        }
-
-        .profile-circle:hover,
-        .profile-circle:focus {
-            transform: scale(1.1);
-        }
-
-        .stats-container {
-            background: var(--white);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--light-gray);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow);
-        }
-
-        .stat-card h3 {
-            color: var(--secondary-color);
-            margin-bottom: 10px;
-        }
-
-        .stat-card p {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .chart-container {
-            background: var(--white);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 2rem;
-        }
-    </style>
 </head>
 <body>
     <input type="hidden" id="token" th:value="${token != null ? token : ''}">
     <input type="hidden" id="advisorId" th:value="${advisorId != null ? advisorId : ''}">
     <input type="hidden" id="username" th:value="${session.username != null ? session.username : 'Advisor'}">
 
-    <nav class="navbar navbar-expand-lg navbar-custom" aria-label="Main navigation">
-        <div class="container-fluid">
-            <a class="navbar-brand" th:href="@{/dashboard/admin}" aria-label="ServiceXpress Home">
-                <img src="/images/logo.jpg" alt="ServiceXpress Logo" onerror="this.src='https://via.placeholder.com/40';">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav center-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" th:href="@{'/service-advisor/home?advisorId=' + ${advisorId}}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{'/service-advisor/dashboard?advisorId=' + ${advisorId}}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{'/service-advisor/completed?advisorId=' + ${advisorId}}">Completed</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a href="#" class="text-dark dropdown-toggle d-flex align-items-center"
-                           data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Profile">
-                            <div class="profile-circle me-2"
-                                 th:text="${#strings.substring(session.username, 0, 1) != null ? #strings.toUpperCase(#strings.substring(session.username, 0, 1)) : 'A'}"
-                                 aria-hidden="true">A</div>
-                            <span class="fw-medium me-2"
-                                  th:text="${session.username != null ? session.username : 'Advisor'}">Advisor</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item text-danger" th:href="@{/advisor/logout}">Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
+     <div th:replace="fragments/advisorNavbar :: navbar"></div>
     <main class="container mt-5 pt-4">
         <div class="stats-container">
             <h2 class="mb-4">Service Advisor Home</h2>
@@ -226,9 +51,11 @@
             </div>
         </div>
     </main>
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+   
     <script>
         $(document).ready(function() {
             const advisorId = $('#advisorId').val();
@@ -310,7 +137,6 @@
                 }
             });
 
-            // Active link handling
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('.nav-link');
             navLinks.forEach(link => {

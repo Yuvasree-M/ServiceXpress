@@ -200,7 +200,7 @@ public class BookingRequestService {
 
     public List<BookingResponseDTO> getCompletedBookings() {
         logger.info("Fetching completed and payment pending bookings");
-        List<BookingRequest> completedBookings = repository.findByStatusIn(Arrays.asList("COMPLETED", "COMPLETED_PENDING_PAYMENT", "COMPLETED_PAID"));
+        List<BookingRequest> completedBookings = repository.findByStatusIn(Arrays.asList("COMPLETED", "COMPLETED_PENDING_PAYMENT"));
         logger.info("Found {} completed or payment pending bookings", completedBookings.size());
         completedBookings.forEach(booking -> logger.info("Booking ID: {}, Status: {}", booking.getId(), booking.getStatus()));
         return mapToBookingResponseDTOs(completedBookings);
@@ -304,7 +304,7 @@ public class BookingRequestService {
 
                 Double cost = calculateCost(booking.getServices(), booking.getVehicleTypeId());
 
-                if (List.of("PENDING", "ASSIGNED", "IN_PROGRESS", "COMPLETED_PENDING_PAYMENT").contains(booking.getStatus())) {
+                if (List.of("PENDING", "ASSIGNED", "IN_PROGRESS", "COMPLETED_PENDING_PAYMENT", "COMPLETED").contains(booking.getStatus())) {
                     ServiceStatus status = new ServiceStatus();
                     status.setId(booking.getId());
                     status.setServiceCenterName(serviceCenterName);
@@ -339,143 +339,6 @@ public class BookingRequestService {
         dto.setOngoingServices(ongoingServices);
         dto.setServiceHistory(serviceHistory);
         return dto;
-    }
-
-    public DashboardDataDTO getAdminDashboardData() {
-        logger.info("Fetching admin dashboard data");
-        DashboardDataDTO dashboardData = new DashboardDataDTO();
-
-        List<BookingResponseDTO> pendingBookings = getPendingBookings();
-        List<VehicleDueDTO> vehiclesDue = pendingBookings.stream().map(booking -> {
-            VehicleDueDTO dto = new VehicleDueDTO();
-            dto.setId(booking.getId());
-            dto.setOwnerName(booking.getCustomerName());
-            dto.setVehicleModel(booking.getVehicleModel());
-            dto.setVehicleType(booking.getVehicleType());
-            dto.setServiceNeeded(booking.getServices());
-            dto.setLocation(booking.getServiceCenter());
-            dto.setRequestedDate(booking.getRequestedDate());
-            dto.setDueDate(booking.getRequestedDate().plusDays(2));
-            dto.setStatus(booking.getStatus());
-            List<AdvisorDTO> advisorDTOs = getAllAdvisors().stream().map(advisor -> {
-                AdvisorDTO advisorDTO = new AdvisorDTO();
-                advisorDTO.setId(advisor.getId());
-                advisorDTO.setName(advisor.getUsername());
-                return advisorDTO;
-            }).collect(Collectors.toList());
-            dto.setAvailableAdvisors(advisorDTOs);
-            Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(booking.getId());
-            if (mapping.isPresent()) {
-                dto.setServiceAdvisorId(mapping.get().getAdvisorId());
-            }
-            return dto;
-        }).collect(Collectors.toList());
-        dashboardData.setVehiclesDue(vehiclesDue);
-        dashboardData.setDueCount(vehiclesDue.size());
-
-        List<BookingResponseDTO> assignedBookings = getAssignedBookings();
-        List<VehicleAssignedDTO> vehiclesAssigned = assignedBookings.stream().map(booking -> {
-            VehicleAssignedDTO dto = new VehicleAssignedDTO();
-            dto.setId(booking.getId());
-            dto.setCustomerName(booking.getCustomerName());
-            dto.setVehicleModel(booking.getVehicleModel());
-            dto.setVehicleType(booking.getVehicleType());
-            dto.setServicesNeeded(booking.getServices());
-            Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(booking.getId());
-            String advisorName = "Unknown";
-            if (mapping.isPresent()) {
-                Optional<Advisor> advisor = advisorRepository.findById(mapping.get().getAdvisorId());
-                advisorName = advisor.isPresent() ? advisor.get().getUsername() : "Unknown";
-            }
-            dto.setAdvisorName(advisorName);
-            dto.setAssignedDate(booking.getUpdatedAt());
-            dto.setStatus(booking.getStatus());
-            return dto;
-        }).collect(Collectors.toList());
-        dashboardData.setVehiclesAssigned(vehiclesAssigned);
-        dashboardData.setAssignedCount(vehiclesAssigned.size());
-
-        List<BookingResponseDTO> inProgressBookings = getInProgressBookings();
-        List<VehicleUnderServiceDTO> vehiclesUnderService = inProgressBookings.stream().map(booking -> {
-            VehicleUnderServiceDTO dto = new VehicleUnderServiceDTO();
-            dto.setId(booking.getId());
-            dto.setOwnerName(booking.getCustomerName());
-            dto.setVehicleType(booking.getVehicleType());
-            dto.setVehicleModel(booking.getVehicleModel());
-            dto.setServiceCenter(booking.getServiceCenter());
-            Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(booking.getId());
-            String advisorName = "Unknown";
-            if (mapping.isPresent()) {
-                Optional<Advisor> advisor = advisorRepository.findById(mapping.get().getAdvisorId());
-                advisorName = advisor.isPresent() ? advisor.get().getUsername() : "Unknown";
-            }
-            dto.setServiceAdvisor(advisorName);
-            dto.setServiceAllocated(booking.getServices());
-            dto.setStatus(booking.getStatus());
-            return dto;
-        }).collect(Collectors.toList());
-        dashboardData.setVehiclesUnderService(vehiclesUnderService);
-        dashboardData.setServicingCount(vehiclesUnderService.size());
-
-        List<BookingResponseDTO> completedBookings = getCompletedBookings();
-        List<VehicleCompletedDTO> vehiclesCompleted = completedBookings.stream().map(booking -> {
-            VehicleCompletedDTO dto = new VehicleCompletedDTO();
-            dto.setId(booking.getId());
-            dto.setCustomerId(booking.getCustomerId() != null ? booking.getCustomerId() : 0L); // Prevent null
-            dto.setOwnerName(booking.getCustomerName());
-            dto.setVehicleType(booking.getVehicleType());
-            dto.setVehicleModel(booking.getVehicleModel());
-            dto.setServiceCenter(booking.getServiceCenter());
-            Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(booking.getId());
-            String advisorName = "Unknown";
-            if (mapping.isPresent()) {
-                Optional<Advisor> advisor = advisorRepository.findById(mapping.get().getAdvisorId());
-                advisorName = advisor.isPresent() ? advisor.get().getUsername() : "Unknown";
-            }
-            dto.setServiceAdvisor(advisorName);
-            dto.setServiceDone(booking.getServices());
-            dto.setCompletedDate(booking.getUpdatedAt());
-            dto.setStatus(booking.getStatus());
-            dto.setCustomerEmail(booking.getCustomerEmail());
-            Optional<BillOfMaterial> bomOptional = billOfMaterialRepository.findByBookingId(booking.getId());
-            boolean hasBom = bomOptional.isPresent();
-            if (hasBom) {
-                logger.info("BOM found for booking ID: {}. BOM details: customerName={}, advisorName={}, total={}",
-                        booking.getId(), bomOptional.get().getCustomerName(), bomOptional.get().getAdvisorName(), bomOptional.get().getTotal());
-            } else {
-                logger.warn("No BOM found for booking ID: {}. Expected BOM to exist in bill_of_material table.", booking.getId());
-            }
-            dto.setHasBom(hasBom);
-            return dto;
-        }).collect(Collectors.toList());
-        dashboardData.setVehiclesCompleted(vehiclesCompleted);
-        dashboardData.setCompletedCount(vehiclesCompleted.size());
-
-        List<AdvisorRequestDTO> advisorRequests = inProgressBookings.stream()
-            .filter(booking -> booking.getStatus().equals("IN_PROGRESS"))
-            .map(booking -> {
-                AdvisorRequestDTO dto = new AdvisorRequestDTO();
-                dto.setId(booking.getId());
-                Optional<BookingAdvisorMapping> mapping = bookingAdvisorMappingRepository.findByBookingId(booking.getId());
-                String advisorName = "Unknown";
-                if (mapping.isPresent()) {
-                    Optional<Advisor> advisor = advisorRepository.findById(mapping.get().getAdvisorId());
-                    advisorName = advisor.isPresent() ? advisor.get().getUsername() : "Unknown";
-                }
-                dto.setAdvisorName(advisorName);
-                dto.setRequestedService(booking.getServices());
-                dto.setCustomerName(booking.getCustomerName());
-                dto.setVehicleType(booking.getVehicleType());
-                dto.setVehicleModel(booking.getVehicleModel());
-                dto.setServiceCenter(booking.getServiceCenter());
-                dto.setStatus("Pending");
-                return dto;
-            }).collect(Collectors.toList());
-        dashboardData.setAdvisorRequests(advisorRequests);
-        dashboardData.setAdvisorRequestsCount(advisorRequests.size());
-
-        dashboardData.setProfileName("Admin");
-        return dashboardData;
     }
 
     @Transactional
@@ -533,7 +396,7 @@ public class BookingRequestService {
     public Map<String, Object> getReceiptData(Long bookingId) {
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
-        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT", "COMPLETED_PAID").contains(booking.getStatus())) {
+        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT").contains(booking.getStatus())) {
             throw new IllegalStateException("Receipt available only for completed bookings (COMPLETED, COMPLETED_PENDING_PAYMENT, or COMPLETED_PAID)");
         }
 

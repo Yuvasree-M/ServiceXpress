@@ -244,7 +244,7 @@
 
         .review-card {
             display: inline-block;
-            width: 350px;
+            width: 500px;
             min-height: 200px;
             background-color: #3a4047; /* Slightly lighter dark for cards */
             border-radius: 15px;
@@ -268,7 +268,12 @@
             margin-bottom: 5px;
             font-size: 1.1rem;
         }
-
+        .review-service {
+            font-weight: bold;
+            color: var(--dark-theme-text);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
         .review-stars {
             color: #ffd700; /* Gold stars stand out on dark */
             font-size: 1rem;
@@ -282,13 +287,13 @@
             line-height: 1.5;
             word-wrap: break-word;
             max-height: 100px;
-            overflow-y: hidden; /* Hide scrollbar and overflow */
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
+            overflow-y: hidden;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         .review-text::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
+            display: none; 
         }
 
         @keyframes reviewScroll {

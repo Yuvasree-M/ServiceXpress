@@ -37,6 +37,7 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model) {
         logger.info("Loading home page");
+
         // Home Section
         model.addAttribute("welcomePart1", "Welcome to");
         model.addAttribute("welcomePart2", "ServiceXpress");
@@ -74,14 +75,37 @@ public class HomeController {
         model.addAttribute("processSteps", processSteps);
 
         // Reviews Section
-        List<Review> reviews = Arrays.asList(
-            new Review("John D.", "<i class='fas fa-star'></i><i class='fas fa-star'></i><i class='fas fa-star'></i><i class='fas fa-star'></i><i class='fas fa-star'></i>", "Fast and reliable service!"),
-            new Review("Sarah M.", "<i class='fas fa-star'></i><i class='fas fa-star'></i><i class='fas fa-star'></i><i class='fas fa-star'></i><i class='far fa-star'></i>", "Great experience!")
-        );
         model.addAttribute("reviewsPart1", "Customer");
         model.addAttribute("reviewsPart2", "Reviews");
         model.addAttribute("reviewsSubtitle", "What Our Customers Say");
-        model.addAttribute("reviews", reviews);
+        try {
+            String url = backendApiUrl.endsWith("/") ? backendApiUrl + "reviews" : backendApiUrl + "/reviews";
+            logger.debug("Fetching reviews from URL: {}", url);
+            ResponseEntity<Review[]> response = restTemplate.getForEntity(url, Review[].class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                List<Review> reviews = Arrays.asList(response.getBody());
+                model.addAttribute("reviews", reviews);
+                logger.info("Fetched {} reviews from backend", reviews.size());
+            } else {
+                logger.warn("No reviews fetched from backend, status: {}", response.getStatusCode());
+                model.addAttribute("reviews", Arrays.asList(
+                    new Review(null, "John D.", 5, "Fast and reliable service!", null, "Basic Oil Change"),
+                    new Review(null, "Sarah M.", 4, "Great experience!", null, "Tire Service")
+                ));
+            }
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error fetching reviews: Status {}, Response: {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+            model.addAttribute("reviews", Arrays.asList(
+                new Review(null, "John D.", 5, "Fast and reliable service!", null, "Basic Oil Change"),
+                new Review(null, "Sarah M.", 4, "Great experience!", null, "Tire Service")
+            ));
+        } catch (Exception e) {
+            logger.error("Error fetching reviews: {}", e.getMessage(), e);
+            model.addAttribute("reviews", Arrays.asList(
+                new Review(null, "John D.", 5, "Fast and reliable service!", null, "Basic Oil Change"),
+                new Review(null, "Sarah M.", 4, "Great experience!", null, "Tire Service")
+            ));
+        }
 
         // Footer Section
         model.addAttribute("footerAboutTitle", "About");

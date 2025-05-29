@@ -17,6 +17,7 @@
         .otp-input { width: 40px; height: 40px; text-align: center; font-size: 18px; border: 1px solid #ced4da; border-radius: 5px; }
         .otp-input:focus { border-color: #f28c38; outline: none; box-shadow: 0 0 5px rgba(242, 140, 56, 0.5); }
         .btn-container { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        
     </style>
 </head>
 <body>
@@ -212,15 +213,17 @@
                         <p class="lead text-muted" th:text="${reviewsSubtitle}">What Our Customers Say</p>
                     </div>
 
-                    <div class="reviews-scroll">
-                        <div class="reviews-scroll-container">
-                            <div class="review-card" th:each="review : ${reviews}">
-                                <p class="review-author" th:text="${review.author}">John D.</p>
-                                <div class="review-stars" th:utext="${review.starsHtml}"></div>
-                                <p class="review-text" th:text="${review.text}">"Fast and reliable service!"</p>
-                            </div>
-                        </div>
-                    </div>
+                   
+<div class="reviews-scroll">
+    <div class="reviews-scroll-container">
+        <div class="review-card" th:each="review : ${reviews}">
+            <p class="review-author" th:text="${review.customerName != null ? review.customerName : 'Anonymous'}">John D.</p>
+            <p class="review-service" th:text="${review.servicePackageName != null ? 'Service: ' + review.servicePackageName : 'Service: Unknown'}">Service: Unknown</p>
+            <div class="review-stars" th:utext="${review.getStarsHtml()}"></div>
+            <p class="review-text" th:text="${review.message != null ? review.message : 'No comment provided'}">"Fast and reliable service!"</p>
+        </div>
+    </div>
+</div>
                 </div>
             </section>
         </div>
@@ -495,6 +498,31 @@
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            const reviewsContainer = document.querySelector('.reviews-scroll-container');
+            if (reviewsContainer) {
+                let scrollAmount = 0;
+                const scrollSpeed = 1; // Adjust speed as needed
+                const scrollDelay = 30; // Adjust delay for smoothness
+
+                function autoScroll() {
+                    reviewsContainer.scrollLeft += scrollSpeed;
+                    if (reviewsContainer.scrollLeft >= (reviewsContainer.scrollWidth - reviewsContainer.clientWidth)) {
+                        reviewsContainer.scrollLeft = 0; // Reset to start
+                    }
+                }
+
+                let scrollInterval = setInterval(autoScroll, scrollDelay);
+
+                reviewsContainer.addEventListener('mouseenter', () => {
+                    clearInterval(scrollInterval); // Pause on hover
+                });
+
+                reviewsContainer.addEventListener('mouseleave', () => {
+                    scrollInterval = setInterval(autoScroll, scrollDelay); // Resume on mouse leave
+                });
+            }
+        });
     </script>
 </body>
 </html>
