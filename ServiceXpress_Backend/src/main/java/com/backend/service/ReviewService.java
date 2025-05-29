@@ -4,6 +4,7 @@ import com.backend.dto.ReviewDTO;
 import com.backend.model.BookingRequest;
 import com.backend.model.Customer;
 import com.backend.model.Review;
+import com.backend.dto.ReviewResponseDTO;
 import com.backend.repository.BookingRequestRepository;
 import com.backend.repository.CustomerRepository;
 import com.backend.repository.ReviewRepository;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
@@ -77,4 +79,32 @@ public class ReviewService {
 
         reviewRepository.save(review);
     }
+ 
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDTO> getAllReviews() {
+        List<Review> reviews = reviewRepository.findAll();
+        return reviews.stream().map(review -> {
+            Optional<Customer> customerOpt = customerRepository.findById(review.getCustomerId());
+            String customerName = customerOpt.isPresent() ? customerOpt.get().getUsername() : "Anonymous";
+
+            // Fetch service package name from booking
+            String servicePackageName = "Unknown Service";
+            Optional<BookingRequest> bookingOpt = bookingRequestRepository.findById(review.getBookingId());
+            if (bookingOpt.isPresent()) {
+                BookingRequest booking = bookingOpt.get();
+                servicePackageName = booking.getServices() != null ? booking.getServices() : "Unknown Service";
+            }
+
+            return new ReviewResponseDTO(
+                review.getId(),
+                customerName,
+                review.getRating(),
+                review.getMessage() != null ? review.getMessage() : "No comment",
+                review.getCreatedAt(),
+                servicePackageName
+            );
+        }).collect(Collectors.toList());
+    }
+    
 }

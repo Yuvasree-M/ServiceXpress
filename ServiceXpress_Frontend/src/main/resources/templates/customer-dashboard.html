@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <style>
         :root {
             --primary-color: #343a40;
@@ -281,6 +282,17 @@
             padding: 8px 16px;
             margin-right: 8px;
         }
+        
+       .inner-status-card {
+    border-radius: 20px;
+    border: 1px solid #ccc; 
+    font-weight: 500;
+    padding: 8px 16px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+        
 
         .btn-download {
             background: var(--light-gray);
@@ -473,7 +485,8 @@
                         <p><strong>Vehicle:</strong> [[${item.vehicleType}]] - [[${item.model}]]</p>
                         <p><strong>Registration:</strong> [[${item.registration}]]</p>
                         <p><strong>Service:</strong> [[${item.service}]]</p>
-                        <p><strong>Cost:</strong> ₹[[${item.cost}]]</p>
+                        <p><strong>Estimated Cost:</strong> ₹[[${item.cost}]] to ₹[[${item.cost + 500}]]</p>
+
                         <span th:classappend="${item.status == 'COMPLETED_PENDING_PAYMENT' ? 'status-completed' : (item.status == 'IN_PROGRESS' ? 'status-under' : 'status-awaiting')}">[[${item.status}]]</span>
                         <div th:if="${item.status == 'COMPLETED_PENDING_PAYMENT'}">
                             <button class="btn btn-payment view-bill-btn" 
@@ -512,7 +525,7 @@
                             <td>[[${history.status}]]</td>
                             <td>[[${history.transactionId}]]</td>
                             <td>
-                                <button class="btn btn-download" 
+                                <button class="btn btn-secondary" 
                                         th:attr="data-id=${history.id},data-customer-id=${customer.id}"
                                         onclick="downloadInvoice(this.getAttribute('data-id'), this.getAttribute('data-customer-id'))">
                                     Invoice
@@ -522,7 +535,7 @@
                                         data-bs-toggle="modal" 
                                         data-bs-target="#reviewModal"
                                         th:attr="data-id=${history.id},data-customer-id=${customer.id}">
-                                    Leave Feedback
+                                    Feedback
                                 </button>
                             </td>
                         </tr>
@@ -577,7 +590,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-confirm-payment" id="proceedPaymentBtn">Proceed to Payment</button>
+                    <button type="button" class="btn btn-payment" id="proceedPaymentBtn">Proceed to Payment</button>
                 </div>
             </div>
         </div>
@@ -615,7 +628,7 @@
             </div>
         </div>
     </div>
-
+  
     <th:block th:replace="~{fragments/footer :: footer}"></th:block>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

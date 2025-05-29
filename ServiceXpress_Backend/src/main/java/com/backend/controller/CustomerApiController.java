@@ -4,6 +4,7 @@ import com.backend.dto.ContactRequestDTO;
 import com.backend.dto.CustomerDashboardDTO;
 import com.backend.dto.CustomerProfileDTO;
 import com.backend.dto.ReviewDTO;
+import com.backend.dto.ReviewResponseDTO;
 import com.backend.model.Customer;
 import com.backend.repository.CustomerRepository;
 import com.backend.service.BookingRequestService;
@@ -100,7 +101,7 @@ public class CustomerApiController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
-            // Fetch customer details for the invoice
+
             Optional<Customer> customerOpt = customerRepository.findById(customerId);
             if (!customerOpt.isPresent()) {
                 logger.error("Customer not found for ID: {}", customerId);
@@ -109,13 +110,13 @@ public class CustomerApiController {
             Customer customer = customerOpt.get();
             String customerPhone = customer.getPhoneNumber() != null ? customer.getPhoneNumber() : "Not provided";
 
-            // Generate PDF using iText
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
 
-            // Header
+
             Paragraph header = new Paragraph("ServiceXpress")
                     .setFontSize(20)
                     .setBold()
@@ -141,7 +142,7 @@ public class CustomerApiController {
                     .setTextAlignment(TextAlignment.CENTER);
             document.add(invoiceDetails);
 
-            // Billed To and Invoice Details
+
             Table infoTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}))
                     .setWidth(UnitValue.createPercentValue(100))
                     .setMarginTop(20);
@@ -159,7 +160,7 @@ public class CustomerApiController {
             infoTable.addCell(new Cell().add(new Paragraph(String.format("Service Center: %s", receiptData.get("serviceCenterName")))));
             document.add(infoTable);
 
-            // Services Table
+
             Table serviceTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1, 1}))
                     .setWidth(UnitValue.createPercentValue(100))
                     .setMarginTop(20);
@@ -175,7 +176,7 @@ public class CustomerApiController {
             serviceTable.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("advisorName") != null ? receiptData.get("advisorName") : "N/A"))));
             document.add(serviceTable);
 
-            // Materials Table
+
             document.add(new Paragraph("Materials Used:").setBold().setMarginTop(20));
             Table materialsTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1}))
                     .setWidth(UnitValue.createPercentValue(100));
@@ -213,7 +214,7 @@ public class CustomerApiController {
             }
             document.add(materialsTable);
 
-            // Total Cost
+
             Table totalTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}))
                     .setWidth(UnitValue.createPercentValue(100))
                     .setMarginTop(20);
@@ -222,7 +223,7 @@ public class CustomerApiController {
                     .setBold()));
             document.add(totalTable);
 
-            // Footer
+
             Paragraph footer = new Paragraph("Thank You for Choosing ServiceXpress!")
                     .setFontSize(14)
                     .setBold()
@@ -303,7 +304,7 @@ public class CustomerApiController {
 
             Customer customer = customerOpt.get();
 
-            // Validate required fields before update
+
             if (customer.getUsername() == null || customer.getEmail() == null ||
                 customer.getPassword() == null || customer.getRole() == null) {
                 throw new RuntimeException("Customer record has missing required fields");
@@ -311,11 +312,10 @@ public class CustomerApiController {
 
             boolean hasChanges = false;
 
-            // Track if fields are provided
+
             boolean usernameProvided = username != null && !username.trim().isEmpty();
             boolean emailProvided = email != null && !email.trim().isEmpty();
 
-            // Update username if provided and different
             if (usernameProvided) {
                 if (username.length() < 3) {
                     throw new RuntimeException("Username must be at least 3 characters long");
@@ -332,7 +332,7 @@ public class CustomerApiController {
                 }
             }
 
-            // Update email if provided and different
+
             if (emailProvided) {
                 if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
                     throw new RuntimeException("Invalid email format");
@@ -349,19 +349,19 @@ public class CustomerApiController {
                 }
             }
 
-            // Check if any fields were provided
+
             if (!usernameProvided && !emailProvided) {
                 logger.info("No fields provided for customer ID: {}", customerId);
                 throw new RuntimeException("No fields provided to update");
             }
 
-            // Check if there are actual changes
+
             if (!hasChanges) {
                 logger.info("No changes detected for customer ID: {}", customerId);
                 throw new RuntimeException("No changes provided to update");
             }
 
-            // Save the updated customer
+
             Customer updatedCustomer = customerRepository.save(customer);
 
             CustomerProfileDTO customerProfileDTO = new CustomerProfileDTO();
@@ -386,7 +386,7 @@ public class CustomerApiController {
     public ResponseEntity<String> submitContactForm(@RequestBody ContactRequestDTO request) {
         logger.debug("Received contact form submission: {}", request);
         try {
-            // Validate request
+
             if (request.getName() == null || request.getName().trim().length() < 3) {
                 throw new IllegalArgumentException("Name must be at least 3 characters long");
             }
@@ -400,7 +400,6 @@ public class CustomerApiController {
                 throw new IllegalArgumentException("Message must be at least 10 characters long");
             }
 
-            // Create support ticket
             supportTicketService.createSupportTicket(request);
 
             logger.info("Support ticket created successfully for email: {}", request.getEmail());
@@ -433,4 +432,15 @@ public class CustomerApiController {
         }
     }
 
+    @GetMapping("/reviews")
+    public ResponseEntity<List<ReviewResponseDTO>> getAllReviews() {
+        try {
+            List<ReviewResponseDTO> reviews = reviewService.getAllReviews();
+            logger.info("Fetched {} reviews successfully", reviews.size());
+            return ResponseEntity.ok(reviews);
+        } catch (Exception e) {
+            logger.error("Error fetching reviews: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
     }

@@ -1,0 +1,316 @@
+        :root {
+            --primary-color: #FF6200;
+            --secondary-color: #00274D;
+            --light-bg: #D9D9D9;
+            --white: #FFFFFF;
+            --text-muted: #4B4B4B;
+            --success-color: #28A745;
+            --warning-color: #FFC107;
+            --danger-color: #DC3545;
+            --shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --dark-gray: #343a40;
+            --light-gray: #e9ecef;
+            --light-background: #F4F4F4;
+            --medium-gray: #6c757d;
+        }
+
+        body {
+            background: linear-gradient(135deg, #D9D9D9, #e9ecef);
+            font-family: Arial, sans-serif;
+            padding-top: 90px;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar-custom {
+            background-color: rgba(255, 255, 255, 0.95);
+            height: 70px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 0 15px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand:hover img,
+        .navbar-brand:focus img {
+            transform: scale(1.05);
+        }
+
+        .navbar-nav.center-nav {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--secondary-color) !important;
+        }
+
+        .nav-link:hover::after,
+        .nav-link:focus::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: bold;
+        }
+
+        .profile-circle {
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .profile-circle:hover,
+        .profile-circle:focus {
+            transform: scale(1.1);
+        }
+
+        .stats-container {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .chart-container {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 2rem;
+        }
+         .table-container {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 2rem;
+        }
+
+        .table thead {
+            background-color: #001f3a;
+            color: var(--white);
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--light-gray);
+        }
+
+        .sortable {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+        .btn-orange {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            transition: var(--transition);
+        }
+
+        .btn-orange:hover {
+            background-color: #e55a00;
+            color: var(--white);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .pagination .page-link {
+            color: var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--light-gray);
+            color: var(--primary-color);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.25);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--shadow);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-gray);
+        }
+
+        .modal-content {
+            border-radius: 8px;
+        }
+
+        .modal-header {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .modal-footer .btn-orange {
+            background-color: var(--primary-color);
+        }
+
+        .modal-footer .btn-orange:hover {
+            background-color: #e55a00;
+        }
+
+        .material-row {
+            margin-bottom: 1rem;
+        }
+         footer {
+            background-color: var(--dark-gray);
+            color: white;
+            padding: 60px 20px 40px;
+            flex-shrink: 0;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        footer h5 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        footer p, footer a {
+            font-size: 0.95rem;
+            color: white;
+            transition: color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        footer .contact-link {
+            color: white;
+            text-decoration: none;
+        }
+
+        footer .contact-link:hover {
+            color: var(--primary-color);
+        }
+
+        footer .quick-links a {
+            display: block;
+            margin-bottom: 10px;
+            color: white;
+            text-decoration: none;
+        }
+
+        footer .quick-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 25px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .social-icon {
+            color: white;
+            font-size: 26px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .social-icon:hover {
+            color: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        footer .footer-bottom {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer .footer-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        footer .footer-column.follow-us {
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            footer .text-center-mobile {
+                text-align: center;
+                margin-bottom: 50px;
+            }
+
+            footer .footer-column {
+                align-items: center;
+            }
+
+            footer .social-icons {
+                justify-content: center;
+            }
+
+            footer {
+                padding: 40px 15px 30px;
+            }
+        }

@@ -241,7 +241,6 @@ public class AdvisorController {
             return "redirect:/login";
         }
 
-        // Use session advisorId if query parameter is not provided
         if (advisorId == null) {
             advisorId = sessionAdvisorId;
         }

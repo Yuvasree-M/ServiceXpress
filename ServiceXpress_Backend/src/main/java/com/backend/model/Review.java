@@ -1,8 +1,14 @@
 package com.backend.model;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "reviews")
 public class Review {
@@ -24,54 +30,4 @@ public class Review {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
-    // Getters
-    public Long getId() {
-        return id;
-    }
-
-    public Long getBookingId() {
-        return bookingId;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public Integer getRating() {
-        return rating;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    // Setters
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setBookingId(Long bookingId) {
-        this.bookingId = bookingId;
-    }
-
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
-
-    public void setRating(Integer rating) {
-        this.rating = rating;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }

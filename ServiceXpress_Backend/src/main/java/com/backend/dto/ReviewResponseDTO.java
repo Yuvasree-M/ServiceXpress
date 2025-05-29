@@ -1,18 +1,18 @@
-
-package com.frontend.model;
+// In com.backend.dto.ReviewResponseDTO.java
+package com.backend.dto;
 
 import java.time.LocalDateTime;
 
-public class Review {
+public class ReviewResponseDTO {
     private Long id;
     private String customerName;
     private Integer rating;
     private String message;
     private LocalDateTime createdAt;
-    private String servicePackageName;
+    private String servicePackageName; // New field
 
-    public Review(Long id, String customerName, Integer rating, String message, 
-                  LocalDateTime createdAt, String servicePackageName) {
+    public ReviewResponseDTO(Long id, String customerName, Integer rating, String message, 
+                            LocalDateTime createdAt, String servicePackageName) {
         this.id = id;
         this.customerName = customerName;
         this.rating = rating;
@@ -34,12 +34,4 @@ public class Review {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public String getServicePackageName() { return servicePackageName; }
     public void setServicePackageName(String servicePackageName) { this.servicePackageName = servicePackageName; }
-
-    public String getStarsHtml() {
-        StringBuilder stars = new StringBuilder();
-        for (int i = 0; i < 5; i++) {
-            stars.append(i < rating ? "<i class='fas fa-star'></i>" : "<i class='far fa-star'></i>");
-        }
-        return stars.toString();
-    }
 }
