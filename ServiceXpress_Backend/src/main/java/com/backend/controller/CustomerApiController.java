@@ -101,7 +101,7 @@ public class CustomerApiController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
-
+            // Fetch customer details for the invoice
             Optional<Customer> customerOpt = customerRepository.findById(customerId);
             if (!customerOpt.isPresent()) {
                 logger.error("Customer not found for ID: {}", customerId);
@@ -110,13 +110,13 @@ public class CustomerApiController {
             Customer customer = customerOpt.get();
             String customerPhone = customer.getPhoneNumber() != null ? customer.getPhoneNumber() : "Not provided";
 
-
+            // Generate PDF using iText
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
 
-
+            // Header
             Paragraph header = new Paragraph("ServiceXpress")
                     .setFontSize(20)
                     .setBold()
@@ -142,7 +142,7 @@ public class CustomerApiController {
                     .setTextAlignment(TextAlignment.CENTER);
             document.add(invoiceDetails);
 
-
+            // Billed To and Invoice Details
             Table infoTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}))
                     .setWidth(UnitValue.createPercentValue(100))
                     .setMarginTop(20);
@@ -160,7 +160,7 @@ public class CustomerApiController {
             infoTable.addCell(new Cell().add(new Paragraph(String.format("Service Center: %s", receiptData.get("serviceCenterName")))));
             document.add(infoTable);
 
-
+            // Services Table
             Table serviceTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1, 1}))
                     .setWidth(UnitValue.createPercentValue(100))
                     .setMarginTop(20);
@@ -176,7 +176,7 @@ public class CustomerApiController {
             serviceTable.addCell(new Cell().add(new Paragraph(String.valueOf(receiptData.get("advisorName") != null ? receiptData.get("advisorName") : "N/A"))));
             document.add(serviceTable);
 
-
+            // Materials Table
             document.add(new Paragraph("Materials Used:").setBold().setMarginTop(20));
             Table materialsTable = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1}))
                     .setWidth(UnitValue.createPercentValue(100));
@@ -214,7 +214,7 @@ public class CustomerApiController {
             }
             document.add(materialsTable);
 
-
+            // Total Cost
             Table totalTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}))
                     .setWidth(UnitValue.createPercentValue(100))
                     .setMarginTop(20);
@@ -223,7 +223,7 @@ public class CustomerApiController {
                     .setBold()));
             document.add(totalTable);
 
-
+            // Footer
             Paragraph footer = new Paragraph("Thank You for Choosing ServiceXpress!")
                     .setFontSize(14)
                     .setBold()
