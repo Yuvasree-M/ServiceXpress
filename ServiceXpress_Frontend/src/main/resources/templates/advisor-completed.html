@@ -60,7 +60,6 @@
         th:attr="data-booking-id=${booking.id},data-customer-name=${booking.customerName},data-services=${booking.services},data-customer-id=${booking.customerId}">
     View BOM
 </button>
-        </button>
     </td>
 </tr>
                 </tbody>
@@ -117,8 +116,9 @@
         </div>
     </main>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         $(document).ready(function() {
