@@ -396,7 +396,7 @@ public class BookingRequestService {
     public Map<String, Object> getReceiptData(Long bookingId) {
         BookingRequest booking = repository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
-        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT").contains(booking.getStatus())) {
+        if (!List.of("COMPLETED", "COMPLETED_PENDING_PAYMENT", "COMPLETED_PAID").contains(booking.getStatus())) {
             throw new IllegalStateException("Receipt available only for completed bookings (COMPLETED, COMPLETED_PENDING_PAYMENT, or COMPLETED_PAID)");
         }
 
